@@ -1,0 +1,64 @@
+import React from 'react';
+
+const AdminReports = () => {
+  return (
+    <div style={{ padding: '20px' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '30px',
+        paddingBottom: '20px',
+        borderBottom: '2px solid #e1e1e1'
+      }}>
+        <div>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: '2rem', 
+            color: '#333',
+            fontWeight: '700'
+          }}>
+            📈 Reports & Analytics
+          </h1>
+          <p style={{ color: '#666', fontSize: '1.1rem', margin: '5px 0 0 0' }}>
+            View detailed reports and analytics for your business
+          </p>
+        </div>
+      </div>
+
+      <div style={{
+        background: 'white',
+        borderRadius: '12px',
+        padding: '40px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '4rem', marginBottom: '20px' }}>📈</div>
+        <h2 style={{ color: '#333', marginBottom: '15px' }}>Reports & Analytics</h2>
+        <p style={{ color: '#666', fontSize: '1.1rem', marginBottom: '30px' }}>
+          Access comprehensive reports and analytics to track your business performance.
+        </p>
+        <div style={{
+          background: '#f8f9fa',
+          padding: '20px',
+          borderRadius: '8px',
+          textAlign: 'left',
+          maxWidth: '600px',
+          margin: '0 auto'
+        }}>
+          <h3 style={{ color: '#333', marginBottom: '15px' }}>Features Coming Soon:</h3>
+          <ul style={{ color: '#666', lineHeight: '1.6' }}>
+            <li>💰 Sales reports</li>
+            <li>📊 Customer analytics</li>
+            <li>📈 Growth metrics</li>
+            <li>🛒 Order analytics</li>
+            <li>📱 Export functionality</li>
+            <li>📅 Custom date ranges</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminReports;

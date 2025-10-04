@@ -1,0 +1,210 @@
+/* Shipping Info Page Styles */
+.legal-page {
+  min-height: 80vh;
+  padding: 2rem 0;
+  background-color: #fafafa;
+}
+
+.legal-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.legal-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.shipping-subtitle {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.shipping-highlight {
+  background: linear-gradient(135deg, #d4af37, #f4d03f);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.highlight-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.highlight-text {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.legal-section {
+  margin-bottom: 2.5rem;
+}
+
+.legal-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #d4af37;
+  padding-bottom: 0.5rem;
+}
+
+.legal-section h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #34495e;
+  margin: 1.5rem 0 0.8rem 0;
+}
+
+.legal-section p {
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.legal-section ul, .legal-section ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.legal-section li {
+  line-height: 1.6;
+  color: #555;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Tables */
+.delivery-table, .shipping-table {
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.delivery-table table, .shipping-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.delivery-table th, .delivery-table td,
+.shipping-table th, .shipping-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.delivery-table th, .shipping-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.delivery-table tr:hover, .shipping-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .legal-page {
+    padding: 1rem 0;
+  }
+  
+  .legal-content {
+    margin: 0 1rem;
+    padding: 2rem 1.5rem;
+  }
+  
+  .legal-title {
+    font-size: 2rem;
+  }
+  
+  .shipping-subtitle {
+    font-size: 1rem;
+  }
+  
+  .shipping-highlight {
+    padding: 1.5rem;
+  }
+  
+  .highlight-title {
+    font-size: 1.3rem;
+  }
+  
+  .highlight-text {
+    font-size: 1.1rem;
+  }
+  
+  .legal-section h2 {
+    font-size: 1.3rem;
+  }
+  
+  .legal-section h3 {
+    font-size: 1.1rem;
+  }
+  
+  .legal-section p,
+  .legal-section li {
+    font-size: 0.95rem;
+  }
+  
+  .delivery-table th, .delivery-table td,
+  .shipping-table th, .shipping-table td {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .legal-content {
+    margin: 0 0.5rem;
+    padding: 1.5rem 1rem;
+  }
+  
+  .legal-title {
+    font-size: 1.8rem;
+  }
+  
+  .shipping-highlight {
+    padding: 1rem;
+  }
+  
+  .highlight-title {
+    font-size: 1.2rem;
+  }
+  
+  .highlight-text {
+    font-size: 1rem;
+  }
+  
+  .legal-section h2 {
+    font-size: 1.2rem;
+  }
+  
+  .legal-section h3 {
+    font-size: 1rem;
+  }
+  
+  .delivery-table th, .delivery-table td,
+  .shipping-table th, .shipping-table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.85rem;
+  }
+}

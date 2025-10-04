@@ -1,0 +1,109 @@
+/* Admin Login Styles */
+.admin-login {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2C2C2C 0%, #8B7355 50%, #2C2C2C 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="stars" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23D4AF37" opacity="0.3"/><circle cx="10" cy="10" r="0.5" fill="%23D4AF37" opacity="0.2"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>');
+  pointer-events: none;
+}
+
+.admin-login-container {
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-login-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.admin-logo {
+  height: 60px;
+  width: auto;
+  margin-bottom: 20px;
+}
+
+.admin-login-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2C2C2C;
+  margin-bottom: 10px;
+}
+
+.admin-login-header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.admin-login-form {
+  margin-bottom: 30px;
+}
+
+.admin-login-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.admin-login-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #E5E5E5;
+}
+
+.back-to-site {
+  color: #D4AF37;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.back-to-site:hover {
+  color: #B8941F;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .admin-login {
+    padding: 15px;
+  }
+  
+  .admin-login-card {
+    padding: 30px 25px;
+  }
+  
+  .admin-login-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .admin-logo {
+    height: 50px;
+  }
+}

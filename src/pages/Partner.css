@@ -1,0 +1,575 @@
+/* Partner Page Styles */
+.partner-page {
+  padding: 40px 0;
+  min-height: 80vh;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.partner-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.partner-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #D4AF37;
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.back-link:hover {
+  color: #B8941F;
+  transform: translateX(-5px);
+}
+
+.partner-header h1 {
+  color: #333;
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.partner-subtitle {
+  color: #666;
+  font-size: 18px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Partnership Types */
+.partnership-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.partnership-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.partnership-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+}
+
+.partnership-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.partnership-card.franchise {
+  border-top: 4px solid #D4AF37;
+}
+
+.partnership-card.agency {
+  border-top: 4px solid #28a745;
+}
+
+.partnership-card.reseller {
+  border-top: 4px solid #007bff;
+}
+
+.partnership-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 25px;
+  color: white;
+  font-size: 32px;
+}
+
+.partnership-card h3 {
+  color: #333;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.partnership-card > p {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.partnership-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px 0;
+  text-align: left;
+}
+
+.partnership-benefits li {
+  color: #555;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.partnership-benefits li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #D4AF37;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.commission-rate {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+}
+
+.commission-rate .rate {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #D4AF37;
+  margin-bottom: 5px;
+}
+
+.commission-rate .label {
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.apply-btn {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.apply-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+/* Contract Process */
+.contract-process {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 60px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.contract-process h2 {
+  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #D4AF37;
+}
+
+.process-note {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  text-align: center;
+  border-left: 4px solid #2196f3;
+}
+
+.process-note .note-icon {
+  color: #2196f3;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.process-note span {
+  display: block;
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 5px;
+}
+
+.process-note p {
+  color: #555;
+  margin: 0;
+  font-size: 14px;
+}
+
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+}
+
+.process-step {
+  text-align: center;
+  padding: 25px 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border-top: 3px solid #D4AF37;
+}
+
+.process-step:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.process-step .step-number {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 auto 15px;
+}
+
+.process-step h4 {
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.process-step p {
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Application Form */
+.application-form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.application-form-section h2 {
+  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  text-align: center;
+  padding-bottom: 15px;
+  border-bottom: 3px solid #D4AF37;
+}
+
+.application-form-section > p {
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Success/Error Messages */
+.success-message {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  border: 1px solid #c3e6cb;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #155724;
+}
+
+.success-message svg {
+  font-size: 48px;
+  color: #28a745;
+  margin-bottom: 15px;
+}
+
+.success-message h3 {
+  color: #155724;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.success-message p {
+  color: #155724;
+  margin: 0;
+  font-size: 14px;
+}
+
+.error-message {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  border: 1px solid #f5c6cb;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  text-align: center;
+  color: #721c24;
+}
+
+.error-message h3 {
+  color: #721c24;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.error-message p {
+  color: #721c24;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Form Styles */
+.partnership-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-label svg {
+  margin-right: 8px;
+  color: #D4AF37;
+}
+
+.form-input,
+.form-textarea,
+.form-file {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  font-family: inherit;
+  background: white;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #D4AF37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #999;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-file {
+  padding: 12px;
+  border: 2px dashed #D4AF37;
+  background: #fefefe;
+  cursor: pointer;
+}
+
+.form-file:hover {
+  background: #f8f9fa;
+}
+
+.file-help {
+  display: block;
+  color: #666;
+  font-size: 12px;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  color: white;
+  border: none;
+  padding: 18px 40px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  align-self: center;
+  min-width: 250px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .partner-page {
+    padding: 20px 0;
+  }
+  
+  .partner-header h1 {
+    font-size: 32px;
+  }
+  
+  .partner-subtitle {
+    font-size: 16px;
+  }
+  
+  .partnership-types {
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-bottom: 40px;
+  }
+  
+  .partnership-card {
+    padding: 30px 20px;
+  }
+  
+  .contract-process {
+    padding: 30px 20px;
+    margin-bottom: 40px;
+  }
+  
+  .contract-process h2 {
+    font-size: 24px;
+  }
+  
+  .process-steps {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .application-form-section {
+    padding: 30px 20px;
+  }
+  
+  .application-form-section h2 {
+    font-size: 24px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .submit-btn {
+    min-width: 100%;
+    padding: 15px 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .partner-header h1 {
+    font-size: 28px;
+  }
+  
+  .partnership-card {
+    padding: 25px 15px;
+  }
+  
+  .partnership-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .partnership-card h3 {
+    font-size: 20px;
+  }
+  
+  .contract-process {
+    padding: 25px 15px;
+  }
+  
+  .application-form-section {
+    padding: 25px 15px;
+  }
+  
+  .form-input,
+  .form-textarea,
+  .form-file {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .submit-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+}
+
+
+

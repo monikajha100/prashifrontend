@@ -1,0 +1,462 @@
+/* Home Page Styles */
+.home {
+  min-height: 100vh;
+}
+
+/* Hero Banner */
+.hero-banner {
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+              url('/banner.jpg') center center/cover no-repeat;
+  color: white;
+  padding: 150px 0;
+  text-align: center;
+  position: relative;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.3rem;
+  margin-bottom: 35px;
+  line-height: 1.7;
+  opacity: 0.95;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
+  font-weight: 400;
+}
+
+.hero-btn {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  color: white;
+  padding: 18px 35px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+.hero-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(212, 175, 55, 0.5);
+  color: white;
+  background: linear-gradient(135deg, #B8941F 0%, #D4AF37 100%);
+}
+
+/* Promotional Offers Section */
+.promotional-offers {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #F5E6D3 0%, #F0E6E6 50%, #F5E6D3 100%);
+  color: #2C2C2C;
+  position: relative;
+  overflow: hidden;
+}
+
+.promotional-offers::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="%23D4AF37" opacity="0.1"/><circle cx="80" cy="40" r="0.5" fill="%23D4AF37" opacity="0.05"/><circle cx="40" cy="80" r="0.8" fill="%23D4AF37" opacity="0.08"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  pointer-events: none;
+}
+
+.offers-header {
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 2;
+}
+
+.offers-header h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #2C2C2C;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.offers-header p {
+  font-size: 1.2rem;
+  color: #2C2C2C;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+.offers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 40px;
+  margin-bottom: 50px;
+  position: relative;
+  z-index: 2;
+}
+
+.offer-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 25px;
+  padding: 45px 35px;
+  text-align: center;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.offer-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+.offer-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.offer-icon {
+  font-size: 4.5rem;
+  margin-bottom: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+.offer-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2C2C2C;
+  position: relative;
+  z-index: 2;
+}
+
+.offer-card p {
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+  color: #2C2C2C;
+  opacity: 0.9;
+  position: relative;
+  z-index: 2;
+}
+
+.offer-timer, .offer-highlight, .offer-badge {
+  background: rgba(212, 175, 55, 0.2);
+  padding: 15px 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.offer-timer p, .offer-highlight p, .offer-badge p {
+  margin: 0;
+  font-weight: 600;
+  color: #2C2C2C;
+  font-size: 1rem;
+}
+
+.offer-btn {
+  background: white;
+  color: #8B7355;
+  padding: 15px 30px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
+  border: 2px solid transparent;
+}
+
+.offer-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  background: #8B7355;
+  color: white;
+}
+
+.offers-footer {
+  text-align: center;
+  background: rgba(245, 230, 211, 0.9);
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.offers-footer h4 {
+  margin: 0 0 15px 0;
+  font-size: 1.4rem;
+  color: #2C2C2C;
+  font-weight: 600;
+}
+
+.offers-footer p {
+  margin: 0;
+  color: #2C2C2C;
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+
+/* Trending Collections Section */
+.trending-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #F5E6D3 0%, #F0E6E6 50%, #F5E6D3 100%);
+  position: relative;
+}
+
+.trending-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23D4AF37" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+  pointer-events: none;
+}
+
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-top: 50px;
+  position: relative;
+  z-index: 2;
+}
+
+.collection-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.collection-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(212, 175, 55, 0.02) 100%);
+  pointer-events: none;
+}
+
+.collection-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+}
+
+.collection-icon {
+  font-size: 4rem;
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 2;
+}
+
+.collection-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2C2C2C;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 2;
+}
+
+.collection-subtitle {
+  color: #8B7355;
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+}
+
+/* Product Sections */
+.product-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 50%, #F8F9FA 100%);
+  position: relative;
+}
+
+.product-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="%23D4AF37" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  pointer-events: none;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  position: relative;
+  z-index: 2;
+}
+
+.section-title-left {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2C2C2C;
+  margin: 0;
+}
+
+.view-all-btn {
+  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+  color: white;
+  padding: 12px 25px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+}
+
+.view-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  color: white;
+}
+
+/* Section Titles */
+.section-title {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #2C2C2C;
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .offers-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .collections-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 25px;
+    text-align: center;
+  }
+  
+  .offers-header h2, .section-title {
+    font-size: 2.5rem;
+  }
+  
+  .section-title-left {
+    font-size: 2rem;
+  }
+  
+  .hero-banner {
+    padding: 100px 0;
+    min-height: 70vh;
+  }
+  
+  .promotional-offers,
+  .trending-section,
+  .product-section {
+    padding: 70px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .offers-header h2, .section-title {
+    font-size: 2rem;
+  }
+  
+  .section-title-left {
+    font-size: 1.6rem;
+  }
+  
+  .offer-card {
+    padding: 35px 25px;
+  }
+  
+  .collection-card {
+    padding: 35px 25px;
+  }
+  
+  .hero-banner {
+    padding: 80px 0;
+    min-height: 60vh;
+  }
+}

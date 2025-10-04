@@ -1,0 +1,630 @@
+/* CSS Variables */
+:root {
+  --font-heading: 'Cormorant Garamond', serif;
+  --charcoal: #2c3e50;
+  --gold: #D4AF37;
+  --black: #000000;
+}
+
+/* About Page Styles - Praashibysupal Design */
+.about-page {
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+/* Page Header */
+.page-header {
+  padding: 80px 0 60px;
+  background: white;
+  text-align: center;
+}
+
+.page-title {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Our Story Section */
+.our-story {
+  padding: 80px 0;
+  background: white;
+}
+
+.story-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.story-text h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+.story-text p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.founder-signature {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.founder-signature p {
+  margin: 0;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.diamond-emoji {
+  font-size: 1.5rem;
+}
+
+.story-image {
+  text-align: center;
+}
+
+.image-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.founder-image {
+  width: 100%;
+  height: auto;
+  min-height: 400px;
+  max-height: 600px;
+  display: block;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 500px;
+  background: linear-gradient(135deg, #F5F5DC 0%, #FFF8DC 100%);
+  border-radius: 20px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 8rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Our Values Section */
+.our-values {
+  padding: 80px 0;
+  background: #f8f9fa;
+}
+
+.values-title {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 60px;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+}
+
+.value-card {
+  background: white;
+  padding: 40px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+}
+
+.value-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #D4AF37;
+}
+
+.value-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.value-card p {
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Founder Section */
+.founder-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.founder-title {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 60px;
+}
+
+.founder-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 60px;
+  align-items: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.founder-image {
+  text-align: center;
+}
+
+.founder-image-container {
+  width: 280px;
+  height: 280px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 5px solid #D4AF37;
+  position: relative;
+}
+
+.founder-photo {
+  width: 120%;
+  height: auto;
+  object-fit: cover;
+  object-position: center 35%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.founder-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #F5F5DC 0%, #FFF8DC 100%);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem;
+}
+
+.founder-details h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.founder-role {
+  color: #D4AF37;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+}
+
+.founder-bio {
+  color: #666;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.founder-bio p {
+  margin-bottom: 20px;
+}
+
+.founder-quote {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.founder-quote p {
+  color: #D4AF37;
+  font-weight: 600;
+  font-style: italic;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Contact CTA Section */
+.contact-cta {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #2c3e50 0%, #2c3e50 100%);
+  color: white;
+  text-align: center;
+}
+
+.cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.cta-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  opacity: 0.9;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 15px 30px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: #D4AF37;
+  color: #2c3e50;
+}
+
+.btn-primary:hover {
+  background: #B8941F;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid #D4AF37;
+}
+
+.btn-secondary:hover {
+  background: #D4AF37;
+  color: #2c3e50;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .story-content {
+    gap: 40px;
+  }
+  
+  .founder-content {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 60px 0 40px;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .our-story,
+  .our-values,
+  .founder-section,
+  .contact-cta {
+    padding: 60px 0;
+  }
+  
+  .story-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .story-text h2 {
+    font-size: 2rem;
+  }
+  
+  .story-text p {
+    font-size: 1rem;
+  }
+  
+  .values-title,
+  .founder-title,
+  .cta-title {
+    font-size: 2rem;
+  }
+  
+  .values-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .value-card {
+    padding: 30px 20px;
+  }
+  
+  .founder-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  
+  .founder-image-container {
+    width: 220px;
+    height: 220px;
+  }
+  
+  .founder-details h3 {
+    font-size: 1.5rem;
+  }
+  
+  .founder-bio {
+    font-size: 1rem;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 40px 0 30px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .our-story,
+  .our-values,
+  .founder-section,
+  .contact-cta {
+    padding: 40px 0;
+  }
+  
+  .story-text h2 {
+    font-size: 1.8rem;
+  }
+  
+  .story-text p {
+    font-size: 0.95rem;
+  }
+  
+  .values-title,
+  .founder-title,
+  .cta-title {
+    font-size: 1.8rem;
+  }
+  
+  .value-card {
+    padding: 25px 15px;
+  }
+  
+  .value-icon {
+    font-size: 2.5rem;
+  }
+  
+  .value-card h3 {
+    font-size: 1.3rem;
+  }
+  
+  .founder-image-container {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .founder-details h3 {
+    font-size: 1.3rem;
+  }
+  
+  .founder-role {
+    font-size: 1rem;
+  }
+  
+  .founder-bio {
+    font-size: 0.95rem;
+  }
+  
+  .founder-quote p {
+    font-size: 1rem;
+  }
+  
+  .cta-title {
+    font-size: 1.8rem;
+  }
+  
+  .cta-subtitle {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    padding: 12px 25px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .page-header {
+    padding: 60px 0 40px;
+  }
+  
+  .page-title {
+    font-size: 2.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  /* Story Section Mobile */
+  .story-content {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    text-align: center;
+  }
+  
+  .story-text h2 {
+    font-size: 2rem !important;
+  }
+  
+  .story-text p {
+    font-size: 1rem !important;
+  }
+  
+  /* Values Section Mobile */
+  .values-grid {
+    grid-template-columns: 1fr !important;
+    gap: 30px !important;
+  }
+  
+  .value-card {
+    padding: 30px 20px !important;
+  }
+  
+  /* Founder Section Mobile */
+  .founder-content {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    text-align: center;
+  }
+  
+  .founder-image div {
+    width: 220px !important;
+    height: 220px !important;
+  }
+  
+  .founder-details h3 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* CTA Section Mobile */
+  .contact-cta {
+    padding: 60px 0 !important;
+  }
+  
+  .contact-cta h2 {
+    font-size: 2rem !important;
+  }
+  
+  .contact-cta div {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .contact-cta a {
+    width: 100% !important;
+    max-width: 300px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    padding: 40px 0 30px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .story-text h2 {
+    font-size: 1.8rem !important;
+  }
+  
+  .story-text p {
+    font-size: 0.95rem !important;
+  }
+  
+  .value-card {
+    padding: 25px 15px !important;
+  }
+  
+  .founder-image div {
+    width: 180px !important;
+    height: 180px !important;
+  }
+  
+  .founder-details h3 {
+    font-size: 1.3rem !important;
+  }
+  
+  .contact-cta h2 {
+    font-size: 1.8rem !important;
+  }
+}
+
+
+

@@ -65,7 +65,7 @@ const FullAdminOrders = () => {
           <h2>⚠️ Error Loading Orders</h2>
           <p>Unable to fetch orders. Please ensure:</p>
           <ul style={{ textAlign: 'left', maxWidth: '500px', margin: '20px auto' }}>
-            <li>Backend server is running (http://localhost:5000)</li>
+            <li>Backend server is running</li>
             <li>Database is connected</li>
             <li>You are logged in as admin</li>
           </ul>

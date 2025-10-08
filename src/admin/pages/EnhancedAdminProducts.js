@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import api, { adminAPI } from '../../services/api';
-
-const API_URL = 'http://localhost:5000/api';
+import api, { adminAPI, API_BASE_URL } from '../../services/api';
 
 const EnhancedAdminProducts = () => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -13,19 +11,19 @@ const EnhancedAdminProducts = () => {
 
   // Fetch products
   const { data: products, isLoading } = useQuery('adminProducts', async () => {
-    const response = await axios.get(`${API_URL}/admin/products`);
+    const response = await axios.get(`${API_BASE_URL}/admin/products`);
     return response.data;
   });
 
   // Fetch categories
   const { data: categories } = useQuery('categories', async () => {
-    const response = await axios.get(`${API_URL}/categories`);
+    const response = await axios.get(`${API_BASE_URL}/categories`);
     return response.data;
   });
 
   // Fetch subcategories
   const { data: subcategories } = useQuery('subcategories', async () => {
-    const response = await axios.get(`${API_URL}/subcategories`);
+    const response = await axios.get(`${API_BASE_URL}/subcategories`);
     return response.data;
   });
 
@@ -270,7 +268,7 @@ const ProductFormModal = ({ product, categories, subcategories, onClose, onSucce
         return adminAPI.updateProduct(product.id, data);
       } else {
         // Use direct axios call with proper headers for create
-        const response = await axios.post(`${API_URL}/admin/products`, data, {
+        const response = await axios.post(`${API_BASE_URL}/admin/products`, data, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'multipart/form-data'

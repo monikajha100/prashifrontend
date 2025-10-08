@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { bannersAPI } from '../../services/api';
+import { bannersAPI, API_BASE_URL } from '../../services/api';
 import toast from 'react-hot-toast';
 
 const FullAdminBanners = () => {
@@ -285,7 +285,7 @@ const BannerFormModal = ({ banner, onClose, onSuccess }) => {
         const uploadFormData = new FormData();
         uploadFormData.append('image', imageFile);
         
-        const response = await fetch('http://localhost:5000/api/upload/banner', {
+        const response = await fetch(`${API_BASE_URL}/upload/banner`, {
           method: 'POST',
           body: uploadFormData
         });

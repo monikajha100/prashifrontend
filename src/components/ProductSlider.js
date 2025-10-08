@@ -78,9 +78,6 @@ const ProductSlider = ({ products, category }) => {
                 <img 
                   src={product.primary_image || '/placeholder-product.jpg'} 
                   alt={product.name}
-                  onError={(e) => {
-                    e.target.src = '/placeholder-product.jpg';
-                  }}
                 />
               </div>
               

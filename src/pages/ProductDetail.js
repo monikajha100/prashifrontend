@@ -58,9 +58,6 @@ const ProductDetail = () => {
               <img 
                 src={product.images?.[0]?.image_url || '/placeholder-product.jpg'} 
                 alt={product.name}
-                onError={(e) => {
-                  e.target.src = '/placeholder-product.jpg';
-                }}
               />
             </div>
             {product.images && product.images.length > 1 && (

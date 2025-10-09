@@ -190,7 +190,9 @@ const Header = () => {
           </div>
 
           <div className="mobile-nav-links">
-            <Link to="/admin" className="mobile-nav-link" onClick={toggleMenu}>Admin</Link>
+            {user?.role === 'admin' && (
+              <Link to="/admin" className="mobile-nav-link" onClick={toggleMenu}>Admin Panel</Link>
+            )}
             <Link to="/" className="mobile-nav-link" onClick={toggleMenu}>Home</Link>
             <Link to="/products?category=necklaces" className="mobile-nav-link" onClick={toggleMenu}>Necklace Sets</Link>
             <Link to="/products?category=earrings" className="mobile-nav-link" onClick={toggleMenu}>Earrings</Link>

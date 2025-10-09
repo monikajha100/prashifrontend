@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../../services/api';
 
 const WorkingAdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -7,6 +8,7 @@ const WorkingAdminLogin = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,24 +19,37 @@ const WorkingAdminLogin = () => {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Simple validation - no API calls
-    if (formData.email === 'admin@praashibysupal.com' && formData.password === 'admin123') {
+    setLoading(true);
+    setError('');
+
+    try {
+      // Make API call to authenticate
+      const response = await authAPI.login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Check if user has admin role
+      if (response.data.user.role !== 'admin') {
+        setError('Access denied. Admin privileges required.');
+        setLoading(false);
+        return;
+      }
+
       // Store admin session
-      localStorage.setItem('adminToken', 'working-admin-token');
-      localStorage.setItem('adminUser', JSON.stringify({
-        id: 1,
-        name: 'Admin User',
-        email: 'admin@praashibysupal.com',
-        role: 'admin'
-      }));
+      localStorage.setItem('adminToken', response.data.token);
+      localStorage.setItem('adminUser', JSON.stringify(response.data.user));
       
       // Navigate to dashboard
       navigate('/admin/dashboard');
-    } else {
-      setError('Invalid credentials. Use admin@praashibysupal.com / admin123');
+    } catch (error) {
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || 'Login failed. Please check your credentials.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,29 +172,37 @@ const WorkingAdminLogin = () => {
 
             <button 
               type="submit" 
+              disabled={loading}
               style={{
                 width: '100%',
                 padding: '15px',
-                background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                background: loading 
+                  ? 'linear-gradient(135deg, #ccc 0%, #999 100%)'
+                  : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '1rem',
                 fontWeight: '600',
-                cursor: 'pointer',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                boxShadow: '0 5px 15px rgba(212, 175, 55, 0.3)'
+                boxShadow: '0 5px 15px rgba(212, 175, 55, 0.3)',
+                opacity: loading ? 0.7 : 1
               }}
               onMouseOver={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 8px 25px rgba(212, 175, 55, 0.4)';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(212, 175, 55, 0.4)';
+                }
               }}
               onMouseOut={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 5px 15px rgba(212, 175, 55, 0.3)';
+                if (!loading) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 5px 15px rgba(212, 175, 55, 0.3)';
+                }
               }}
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
@@ -209,9 +232,9 @@ const WorkingAdminLogin = () => {
             fontSize: '0.8rem',
             color: '#666'
           }}>
-            <strong>Working Admin Credentials:</strong><br />
-            Email: admin@praashibysupal.com<br />
-            Password: admin123
+            <strong>Admin Login:</strong><br />
+            Use your admin account credentials to access the panel.<br />
+            Contact system administrator if you need access.
           </div>
         </div>
       </div>

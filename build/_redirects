@@ -1,0 +1,5 @@
+# SPA Routing Configuration
+# This file ensures all routes are handled by React Router
+# Required for proper admin panel routing in production
+
+/* /index.html 200

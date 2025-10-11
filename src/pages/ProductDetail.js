@@ -94,8 +94,8 @@ const ProductDetail = () => {
             )}
 
             {/* Quantity + actions */}
-            <div className="product-actions">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="product-actions" style={{ border: '2px solid red', padding: '10px', margin: '10px 0' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '10px' }}>
                 <label style={{ fontWeight: 600 }}>Qty:</label>
                 <input
                   type="number"
@@ -111,6 +111,20 @@ const ProductDetail = () => {
                 onClick={handleAddToCart}
               >
                 Add to Cart
+              </button>
+              <button 
+                className="btn btn-primary buy-now-btn"
+                onClick={() => {
+                  handleAddToCart();
+                  // Navigate to checkout
+                  window.location.href = '/checkout';
+                }}
+                style={{ 
+                  background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+                  marginLeft: '10px'
+                }}
+              >
+                Buy Now
               </button>
               <button className="btn btn-secondary">
                 Add to Wishlist

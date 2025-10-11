@@ -106,20 +106,54 @@ const Checkout = () => {
       console.log('cartTotals:', cartTotals);
       
       // Extract order ID from the response
-      const orderId = orderData.data?.order?.id || orderData.data?.id;
+      console.log('Full orderData structure:', JSON.stringify(orderData, null, 2));
+      
+      let orderId = null;
+      
+      // Try different possible structures
+      if (orderData.data?.order?.id) {
+        orderId = orderData.data.order.id;
+      } else if (orderData.data?.id) {
+        orderId = orderData.data.id;
+      } else if (orderData.order?.id) {
+        orderId = orderData.order.id;
+      } else if (orderData.id) {
+        orderId = orderData.id;
+      }
+      
       console.log('Extracted orderId:', orderId);
+      console.log('orderId type:', typeof orderId);
       
       if (!orderId) {
         console.error('Order ID not found in response structure');
-        throw new Error('Order ID not found in response');
+        console.error('Available keys in orderData:', Object.keys(orderData));
+        if (orderData.data) {
+          console.error('Available keys in orderData.data:', Object.keys(orderData.data));
+        }
+        
+        // Fallback: use timestamp-based order ID
+        orderId = `order_${Date.now()}`;
+        console.log('Using fallback orderId:', orderId);
       }
       
+      // Validate payment data
+      if (!cartTotals.totalAmount || cartTotals.totalAmount <= 0) {
+        throw new Error('Invalid cart total amount');
+      }
+      
+      // Ensure orderId is a string
+      orderId = String(orderId);
+      
       const paymentRequest = {
-        amount: cartTotals.totalAmount,
+        amount: parseFloat(cartTotals.totalAmount),
         currency: 'INR',
         order_id: orderId
       };
       console.log('Payment request payload:', paymentRequest);
+      console.log('cartTotals:', cartTotals);
+      console.log('orderId:', orderId);
+      console.log('amount type:', typeof cartTotals.totalAmount);
+      console.log('amount value:', cartTotals.totalAmount);
       
       // Create Razorpay order
       console.log('Calling paymentsAPI.createRazorpayOrder...');
@@ -128,29 +162,7 @@ const Checkout = () => {
 
       const { order, key } = razorpayOrderResponse.data;
 
-      // Check if this is demo mode
-      if (razorpayOrderResponse.data.demo) {
-        // For demo mode, simulate payment success with better UX
-        const proceed = window.confirm(
-          'Demo Mode: This will simulate a successful payment.\n\n' +
-          'In production, this would open the Razorpay payment modal.\n\n' +
-          'Click OK to proceed with test payment and invoice generation.'
-        );
-        
-        if (!proceed) {
-          setIsProcessing(false);
-          return;
-        }
-        
-        // Simulate successful payment
-        await verifyPaymentMutation.mutateAsync({
-          razorpay_order_id: order.id,
-          razorpay_payment_id: 'pay_demo_' + Date.now(),
-          razorpay_signature: 'demo_signature',
-          order_id: orderId
-        });
-        return;
-      }
+      // Proceed with live Razorpay payment
 
       // Load Razorpay script for real payments
       const script = document.createElement('script');

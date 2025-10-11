@@ -19,14 +19,37 @@ const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [cartTotals, setCartTotals] = useState({});
 
+  // Calculate cart totals from items
+  const calculateCartTotals = (items) => {
+    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingAmount = subtotal >= 999 ? 0 : 50;
+    const taxAmount = subtotal * 0.18; // 18% GST
+    const totalAmount = subtotal + shippingAmount + taxAmount;
+    
+    return {
+      subtotal,
+      shippingAmount,
+      taxAmount,
+      totalAmount
+    };
+  };
+
   // Load cart data from localStorage
   useEffect(() => {
     const savedCartItems = localStorage.getItem('cartItems');
     const savedCartTotals = localStorage.getItem('cartTotals');
     
-    if (savedCartItems && savedCartTotals) {
-      setCartItems(JSON.parse(savedCartItems));
-      setCartTotals(JSON.parse(savedCartTotals));
+    if (savedCartItems) {
+      const items = JSON.parse(savedCartItems);
+      setCartItems(items);
+      
+      if (savedCartTotals) {
+        setCartTotals(JSON.parse(savedCartTotals));
+      } else {
+        // Calculate totals if not available
+        const totals = calculateCartTotals(items);
+        setCartTotals(totals);
+      }
     } else {
       // Redirect to cart if no items
       navigate('/cart');
@@ -136,8 +159,11 @@ const Checkout = () => {
         console.log('Using fallback orderId:', orderId);
       }
       
+      // Calculate totals if not available
+      const totals = cartTotals && cartTotals.totalAmount ? cartTotals : calculateCartTotals(cartItems);
+      
       // Validate payment data
-      if (!cartTotals.totalAmount || cartTotals.totalAmount <= 0) {
+      if (!totals.totalAmount || totals.totalAmount <= 0) {
         throw new Error('Invalid cart total amount');
       }
       
@@ -145,7 +171,7 @@ const Checkout = () => {
       orderId = String(orderId);
       
       const paymentRequest = {
-        amount: parseFloat(cartTotals.totalAmount),
+        amount: parseFloat(totals.totalAmount),
         currency: 'INR',
         order_id: orderId
       };
@@ -256,6 +282,15 @@ const Checkout = () => {
       console.log('Form data:', formData);
       console.log('Payment method:', paymentMethod);
       
+      // Validate cart data
+      if (!cartItems || cartItems.length === 0) {
+        throw new Error('No items in cart');
+      }
+      
+      // Ensure cartTotals is available
+      const totals = cartTotals && cartTotals.totalAmount ? cartTotals : calculateCartTotals(cartItems);
+      console.log('Using totals:', totals);
+      
       const orderData = {
         items: cartItems.map(item => ({
           productId: item.id,
@@ -273,10 +308,10 @@ const Checkout = () => {
         state: 'Maharashtra', // Default state for demo
         pincode: '400001', // Default pincode for demo
         paymentMethod: paymentMethod,
-        subtotal: cartTotals.subtotal,
-        taxAmount: cartTotals.taxAmount,
-        shippingAmount: cartTotals.shippingAmount,
-        totalAmount: cartTotals.totalAmount,
+        subtotal: totals.subtotal,
+        taxAmount: totals.taxAmount,
+        shippingAmount: totals.shippingAmount,
+        totalAmount: totals.totalAmount,
         notes: formData.notes
       };
 

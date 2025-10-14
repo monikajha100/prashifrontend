@@ -97,7 +97,7 @@ export const subcategoriesAPI = {
 
 export const bannersAPI = {
   getAll: () => api.get('/banners'),
-  getActive: () => api.get('/banners/active'),
+  getActive: () => api.get('/banners'),
   getById: (id) => api.get(`/banners/${id}`),
   create: (bannerData) => api.post('/admin/banners', bannerData),
   update: (bannerId, bannerData) => api.put(`/admin/banners/${bannerId}`, bannerData),

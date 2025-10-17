@@ -90,8 +90,8 @@ export const productsAPI = {
       : api.get(`/products/slug/${identifier}`);
   },
   getFeatured: (limit = 8) => api.get(`/products/featured/list?limit=${limit}`),
-  getVictorian: (limit = 20) => api.get(`/products/victorian/list?limit=${limit}`),
-  getColorChanging: (limit = 10) => api.get(`/products/color-changing/list?limit=${limit}`),
+  getNecklaces: (limit = 20) => api.get(`/products/category/necklaces?limit=${limit}`),
+  getEarrings: (limit = 10) => api.get(`/products/category/earrings?limit=${limit}`),
   getByCategory: (categorySlug, params) => api.get(`/products/category/${categorySlug}`, { params }),
   search: (query, params) => api.get(`/products/search/${query}`, { params }),
   create: (productData) => api.post('/admin/products', productData),

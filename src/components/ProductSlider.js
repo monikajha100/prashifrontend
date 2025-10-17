@@ -124,9 +124,6 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
                     borderRadius: '8px',
                     marginBottom: '10px'
                   }}
-                  onError={(e) => {
-                    e.target.src = '/placeholder-product.jpg';
-                  }}
                 />
                 <h4 style={{
                   fontSize: '16px',

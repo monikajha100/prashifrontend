@@ -97,21 +97,21 @@ const Home = () => {
   );
 
   // Fetch Victorian products with error handling
-  const { data: victorianProducts, isLoading: victorianLoading, error: victorianError } = useQuery(
-    'victorianProducts',
-    () => productsAPI.getVictorian(20),
+  const { data: necklacesProducts, isLoading: necklacesLoading, error: necklacesError } = useQuery(
+    'necklacesProducts',
+    () => productsAPI.getNecklaces(20),
     {
       select: (response) => response.data,
       retry: 1,
       retryDelay: 1000,
       onError: () => setIsApiAvailable(false)
     }
-  );
+  );  
 
   // Fetch color changing products with error handling
-  const { data: colorChangingProducts, isLoading: colorChangingLoading, error: colorChangingError } = useQuery(
-    'colorChangingProducts',
-    () => productsAPI.getColorChanging(10),
+  const { data: earringsProducts, isLoading: earringsLoading, error: earringsError } = useQuery(
+    'earringsProducts',
+    () => productsAPI.getEarrings(10),
     {
       select: (response) => response.data,
       retry: 1,
@@ -146,8 +146,8 @@ const Home = () => {
   // Use fallback data if API is not available - ensure arrays
   const displayCategories = categories || fallbackCategories;
   const displayFeaturedProducts = Array.isArray(featuredProducts) ? featuredProducts : [];
-  const displayVictorianProducts = Array.isArray(victorianProducts) ? victorianProducts : fallbackProducts;
-  const displayColorChangingProducts = Array.isArray(colorChangingProducts) ? colorChangingProducts : fallbackProducts;
+  const displayNecklacesProducts = Array.isArray(necklacesProducts) ? necklacesProducts : [];
+  const displayEarringsProducts = Array.isArray(earringsProducts) ? earringsProducts : [];
   const displayBanners = Array.isArray(banners) ? banners : (banners ? [banners] : fallbackBanners);
 
   // Banner slider effect
@@ -411,17 +411,18 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Victorian Sets Section */}
+      {/* Necklaces Sets Section */}
       <section className="product-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title-left">TIMELESS JEWELS</h2>
-            <Link to="/products?category=victorian" className="view-all-btn">View all</Link>
+            <h2 className="section-title-left">NECKLACES COLLECTION</h2>
+            <Link to="/products?category=necklaces" className="view-all-btn">View all</Link>
           </div>
           
           <ProductSlider 
-            products={displayVictorianProducts || []} 
-            category="victorian"
+            products={displayNecklacesProducts || []} 
+            category="necklaces"
+            title=''
           />
         </div>
       </section>
@@ -443,17 +444,18 @@ const Home = () => {
         </section>
       )}
 
-      {/* Color Changing Jewelry Section */}
+      {/* Earrings Section */}
       <section className="product-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title-left">MAGIC COLLECTION</h2>
-            <Link to="/products?category=color-changing" className="view-all-btn">View all</Link>
+            <h2 className="section-title-left">EARRINGS COLLECTION</h2>
+            <Link to="/products?category=earrings" className="view-all-btn">View all</Link>
           </div>
           
           <ProductSlider 
-            products={displayColorChangingProducts || []} 
-            category="color-changing"
+            products={displayEarringsProducts || []} 
+            category="earrings"
+            title=''
           />
         </div>
       </section>

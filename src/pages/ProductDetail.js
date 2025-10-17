@@ -88,9 +88,6 @@ const ProductDetail = () => {
                 cursor: 'pointer',
                 transition: 'transform 0.3s ease'
               }}
-              onError={(e) => {
-                e.target.src = '/placeholder-product.jpg';
-              }}
               onClick={() => {
                 const images = product.images || product.productImages || [];
                 if (images.length > 1) {
@@ -143,9 +140,6 @@ const ProductDetail = () => {
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      e.target.src = '/placeholder-product.jpg';
                     }}
                   />
                 </div>

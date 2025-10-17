@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { motion } from 'framer-motion';
+import { toAbsoluteImageUrl } from '../services/api';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
@@ -30,7 +31,7 @@ const ProductCard = ({ product }) => {
             <div className="sale-badge">Sale</div>
           )}
           <img 
-            src={selectedColorImage || product.primary_image || '/placeholder-product.jpg'} 
+            src={toAbsoluteImageUrl(selectedColorImage || product.primary_image) || '/placeholder-product.jpg'} 
             alt={product.name}
           />
         </div>

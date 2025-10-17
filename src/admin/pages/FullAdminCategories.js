@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { categoriesAPI } from '../../services/api';
+import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const FullAdminCategories = () => {
@@ -17,21 +18,51 @@ const FullAdminCategories = () => {
   );
 
   const deleteMutation = useMutation(
-    (id) => categoriesAPI.delete(id),
+    async ({ id, force }) => {
+      const url = force ? `/admin/categories/${id}?force=true` : `/admin/categories/${id}`;
+      return api.delete(url);
+    },
     {
-      onSuccess: () => {
-        toast.success('Category deleted successfully!');
+      onSuccess: (response) => {
+        const data = response.data;
+        if (data.deleted_products > 0) {
+          toast.success(`Category and ${data.deleted_products} products deleted successfully!`);
+        } else {
+          toast.success('Category deleted successfully!');
+        }
         queryClient.invalidateQueries('adminCategories');
       },
-      onError: () => {
-        toast.error('Failed to delete category');
+      onError: (error) => {
+        console.error('Delete error:', error);
+        if (error.response?.status === 400 && error.response?.data?.message?.includes('existing products')) {
+          // Show force delete option
+          const categoryId = error.config?.url?.match(/\/(\d+)/)?.[1];
+          if (categoryId) {
+            // Get category name from the categories list
+            const category = categories?.find(cat => cat.id == categoryId);
+            const categoryName = category?.name || 'Unknown Category';
+            handleForceDelete(categoryId, error.response.data.product_count, categoryName);
+          } else {
+            toast.error('Failed to delete category: ' + error.response.data.message);
+          }
+        } else {
+          toast.error('Failed to delete category: ' + (error.response?.data?.message || error.message || 'Unknown error'));
+        }
       }
     }
   );
 
   const handleDelete = (id) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate({ id });
+    }
+  };
+
+  const handleForceDelete = (categoryId, productCount, categoryName) => {
+    const confirmMessage = `Category "${categoryName}" has ${productCount} products.\n\nDo you want to DELETE the category and ALL its products?\n\n⚠️ WARNING: This action cannot be undone!`;
+    
+    if (window.confirm(confirmMessage)) {
+      deleteMutation.mutate({ id: categoryId, force: true });
     }
   };
 

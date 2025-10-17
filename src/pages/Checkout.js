@@ -22,7 +22,7 @@ const Checkout = () => {
   // Calculate cart totals from items
   const calculateCartTotals = (items) => {
     const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const shippingAmount = subtotal >= 999 ? 0 : 50;
+    const shippingAmount = 0; // Free shipping for all orders
     const taxAmount = subtotal * 0.18; // 18% GST
     const totalAmount = subtotal + shippingAmount + taxAmount;
     
@@ -257,7 +257,7 @@ const Checkout = () => {
     localStorage.removeItem('cartTotals');
     
     // Show success message with more details
-    const orderNumber = orderData?.data?.order?.order_number || orderData?.order_number || 'N/A';
+    const orderNumber = orderData?.data?.order?.order_number || orderData?.order?.order_number || orderData?.order_number || 'N/A';
     const paymentMethodText = paymentMethod === 'razorpay' ? 'Online Payment' : 'Cash on Delivery';
     
     alert(

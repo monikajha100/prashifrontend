@@ -21,7 +21,7 @@ const ShippingInfo = () => {
               <p className="highlight-text">
                 <strong>Free Shipping on Orders ₹999 & Above</strong>
               </p>
-              <p>Enjoy complimentary shipping on all orders above ₹999 across India!</p>
+              <p>Enjoy complimentary shipping on all orders across India!</p>
             </div>
 
             <div className="legal-section">
@@ -82,7 +82,7 @@ const ShippingInfo = () => {
               
               <h3>💰 Shipping Cost Structure</h3>
               <p>
-                <strong>Free shipping on orders above ₹999; flat ₹80 below that amount.</strong>
+                <strong>Free shipping on all orders!</strong>
               </p>
               
               <div className="shipping-table">
@@ -118,7 +118,7 @@ const ShippingInfo = () => {
               <h3>Shipping Cost Summary</h3>
               <ul>
                 <li><strong>Orders ₹999 and above:</strong> FREE standard shipping</li>
-                <li><strong>Orders below ₹999:</strong> Standard shipping ₹80</li>
+                <li><strong>All orders:</strong> Free shipping</li>
                 <li><strong>Express Shipping:</strong> ₹150 (all orders)</li>
                 <li><strong>No hidden charges:</strong> What you see is what you pay</li>
               </ul>

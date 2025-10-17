@@ -1,122 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { useCart } from '../context/CartContext';
-import '../live-styles.css';
+import React, { useState } from 'react';
+import { toAbsoluteImageUrl } from '../services/api';
 
-const ProductSlider = ({ products, category }) => {
+const ProductSlider = ({ products, title = "Related Products" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsPerView, setItemsPerView] = useState(4);
-  const { addToCart } = useCart();
-
-  // Calculate items per view based on screen size
-  useEffect(() => {
-    const updateItemsPerView = () => {
-      const width = window.innerWidth;
-      if (width < 480) {
-        setItemsPerView(1);
-      } else if (width < 768) {
-        setItemsPerView(2);
-      } else if (width < 1024) {
-        setItemsPerView(3);
-      } else {
-        setItemsPerView(4);
-      }
-    };
-
-    updateItemsPerView();
-    window.addEventListener('resize', updateItemsPerView);
-    return () => window.removeEventListener('resize', updateItemsPerView);
-  }, []);
-
-  const maxIndex = Math.max(0, products.length - itemsPerView);
+  const itemsPerView = 4; // Number of items to show at once
 
   const nextSlide = () => {
-    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+    setCurrentIndex((prevIndex) => 
+      prevIndex + itemsPerView >= products.length ? 0 : prevIndex + 1
+    );
   };
 
   const prevSlide = () => {
-    setCurrentIndex(prev => Math.max(prev - 1, 0));
-  };
-
-  const handleAddToCart = (product) => {
-    addToCart(product, 1);
-  };
-
-  if (!products || products.length === 0) {
-    return (
-      <div className="no-products">
-        <p>No products available in this category.</p>
-      </div>
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? Math.max(0, products.length - itemsPerView) : prevIndex - 1
     );
+  };
+
+  if (!products || !Array.isArray(products) || products.length === 0) {
+    return null;
   }
 
   return (
-    <div className="product-slider-container">
-      <button 
-        className="slider-button" 
-        onClick={prevSlide}
-        disabled={currentIndex === 0}
-        aria-label="Previous products"
-      >
-        <FaChevronLeft />
-      </button>
+    <div className="product-slider" style={{ marginTop: '40px', padding: '20px 0' }}>
+      <h3 style={{ 
+        fontSize: '24px', 
+        fontWeight: '600', 
+        marginBottom: '20px',
+        textAlign: 'center',
+        color: '#333'
+      }}>
+        {title}
+      </h3>
       
-      <div className="product-slider">
-        <div 
-          className="product-slider-track"
+      <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto' }}>
+        {/* Navigation buttons */}
+        <button
+          onClick={prevSlide}
           style={{
-            transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`
+            position: 'absolute',
+            left: '-50px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: '#D4AF37',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '16px',
+            zIndex: 10,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
           }}
         >
-          {products.map((product, index) => (
-            <div key={product.id} className="product-card">
-              <div className="product-image">
-                {product.discount_percentage > 0 && (
-                  <div className="sale-badge">Sale</div>
-                )}
-                <img 
-                  src={product.primary_image || '/placeholder-product.jpg'} 
+          ←
+        </button>
+        
+        <button
+          onClick={nextSlide}
+          style={{
+            position: 'absolute',
+            right: '-50px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: '#D4AF37',
+            border: 'none',
+            borderRadius: '50%',
+            width: '40px',
+            height: '40px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '16px',
+            zIndex: 10,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+          }}
+        >
+          →
+        </button>
+
+        {/* Slider container */}
+        <div style={{
+          overflow: 'hidden',
+          borderRadius: '10px'
+        }}>
+          <div style={{
+            display: 'flex',
+            transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
+            transition: 'transform 0.3s ease',
+            gap: '20px'
+          }}>
+            {products.map((product, index) => (
+              <div
+                key={product.id}
+                style={{
+                  minWidth: `calc(${100 / itemsPerView}% - ${20 * (itemsPerView - 1) / itemsPerView}px)`,
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '10px',
+                  padding: '15px',
+                  textAlign: 'center',
+                  backgroundColor: 'white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'translateY(-5px)'}
+                onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                onClick={() => window.location.href = `/product/${product.slug || product.id}`}
+              >
+                <img
+                  src={toAbsoluteImageUrl(product.primary_image) || '/placeholder-product.jpg'}
                   alt={product.name}
+                  style={{
+                    width: '100%',
+                    height: '200px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    marginBottom: '10px'
+                  }}
+                  onError={(e) => {
+                    e.target.src = '/placeholder-product.jpg';
+                  }}
                 />
+                <h4 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: '#333',
+                  lineHeight: '1.4'
+                }}>
+                  {product.name}
+                </h4>
+                <p style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#D4AF37',
+                  margin: '0'
+                }}>
+                  ₹ {product.price}
+                </p>
               </div>
-              
-              <div className="product-info">
-                <h3 className="product-title">{product.name}</h3>
-                
-                <div className="product-price">
-                  <span className="current-price">₹ {product.price}</span>
-                  {product.original_price && product.original_price > product.price && (
-                    <>
-                      <span className="original-price">₹ {product.original_price}</span>
-                      <span className="discount">{product.discount_percentage}% Off</span>
-                    </>
-                  )}
-                </div>
-                
-                <button 
-                  className="add-to-cart-btn"
-                  onClick={() => handleAddToCart(product)}
-                >
-                  Add to Cart
-                </button>
-                <Link to={`/products/${product.slug}`} className="view-details-btn">
-                  View Details
-                </Link>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-      
-      <button 
-        className="slider-button" 
-        onClick={nextSlide}
-        disabled={currentIndex >= maxIndex}
-        aria-label="Next products"
-      >
-        <FaChevronRight />
-      </button>
     </div>
   );
 };

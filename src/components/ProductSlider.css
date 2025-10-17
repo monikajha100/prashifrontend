@@ -189,14 +189,15 @@
 }
 
 .view-details-btn {
-  background: transparent;
-  color: #D4AF37;
-  border: 2px solid #D4AF37;
+  background: #19692c !important;
+  color: white !important;
+  border: 2px solid #19692c;
 }
 
 .view-details-btn:hover {
-  background: #D4AF37;
-  color: white;
+  background: #0d3d1a !important;
+  color: white !important;
+  border-color: #0d3d1a;
   transform: translateY(-2px);
 }
 

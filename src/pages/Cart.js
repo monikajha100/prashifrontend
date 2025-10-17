@@ -47,7 +47,7 @@ const Cart = () => {
 
   const calculateTotals = () => {
     const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-    const shippingAmount = subtotal > 1000 ? 0 : 100; // Free shipping above ₹1000
+    const shippingAmount = 0; // Free shipping for all orders
     const taxAmount = Math.round(subtotal * 0.18); // 18% GST
     const totalAmount = subtotal + shippingAmount + taxAmount;
     

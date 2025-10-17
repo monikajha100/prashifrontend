@@ -2,6 +2,28 @@ import axios from 'axios';
 
 export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.praashibysupal.com/api';
 
+// Convert relative asset paths (e.g., /uploads/...) to absolute URLs against the API origin
+// Leaves fully qualified URLs (http/https) untouched
+export const toAbsoluteImageUrl = (pathOrUrl) => {
+  if (!pathOrUrl) return pathOrUrl;
+  const asString = String(pathOrUrl).trim();
+
+  // Already absolute or non-HTTP assets (data/blob)
+  if (/^https?:\/\//i.test(asString)) return asString;
+  if (/^(data:|blob:)/i.test(asString)) return asString;
+
+  // Only rewrite backend-hosted assets that live under /uploads
+  const isUploadsAsset = /^\/?uploads(\/|$)/i.test(asString);
+  if (!isUploadsAsset) {
+    // Frontend public assets should remain relative to the frontend origin
+    return asString.startsWith('/') ? asString : `/${asString}`;
+  }
+
+  const assetBase = API_BASE_URL.replace(/\/api$/i, '');
+  const normalizedPath = asString.startsWith('/') ? asString : `/${asString}`;
+  return `${assetBase}${normalizedPath}`;
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -65,7 +87,7 @@ export const productsAPI = {
     const isNumeric = /^\d+$/.test(String(identifier));
     return isNumeric
       ? api.get(`/products/${identifier}`)
-      : api.get(`/products/by-slug/${identifier}`);
+      : api.get(`/products/slug/${identifier}`);
   },
   getFeatured: (limit = 8) => api.get(`/products/featured/list?limit=${limit}`),
   getVictorian: (limit = 20) => api.get(`/products/victorian/list?limit=${limit}`),
@@ -88,7 +110,7 @@ export const categoriesAPI = {
 
 export const subcategoriesAPI = {
   getAll: () => api.get('/subcategories'),
-  getAllAdmin: (params) => api.get('/subcategories/admin', { params }),
+  getAllAdmin: (params) => api.get('/subcategories/admin/all', { params }),
   getByCategory: (categorySlug) => api.get(`/subcategories/category/${categorySlug}`),
   create: (subcategoryData) => api.post('/admin/subcategories', subcategoryData),
   update: (subcategoryId, subcategoryData) => api.put(`/admin/subcategories/${subcategoryId}`, subcategoryData),
@@ -97,7 +119,7 @@ export const subcategoriesAPI = {
 
 export const bannersAPI = {
   getAll: () => api.get('/banners'),
-  getActive: () => api.get('/banners'),
+  getActive: () => api.get('/banners/active'),
   getById: (id) => api.get(`/banners/${id}`),
   create: (bannerData) => api.post('/admin/banners', bannerData),
   update: (bannerId, bannerData) => api.put(`/admin/banners/${bannerId}`, bannerData),
@@ -125,7 +147,7 @@ export const ordersAPI = {
   updateStatus: (orderId, statusData) => api.put(`/orders/${orderId}/status`, statusData),
   updatePaymentStatus: (orderId, paymentData) => api.put(`/orders/${orderId}/payment-status`, paymentData),
   addTracking: (orderId, trackingData) => api.put(`/orders/${orderId}/tracking`, trackingData),
-  getAllOrders: (params) => api.get('/orders', { params }),
+  getAllOrders: (params) => api.get('/orders/admin/all', { params }),
 };
 
 export const contactAPI = {
@@ -185,6 +207,60 @@ export const paymentsAPI = {
   updatePaymentSettings: (settings) => api.put('/payments/settings', settings)
 };
 
+export const contractsAPI = {
+  getAllContracts: (params) => api.get('/contracts', { params }),
+  getContractById: (contractId) => api.get(`/contracts/${contractId}`),
+  createContract: (contractData) => api.post('/contracts', contractData),
+  updateContract: (contractId, contractData) => api.put(`/contracts/${contractId}`, contractData),
+  addSignature: (contractId, signatureData) => api.post(`/contracts/${contractId}/signature`, signatureData),
+  sendReminder: (contractId) => api.post(`/contracts/${contractId}/reminder`),
+  getTemplates: () => api.get('/contracts/templates/all'),
+  createTemplate: (templateData) => api.post('/contracts/templates', templateData),
+  getAnalytics: () => api.get('/contracts/analytics/overview')
+};
+
+export const couponsAPI = {
+  getAllCoupons: (params) => api.get('/coupons', { params }),
+  getCouponById: (couponId) => api.get(`/coupons/${couponId}`),
+  createCoupon: (couponData) => api.post('/coupons', couponData),
+  updateCoupon: (couponId, couponData) => api.put(`/coupons/${couponId}`, couponData),
+  validateCoupon: (code, params) => api.get(`/coupons/validate/${code}`, { params }),
+  applyCoupon: (couponData) => api.post('/coupons/apply', couponData),
+  getAnalytics: () => api.get('/coupons/analytics/overview'),
+  getCampaigns: () => api.get('/coupons/campaigns/all'),
+  createCampaign: (campaignData) => api.post('/coupons/campaigns', campaignData)
+};
+
+export const storefrontAPI = {
+  getSettings: () => api.get('/storefront/settings'),
+  updateSettings: (settingsData) => api.put('/storefront/settings', settingsData),
+  getThemes: () => api.get('/storefront/themes'),
+  createTheme: (themeData) => api.post('/storefront/themes', themeData),
+  getSections: () => api.get('/storefront/sections'),
+  updateSection: (sectionId, sectionData) => api.put(`/storefront/sections/${sectionId}`, sectionData),
+  createSection: (sectionData) => api.post('/storefront/sections', sectionData),
+  getWidgets: () => api.get('/storefront/widgets'),
+  updateWidget: (widgetId, widgetData) => api.put(`/storefront/widgets/${widgetId}`, widgetData),
+  getAnalytics: (params) => api.get('/storefront/analytics', { params }),
+  uploadAsset: (fileData) => api.post('/storefront/upload', fileData)
+};
+
+export const socialAPI = {
+  getAccounts: () => api.get('/social/accounts'),
+  connectAccount: (accountData) => api.post('/social/accounts/connect', accountData),
+  disconnectAccount: (accountId) => api.delete(`/social/accounts/${accountId}`),
+  getPosts: (params) => api.get('/social/posts', { params }),
+  createPost: (postData) => api.post('/social/posts', postData),
+  updatePost: (postId, postData) => api.put(`/social/posts/${postId}`, postData),
+  getCampaigns: (params) => api.get('/social/campaigns', { params }),
+  createCampaign: (campaignData) => api.post('/social/campaigns', campaignData),
+  getInfluencers: (params) => api.get('/social/influencers', { params }),
+  createInfluencer: (influencerData) => api.post('/social/influencers', influencerData),
+  getAnalytics: (params) => api.get('/social/analytics', { params }),
+  syncAccount: (accountId) => api.post(`/social/sync/${accountId}`),
+  uploadMedia: (fileData) => api.post('/social/upload', fileData)
+};
+
 export const adminAPI = {
   // Dashboard
   getDashboard: () => api.get('/admin/dashboard'),
@@ -200,7 +276,19 @@ export const adminAPI = {
   deleteCategory: (categoryId) => api.delete(`/admin/categories/${categoryId}`),
   
   // Orders
-  getAllOrders: (params) => api.get('/orders', { params }),
+  getAllOrders: (params) => api.get('/orders/admin/all', { params }),
+  
+  // Contracts
+  ...contractsAPI,
+  
+  // Coupons
+  ...couponsAPI,
+  
+  // Storefront
+  ...storefrontAPI,
+  
+  // Social Media
+  ...socialAPI,
   
   // Users
   getAllUsers: (params) => api.get('/users', { params }),

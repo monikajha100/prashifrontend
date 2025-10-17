@@ -533,7 +533,7 @@ img {
 }
 
 .partner-link {
-  background: var(--brand-accent);
+  background: #19692c !important;
   color: white !important;
   padding: 8px 20px;
   border-radius: 20px;
@@ -541,7 +541,7 @@ img {
 }
 
 .partner-link:hover {
-  background: var(--brand-accent-dark);
+  background: #19692c !important;
   color: white !important;
 }
 
@@ -677,8 +677,8 @@ img {
 }
 
 .mobile-nav-link.partner-link {
-  background: var(--theme-gradient);
-  color: white;
+  background: #19692c !important;
+  color: white !important;
   padding: 18px 20px;
   border-radius: 8px;
   text-align: center;
@@ -688,7 +688,7 @@ img {
 }
 
 .mobile-nav-link.partner-link:hover {
-  background: var(--theme-gradient-dark);
+  background: #19692c !important;
   padding-left: 20px;
 }
 
@@ -907,23 +907,24 @@ img {
 }
 
 .offer-btn {
-  background: linear-gradient(135deg, #E8B4B8 0%, #D4A5AA 100%);
-  color: white;
+  background: #19692c !important;
+  color: white !important;
   padding: 15px 30px;
   border-radius: 25px;
   text-decoration: none;
   font-weight: 600;
   display: inline-block;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+  box-shadow: 0 5px 15px rgba(25, 105, 44, 0.3);
   position: relative;
   z-index: 2;
 }
 
 .offer-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-  color: white;
+  box-shadow: 0 8px 25px rgba(25, 105, 44, 0.4);
+  background: #0d3d1a !important;
+  color: white !important;
   text-decoration: none;
 }
 
@@ -1247,17 +1248,18 @@ img {
 }
 
 .view-details-btn {
-  background: transparent;
-  color: #E8B4B8;
-  border: 2px solid #E8B4B8;
+  background: #19692c !important;
+  color: white !important;
+  border: 2px solid #19692c;
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
 .view-details-btn:hover {
-  background: #E8B4B8;
-  color: white;
+  background: #0d3d1a !important;
+  color: white !important;
+  border-color: #0d3d1a;
   transform: translateY(-2px);
   text-decoration: none;
 }
@@ -1524,8 +1526,8 @@ img {
   }
   
   .mobile-nav-link.partner-link {
-    background: var(--theme-gradient);
-    color: white;
+    background: #19692c !important;
+    color: white !important;
     padding: 12px 20px;
     border-radius: 25px;
     text-align: center;

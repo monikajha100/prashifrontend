@@ -59,8 +59,8 @@ a:hover {
   color: #B8941F;
 }
 
-/* Buttons */
-.btn {
+/* Buttons - Global Green Theme */
+.btn, button, input[type="button"], input[type="submit"] {
   display: inline-block;
   padding: 12px 24px;
   border: none;
@@ -71,41 +71,53 @@ a:hover {
   transition: all 0.3s ease;
   text-decoration: none;
   font-size: 0.95rem;
+  background: #19692c !important;
+  color: white !important;
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn:hover, button:hover, input[type="button"]:hover, input[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+  background: #19692c !important;
+  color: white !important;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
-  color: white;
-  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+  background: #19692c !important;
+  color: white !important;
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
-  color: white;
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+  background: #19692c !important;
+  color: white !important;
 }
 
 .btn-secondary {
-  background: transparent;
-  color: #D4AF37;
-  border: 2px solid #D4AF37;
+  background: #19692c !important;
+  color: white !important;
+  border: 2px solid #28a745;
 }
 
 .btn-secondary:hover {
-  background: #D4AF37;
-  color: white;
+  background: #19692c !important;
+  color: white !important;
+  border-color: #218838;
   transform: translateY(-2px);
 }
 
 .btn-outline {
-  background: transparent;
-  color: white;
-  border: 2px solid white;
+  background: transparent !important;
+  color: #28a745 !important;
+  border: 2px solid #28a745;
 }
 
 .btn-outline:hover {
-  background: white;
-  color: #D4AF37;
+  background: #19692c !important;
+  color: white !important;
   transform: translateY(-2px);
 }
 
@@ -265,9 +277,11 @@ a:hover {
     grid-template-columns: 1fr;
   }
   
-  .btn {
+  .btn, button, input[type="button"], input[type="submit"] {
     padding: 10px 20px;
     font-size: 0.9rem;
+    background: #19692c !important;
+    color: white !important;
   }
 }
 

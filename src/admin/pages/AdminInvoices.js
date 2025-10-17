@@ -17,7 +17,7 @@ const AdminInvoices = () => {
   const invoiceRef = useRef(null);
   const queryClient = useQueryClient();
 
-  const { data: invoices, isLoading, error } = useQuery(
+  const { data: invoicesResponse, isLoading, error } = useQuery(
     ['adminInvoices', filters],
     () => invoicesAPI.getAllInvoices(filters),
     {
@@ -25,6 +25,9 @@ const AdminInvoices = () => {
       refetchOnWindowFocus: false
     }
   );
+
+  // Extract invoices array from response
+  const invoices = invoicesResponse?.value || [];
 
   const { data: invoiceDetails } = useQuery(
     ['invoiceDetails', selectedInvoice?.id],

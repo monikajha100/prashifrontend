@@ -79,8 +79,8 @@
 }
 
 .nav-link.partner-link {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
-  color: white;
+  background: #19692c !important;
+  color: white !important;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 600;
@@ -88,8 +88,9 @@
 
 .nav-link.partner-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
-  color: white;
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+  background: #19692c !important;
+  color: white !important;
 }
 
 .header-actions {
@@ -301,8 +302,8 @@
 }
 
 .mobile-nav-link.partner-link {
-  background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
-  color: white;
+  background: #19692c !important;
+  color: white !important;
   padding: 15px 20px;
   border-radius: 10px;
   text-align: center;

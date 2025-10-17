@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { productsAPI, categoriesAPI, bannersAPI } from '../services/api';
+import { productsAPI, categoriesAPI, bannersAPI, toAbsoluteImageUrl } from '../services/api';
 import ProductSlider from '../components/ProductSlider';
 import Newsletter from '../components/Newsletter';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -101,7 +101,7 @@ const Home = () => {
     'victorianProducts',
     () => productsAPI.getVictorian(20),
     {
-      select: (response) => response.data.products,
+      select: (response) => response.data,
       retry: 1,
       retryDelay: 1000,
       onError: () => setIsApiAvailable(false)
@@ -113,7 +113,7 @@ const Home = () => {
     'colorChangingProducts',
     () => productsAPI.getColorChanging(10),
     {
-      select: (response) => response.data.products,
+      select: (response) => response.data,
       retry: 1,
       retryDelay: 1000,
       onError: () => setIsApiAvailable(false)
@@ -123,7 +123,7 @@ const Home = () => {
   // Fetch banners with error handling
   const { data: banners, isLoading: bannersLoading } = useQuery(
     'activeBanners',
-    bannersAPI.getActive,
+    bannersAPI.getAll,
     {
       select: (response) => {
         // Handle both array and object responses
@@ -145,8 +145,9 @@ const Home = () => {
 
   // Use fallback data if API is not available - ensure arrays
   const displayCategories = categories || fallbackCategories;
-  const displayVictorianProducts = victorianProducts || fallbackProducts;
-  const displayColorChangingProducts = colorChangingProducts || fallbackProducts;
+  const displayFeaturedProducts = Array.isArray(featuredProducts) ? featuredProducts : [];
+  const displayVictorianProducts = Array.isArray(victorianProducts) ? victorianProducts : fallbackProducts;
+  const displayColorChangingProducts = Array.isArray(colorChangingProducts) ? colorChangingProducts : fallbackProducts;
   const displayBanners = Array.isArray(banners) ? banners : (banners ? [banners] : fallbackBanners);
 
   // Banner slider effect
@@ -197,7 +198,7 @@ const Home = () => {
               height: '100%',
               opacity: index === currentBannerIndex ? 1 : 0,
               transition: 'opacity 1s ease-in-out',
-              background: banner.image ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${banner.image}) center/cover no-repeat` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+              background: banner.image ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${toAbsoluteImageUrl(banner.image)}) center/cover no-repeat` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -435,7 +436,7 @@ const Home = () => {
             </div>
             
             <ProductSlider 
-              products={featuredProducts || []} 
+              products={displayFeaturedProducts} 
               category="featured"
             />
           </div>

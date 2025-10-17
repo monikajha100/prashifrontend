@@ -11,7 +11,7 @@ const EnhancedAdminProducts = () => {
 
   // Fetch products
   const { data: products, isLoading } = useQuery('adminProducts', async () => {
-    const response = await axios.get(`${API_BASE_URL}/admin/products`);
+    const response = await adminAPI.getProducts();
     return response.data;
   });
 

@@ -30,6 +30,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Request interceptor
@@ -266,6 +267,7 @@ export const adminAPI = {
   getDashboard: () => api.get('/admin/dashboard'),
   
   // Products
+  getProducts: () => api.get('/admin/products'),
   createProduct: (productData) => api.post('/admin/products', productData),
   updateProduct: (productId, productData) => api.put(`/admin/products/${productId}`, productData),
   deleteProduct: (productId) => api.delete(`/admin/products/${productId}`),

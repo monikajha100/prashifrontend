@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { categoriesAPI } from '../../services/api';
+import { categoriesAPI, API_BASE_URL } from '../../services/api';
 import { Helmet } from 'react-helmet-async';
 import AdminLayout from '../components/AdminLayout';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -69,6 +69,15 @@ const AdminCategories = () => {
           {categories?.map(category => (
             <div key={category.id} className="category-card">
               <div className="category-info">
+                {category.image && (
+                  <div className="category-image">
+                    <img 
+                      src={category.image} 
+                      alt={category.name}
+                      style={{width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px', marginBottom: '15px'}}
+                    />
+                  </div>
+                )}
                 <h3>{category.name}</h3>
                 <p className="category-slug">Slug: {category.slug}</p>
                 <p className="category-description">{category.description}</p>
@@ -126,10 +135,14 @@ const AdminCategories = () => {
 const CategoryForm = ({ category, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: category?.name || '',
+    slug: category?.slug || '',
     description: category?.description || '',
+    image: category?.image || '',
     sort_order: category?.sort_order || 0,
     is_active: category?.is_active !== undefined ? category.is_active : true
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(category?.image || '');
 
   const createMutation = useMutation(
     (data) => categoriesAPI.createCategory(data),
@@ -159,18 +172,78 @@ const CategoryForm = ({ category, onClose, onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    
+    // Auto-generate slug when name changes
+    if (name === 'name' && !category) {
+      const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      setFormData({
+        ...formData,
+        [name]: value,
+        slug: slug
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === 'checkbox' ? checked : value
+      });
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload/image`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} ${errorText}`);
+      }
+      
+      const result = await response.json();
+      return result.url;
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error(`Upload failed: ${error.message}`);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (category) {
-      updateMutation.mutate(formData);
-    } else {
-      createMutation.mutate(formData);
+    
+    try {
+      let submitData = { ...formData };
+      
+      // Upload image if a new file is selected
+      if (imageFile) {
+        const imageUrl = await uploadImage(imageFile);
+        submitData.image = imageUrl;
+      }
+      
+      if (category) {
+        updateMutation.mutate(submitData);
+      } else {
+        createMutation.mutate(submitData);
+      }
+    } catch (error) {
+      toast.error('Failed to upload image');
     }
   };
 
@@ -198,6 +271,20 @@ const CategoryForm = ({ category, onClose, onSuccess }) => {
           </div>
 
           <div className="form-group">
+            <label htmlFor="slug" className="form-label">Slug *</label>
+            <input
+              type="text"
+              id="slug"
+              name="slug"
+              value={formData.slug || ''}
+              onChange={handleChange}
+              className="form-input"
+              required
+              placeholder="Enter category slug (e.g., rings, necklaces)"
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="description" className="form-label">Description</label>
             <textarea
               id="description"
@@ -208,6 +295,30 @@ const CategoryForm = ({ category, onClose, onSuccess }) => {
               rows="3"
               placeholder="Enter category description"
             />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="image" className="form-label">Category Icon/Image</label>
+            <input
+              type="file"
+              id="image"
+              name="image"
+              onChange={handleImageChange}
+              className="form-input"
+              accept="image/*"
+            />
+            <small style={{color: '#666', fontSize: '12px', marginTop: '5px', display: 'block'}}>
+              Upload a custom icon or image for this category (JPG, PNG, GIF, WebP - Max 5MB)
+            </small>
+            {imagePreview && (
+              <div className="image-preview">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  style={{width: '100px', height: '100px', objectFit: 'cover', borderRadius: '8px', marginTop: '10px'}}
+                />
+              </div>
+            )}
           </div>
 
           <div className="form-row">

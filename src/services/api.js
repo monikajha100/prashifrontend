@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://api.praashibysupal.com/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Convert relative asset paths (e.g., /uploads/...) to absolute URLs against the API origin
 // Leaves fully qualified URLs (http/https) untouched
@@ -105,8 +105,11 @@ export const categoriesAPI = {
   getAllAdmin: () => api.get('/categories/admin'),
   getBySlug: (slug) => api.get(`/categories/${slug}`),
   create: (categoryData) => api.post('/admin/categories', categoryData),
+  createCategory: (categoryData) => api.post('/admin/categories', categoryData),
   update: (categoryId, categoryData) => api.put(`/admin/categories/${categoryId}`, categoryData),
+  updateCategory: (categoryId, categoryData) => api.put(`/admin/categories/${categoryId}`, categoryData),
   delete: (categoryId) => api.delete(`/admin/categories/${categoryId}`),
+  deleteCategory: (categoryId) => api.delete(`/admin/categories/${categoryId}`),
 };
 
 export const subcategoriesAPI = {

@@ -143,7 +143,7 @@
   background: white;
   border-radius: 8px;
   padding: 0;
-  max-width: 500px;
+  max-width: 600px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
@@ -212,6 +212,18 @@
   transition: border-color 0.3s ease;
 }
 
+.form-input[type="file"] {
+  padding: 8px;
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  cursor: pointer;
+}
+
+.form-input[type="file"]:hover {
+  border-color: #D4AF37;
+  background: #fff8dc;
+}
+
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
@@ -233,6 +245,17 @@
 
 .checkbox-label input[type="checkbox"] {
   margin: 0;
+}
+
+.image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.image-preview img {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .form-actions {

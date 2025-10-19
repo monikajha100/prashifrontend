@@ -31,7 +31,7 @@ import NotFound from './pages/NotFound';
 import AdminLogin from './admin/pages/WorkingAdminLogin';
 import AdminDashboard from './admin/pages/WorkingAdminDashboard';
 import AdminProducts from './admin/pages/EnhancedAdminProducts';
-import AdminCategories from './admin/pages/FullAdminCategories';
+import AdminCategories from './admin/pages/AdminCategories';
 import AdminSubcategories from './admin/pages/FullAdminSubcategories';
 import InventoryManagement from './admin/pages/InventoryManagement';
 import AdminBanners from './admin/pages/FullAdminBanners';

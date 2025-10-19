@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { productsAPI, categoriesAPI, bannersAPI, toAbsoluteImageUrl } from '../services/api';
 import ProductSlider from '../components/ProductSlider';
+import CategorySlider from '../components/CategorySlider';
 import Newsletter from '../components/Newsletter';
 import LoadingSpinner from '../components/LoadingSpinner';
 import '../live-styles.css';
@@ -383,33 +384,7 @@ const Home = () => {
       </section>
 
       {/* Top Trending Collections */}
-      <section className="trending-section">
-        <div className="container">
-          <h2 className="section-title">Top Trending Collections</h2>
-          <div className="collections-grid">
-            <div className="collection-card">
-              <div className="collection-icon">💍</div>
-              <h3 className="collection-name">Rings</h3>
-              <p className="collection-subtitle">Designer Rings</p>
-            </div>
-            <div className="collection-card">
-              <div className="collection-icon">📿</div>
-              <h3 className="collection-name">Necklaces</h3>
-              <p className="collection-subtitle">Statement Necklaces</p>
-            </div>
-            <div className="collection-card">
-              <div className="collection-icon">💎</div>
-              <h3 className="collection-name">Earrings</h3>
-              <p className="collection-subtitle">Exclusive Earrings</p>
-            </div>
-            <div className="collection-card">
-              <div className="collection-icon">🌈</div>
-              <h3 className="collection-name">Bracelets</h3>
-              <p className="collection-subtitle">Complete Range</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CategorySlider />
 
       {/* Necklaces Sets Section */}
       <section className="product-section">

@@ -62,14 +62,14 @@ const About = () => {
           <h2 style={{textAlign: 'center', fontFamily: 'var(--font-heading)', fontSize: '2.5rem', fontWeight: '700', color: 'var(--charcoal)', marginBottom: '60px'}}>Our Values</h2>
           <div className="values-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px'}}>
             <div className="value-card" style={{background: 'white', padding: '40px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)', transition: 'transform 0.3s ease'}}>
-              <div style={{fontSize: '3rem', marginBottom: '20px', color: 'var(--gold)'}}>✨</div>
-              <h3 style={{fontSize: '1.5rem', fontWeight: '600', color: 'var(--charcoal)', marginBottom: '15px'}}>Quality Craftsmanship</h3>
-              <p style={{color: '#666', lineHeight: '1.6'}}>Every piece is meticulously crafted using the finest materials and traditional techniques passed down through generations.</p>
+              <div style={{fontSize: '3rem', marginBottom: '20px', color: 'var(--gold)'}}>💰</div>
+              <h3 style={{fontSize: '1.5rem', fontWeight: '600', color: 'var(--charcoal)', marginBottom: '15px'}}>Affordability</h3>
+              <p style={{color: '#666', lineHeight: '1.6'}}>We make style accessible, blending elegance with affordability so you never compromise.</p>
             </div>
             <div className="value-card" style={{background: 'white', padding: '40px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)', transition: 'transform 0.3s ease'}}>
-              <div style={{fontSize: '3rem', marginBottom: '20px', color: 'var(--gold)'}}>🎨</div>
-              <h3 style={{fontSize: '1.5rem', fontWeight: '600', color: 'var(--charcoal)', marginBottom: '15px'}}>Innovative Design</h3>
-              <p style={{color: '#666', lineHeight: '1.6'}}>We blend Victorian elegance with contemporary aesthetics to create unique pieces that stand out in any collection.</p>
+              <div style={{fontSize: '3rem', marginBottom: '20px', color: 'var(--gold)'}}>✨</div>
+              <h3 style={{fontSize: '1.5rem', fontWeight: '600', color: 'var(--charcoal)', marginBottom: '15px'}}>Quality</h3>
+              <p style={{color: '#666', lineHeight: '1.6'}}>We deliver high-quality, timeless jewellery. From everyday chic pieces to festive designs, every item reflects elegance and premium finish.</p>
             </div>
             <div className="value-card" style={{background: 'white', padding: '40px', borderRadius: '15px', textAlign: 'center', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)', transition: 'transform 0.3s ease'}}>
               <div style={{fontSize: '3rem', marginBottom: '20px', color: 'var(--gold)'}}>💝</div>

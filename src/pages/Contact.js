@@ -466,7 +466,7 @@ const Contact = () => {
                   <li>Send us an email within 24 hours of delivery to initiate the exchange process</li>
                   <li>Provide Unboxing Video - Attach a complete unboxing video clearly showing the parcel opening and product received</li>
                 </ul>
-                <p>We offer a 24-hour return policy for all items in original condition.</p>
+                <p>We offer a 24-hour return policy only on wrong product received.</p>
               </div>
             </div>
             

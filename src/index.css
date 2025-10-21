@@ -261,7 +261,24 @@ a:hover {
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Enhanced Mobile Responsive Design */
+
+/* Large Tablets */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 20px;
+  }
+  
+  h1 { font-size: 2.3rem; }
+  h2 { font-size: 1.9rem; }
+  h3 { font-size: 1.4rem; }
+  
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
   .container {
     padding: 0 15px;
@@ -282,6 +299,148 @@ a:hover {
     font-size: 0.9rem;
     background: #19692c !important;
     color: white !important;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Touch-friendly elements */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve text readability */
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Optimize images for mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Large Mobile Devices */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.2rem; }
+  
+  .btn, button, input[type="button"], input[type="submit"] {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .form-input, .form-textarea {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .card {
+    padding: 15px;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+  }
+  
+  h1 { font-size: 1.6rem; }
+  h2 { font-size: 1.4rem; }
+  h3 { font-size: 1.1rem; }
+  
+  .btn, button, input[type="button"], input[type="submit"] {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .form-input, .form-textarea {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+}
+
+/* Touch-friendly elements */
+@media (max-width: 768px) {
+  .btn, button, input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .form-input, .form-textarea {
+    min-height: 44px;
+  }
+  
+  a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .container {
+    padding: 0 12px;
+  }
+  
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.2rem; }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+  }
+  
+  .card {
+    background-color: #2a2a2a;
+    border: 1px solid #333;
+  }
+  
+  .form-input, .form-textarea {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
   }
 }
 

@@ -1,6 +1,38 @@
-/* Mobile Responsive Styles for Praashi by Supal */
+/* Enhanced Mobile Responsive Styles for Praashi by Supal */
 
 /* Mobile First Approach - Base styles are for mobile */
+
+/* Global Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Smooth scrolling for mobile */
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Touch-friendly tap targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve text readability */
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Optimize images for mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
 
 /* Extra Small Devices (phones, 576px and down) */
 @media (max-width: 575.98px) {

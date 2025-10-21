@@ -385,78 +385,317 @@
   z-index: 2;
 }
 
-/* Responsive Design */
+/* Enhanced Mobile Responsive Design */
+
+/* Hero Banner Mobile Optimizations */
 @media (max-width: 768px) {
+  .hero-banner-slider {
+    height: 500px !important;
+  }
+  
   .hero-title {
-    font-size: 2.8rem;
+    font-size: 2.5rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 15px !important;
   }
   
   .hero-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.1rem !important;
+    margin-bottom: 25px !important;
+    padding: 0 10px !important;
   }
   
-  .offers-grid {
-    grid-template-columns: 1fr;
-    gap: 30px;
+  .hero-btn {
+    padding: 12px 25px !important;
+    font-size: 1rem !important;
   }
   
-  .collections-grid {
-    grid-template-columns: 1fr;
+  .banner-nav {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 1.5rem !important;
   }
   
-  .section-header {
-    flex-direction: column;
-    gap: 25px;
-    text-align: center;
+  .banner-prev {
+    left: 10px !important;
   }
   
-  .offers-header h2, .section-title {
-    font-size: 2.5rem;
+  .banner-next {
+    right: 10px !important;
   }
   
-  .section-title-left {
-    font-size: 2rem;
+  .banner-dots {
+    bottom: 20px !important;
   }
   
-  .hero-banner {
-    padding: 100px 0;
-    min-height: 70vh;
-  }
-  
-  .promotional-offers,
-  .trending-section,
-  .product-section {
-    padding: 70px 0;
+  .banner-dot {
+    width: 8px !important;
+    height: 8px !important;
   }
 }
 
 @media (max-width: 480px) {
+  .hero-banner-slider {
+    height: 400px !important;
+  }
+  
   .hero-title {
-    font-size: 2.2rem;
+    font-size: 2rem !important;
+    margin-bottom: 10px !important;
   }
   
   .hero-subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem !important;
+    margin-bottom: 20px !important;
   }
   
-  .offers-header h2, .section-title {
-    font-size: 2rem;
+  .hero-btn {
+    padding: 10px 20px !important;
+    font-size: 0.9rem !important;
   }
   
-  .section-title-left {
-    font-size: 1.6rem;
+  .banner-nav {
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 1.2rem !important;
+  }
+  
+  .banner-prev {
+    left: 5px !important;
+  }
+  
+  .banner-next {
+    right: 5px !important;
+  }
+}
+
+/* Promotional Offers Mobile */
+@media (max-width: 768px) {
+  .promotional-offers {
+    padding: 60px 0;
+  }
+  
+  .offers-header h2 {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+  }
+  
+  .offers-header p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+  
+  .offers-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
   }
   
   .offer-card {
-    padding: 35px 25px;
+    padding: 30px 20px;
   }
   
-  .collection-card {
-    padding: 35px 25px;
+  .offer-icon {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
   }
   
-  .hero-banner {
-    padding: 80px 0;
-    min-height: 60vh;
+  .offer-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+  }
+  
+  .offer-card p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .offer-timer, .offer-highlight, .offer-badge {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+  }
+  
+  .offer-btn {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+  
+  .offers-footer {
+    padding: 25px 20px;
+  }
+  
+  .offers-footer h4 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  .offers-footer p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .promotional-offers {
+    padding: 40px 0;
+  }
+  
+  .offers-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .offers-header p {
+    font-size: 0.9rem;
+  }
+  
+  .offers-grid {
+    gap: 20px;
+  }
+  
+  .offer-card {
+    padding: 25px 15px;
+  }
+  
+  .offer-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+  }
+  
+  .offer-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 12px;
+  }
+  
+  .offer-card p {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .offer-timer, .offer-highlight, .offer-badge {
+    padding: 10px 12px;
+    margin-bottom: 15px;
+  }
+  
+  .offer-timer p, .offer-highlight p, .offer-badge p {
+    font-size: 0.9rem;
+  }
+  
+  .offer-btn {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+  }
+  
+  .offers-footer {
+    padding: 20px 15px;
+  }
+  
+  .offers-footer h4 {
+    font-size: 1.1rem;
+  }
+  
+  .offers-footer p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Product Sections Mobile */
+@media (max-width: 768px) {
+  .product-section {
+    padding: 60px 0;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .section-title-left {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+  
+  .view-all-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-section {
+    padding: 40px 0;
+  }
+  
+  .section-header {
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .section-title-left {
+    font-size: 1.5rem;
+  }
+  
+  .view-all-btn {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Container Mobile Optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 10px;
+  }
+}
+
+/* Touch-friendly elements */
+@media (max-width: 768px) {
+  .hero-btn, .offer-btn, .view-all-btn {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .banner-nav {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .banner-dot {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-banner-slider {
+    height: 350px !important;
+  }
+  
+  .hero-title {
+    font-size: 2rem !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem !important;
+  }
+  
+  .promotional-offers {
+    padding: 40px 0;
+  }
+  
+  .product-section {
+    padding: 40px 0;
   }
 }

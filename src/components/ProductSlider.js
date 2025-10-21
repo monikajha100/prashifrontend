@@ -1,9 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toAbsoluteImageUrl } from '../services/api';
 
 const ProductSlider = ({ products, title = "Related Products" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const itemsPerView = 4; // Number of items to show at once
+  const [itemsPerView, setItemsPerView] = useState(4); // Number of items to show at once
+
+  // Responsive items per view
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 480) {
+        setItemsPerView(1);
+      } else if (window.innerWidth < 768) {
+        setItemsPerView(2);
+      } else if (window.innerWidth < 1024) {
+        setItemsPerView(3);
+      } else {
+        setItemsPerView(4);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => 
@@ -24,7 +43,7 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
   return (
     <div className="product-slider" style={{ marginTop: '40px', padding: '20px 0' }}>
       <h3 style={{ 
-        fontSize: '24px', 
+        fontSize: window.innerWidth < 768 ? '20px' : '24px', 
         fontWeight: '600', 
         marginBottom: '20px',
         textAlign: 'center',
@@ -33,57 +52,111 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
         {title}
       </h3>
       
-      <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Navigation buttons */}
-        <button
-          onClick={prevSlide}
-          style={{
-            position: 'absolute',
-            left: '-50px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: '#D4AF37',
-            border: 'none',
-            borderRadius: '50%',
-            width: '40px',
-            height: '40px',
-            cursor: 'pointer',
+      <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+        {/* Navigation buttons - hidden on mobile */}
+        {window.innerWidth >= 768 && (
+          <>
+            <button
+              onClick={prevSlide}
+              style={{
+                position: 'absolute',
+                left: '-50px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#D4AF37',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '16px',
+                zIndex: 10,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+              }}
+            >
+              ←
+            </button>
+            
+            <button
+              onClick={nextSlide}
+              style={{
+                position: 'absolute',
+                right: '-50px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#D4AF37',
+                border: 'none',
+                borderRadius: '50%',
+                width: '40px',
+                height: '40px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '16px',
+                zIndex: 10,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+              }}
+            >
+              →
+            </button>
+          </>
+        )}
+
+        {/* Mobile navigation buttons */}
+        {window.innerWidth < 768 && (
+          <div style={{
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            color: 'white',
-            fontSize: '16px',
-            zIndex: 10,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-          }}
-        >
-          ←
-        </button>
-        
-        <button
-          onClick={nextSlide}
-          style={{
-            position: 'absolute',
-            right: '-50px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            background: '#D4AF37',
-            border: 'none',
-            borderRadius: '50%',
-            width: '40px',
-            height: '40px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '16px',
-            zIndex: 10,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
-          }}
-        >
-          →
-        </button>
+            gap: '15px',
+            marginBottom: '20px'
+          }}>
+            <button
+              onClick={prevSlide}
+              style={{
+                background: '#D4AF37',
+                border: 'none',
+                borderRadius: '25px',
+                width: '44px',
+                height: '44px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '18px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+              }}
+            >
+              ←
+            </button>
+            
+            <button
+              onClick={nextSlide}
+              style={{
+                background: '#D4AF37',
+                border: 'none',
+                borderRadius: '25px',
+                width: '44px',
+                height: '44px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '18px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+              }}
+            >
+              →
+            </button>
+          </div>
+        )}
 
         {/* Slider container */}
         <div style={{
@@ -94,16 +167,16 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
             display: 'flex',
             transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
             transition: 'transform 0.3s ease',
-            gap: '20px'
+            gap: window.innerWidth < 768 ? '15px' : '20px'
           }}>
             {products.map((product, index) => (
               <div
                 key={product.id}
                 style={{
-                  minWidth: `calc(${100 / itemsPerView}% - ${20 * (itemsPerView - 1) / itemsPerView}px)`,
+                  minWidth: `calc(${100 / itemsPerView}% - ${(window.innerWidth < 768 ? 15 : 20) * (itemsPerView - 1) / itemsPerView}px)`,
                   border: '1px solid #e0e0e0',
                   borderRadius: '10px',
-                  padding: '15px',
+                  padding: window.innerWidth < 768 ? '12px' : '15px',
                   textAlign: 'center',
                   backgroundColor: 'white',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
@@ -119,14 +192,14 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
                   alt={product.name}
                   style={{
                     width: '100%',
-                    height: '200px',
+                    height: window.innerWidth < 768 ? '150px' : '200px',
                     objectFit: 'cover',
                     borderRadius: '8px',
                     marginBottom: '10px'
                   }}
                 />
                 <h4 style={{
-                  fontSize: '16px',
+                  fontSize: window.innerWidth < 768 ? '14px' : '16px',
                   fontWeight: '600',
                   marginBottom: '8px',
                   color: '#333',
@@ -135,7 +208,7 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
                   {product.name}
                 </h4>
                 <p style={{
-                  fontSize: '18px',
+                  fontSize: window.innerWidth < 768 ? '16px' : '18px',
                   fontWeight: '600',
                   color: '#D4AF37',
                   margin: '0'

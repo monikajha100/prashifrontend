@@ -401,15 +401,44 @@
   margin-bottom: 20px;
 }
 
-/* Responsive Design */
+/* Enhanced Mobile Responsive Design */
+
+/* Large Tablets */
 @media (max-width: 1024px) {
   .products-layout {
     grid-template-columns: 250px 1fr;
     gap: 30px;
   }
+  
+  .filters-sidebar {
+    padding: 20px;
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
 }
 
+/* Tablets */
 @media (max-width: 768px) {
+  .products-page {
+    padding: 20px 0;
+  }
+  
+  .page-header {
+    margin-bottom: 30px;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
   .products-layout {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -419,10 +448,13 @@
     position: fixed;
     top: 0;
     left: -100%;
-    width: 300px;
+    width: 100%;
     height: 100vh;
     z-index: 1000;
     transition: left 0.3s ease;
+    border-radius: 0;
+    padding: 20px;
+    overflow-y: auto;
     max-height: 100vh;
   }
   
@@ -434,15 +466,19 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    background: #D4AF37;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   
   .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-  }
-  
-  .page-title {
-    font-size: 2rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
   }
   
   .products-toolbar {
@@ -455,11 +491,61 @@
     justify-content: center;
     flex-wrap: wrap;
   }
+  
+  .filter-group {
+    margin-bottom: 20px;
+  }
+  
+  .filter-group h4 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  .filter-option {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  
+  .price-range {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .price-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filter-btn {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+  }
 }
 
+/* Large Mobile Devices */
 @media (max-width: 480px) {
   .products-page {
-    padding: 20px 0;
+    padding: 15px 0;
+  }
+  
+  .page-header {
+    margin-bottom: 25px;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+  }
+  
+  .page-subtitle {
+    font-size: 0.9rem;
   }
   
   .products-content {
@@ -471,16 +557,128 @@
     gap: 15px;
   }
   
-  .page-title {
-    font-size: 1.8rem;
-  }
-  
   .filters-sidebar {
     width: 100%;
+    padding: 15px;
+  }
+  
+  .filter-toggle-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .filter-group {
+    margin-bottom: 15px;
+  }
+  
+  .filter-group h4 {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  
+  .filter-option {
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+  
+  .price-input {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+  
+  .filter-btn {
+    padding: 8px;
+    font-size: 0.85rem;
   }
   
   .pagination {
     flex-direction: column;
     gap: 15px;
+  }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 360px) {
+  .page-title {
+    font-size: 1.6rem;
+  }
+  
+  .page-subtitle {
+    font-size: 0.85rem;
+  }
+  
+  .filters-sidebar {
+    padding: 12px;
+  }
+  
+  .filter-toggle-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .filter-group h4 {
+    font-size: 0.9rem;
+  }
+  
+  .filter-option {
+    font-size: 0.8rem;
+  }
+  
+  .price-input {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .filter-btn {
+    padding: 6px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Touch-friendly elements */
+@media (max-width: 768px) {
+  .filter-toggle-btn {
+    min-height: 44px;
+  }
+  
+  .filter-btn {
+    min-height: 44px;
+  }
+  
+  .filter-option {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .price-input {
+    min-height: 44px;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .products-page {
+    padding: 10px 0;
+  }
+  
+  .page-header {
+    margin-bottom: 20px;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .page-subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .filters-sidebar {
+    padding: 15px;
+  }
+  
+  .filter-group {
+    margin-bottom: 12px;
   }
 }

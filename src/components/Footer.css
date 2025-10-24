@@ -52,8 +52,8 @@
 }
 
 .footer-logo {
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
   border-radius: 8px;
   padding: 8px;
@@ -87,8 +87,8 @@
 }
 
 .social-link {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background-color: #FFFFFF;
   border-radius: 50%;
   display: flex;
@@ -96,14 +96,14 @@
   justify-content: center;
   color: #28a745;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 18px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4), 0 0 0 1px rgba(40, 167, 69, 0.3);
   border: 2px solid #28a745;
   font-weight: 700;
   flex-shrink: 0;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   text-shadow: none;
 }
 
@@ -122,8 +122,14 @@
 
 .threads-icon {
   font-weight: 700;
-  font-size: 16px;
-  color: #FFFFFF;
+  font-size: 18px;
+  color: #28a745;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 /* Footer Sections */
@@ -189,15 +195,18 @@
 }
 
 .contact-icon {
-  width: 20px;
-  height: 20px;
-  color: #004646;
+  width: 24px;
+  height: 24px;
+  color: #28a745;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   margin-top: 2px;
-  font-size: 14px;
+  font-size: 16px;
+  background-color: rgba(40, 167, 69, 0.1);
+  border-radius: 50%;
+  padding: 4px;
 }
 
 .contact-details {
@@ -311,8 +320,8 @@
   }
   
   .footer-logo {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
   
   .brand-description {
@@ -355,8 +364,8 @@
   }
   
   .footer-logo {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
   }
   
   .brand-description {
@@ -371,11 +380,11 @@
   }
   
   .social-link {
-    width: 38px;
-    height: 38px;
-    font-size: 15px;
-    min-width: 38px;
-    min-height: 38px;
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+    min-width: 42px;
+    min-height: 42px;
     background-color: #FFFFFF;
     color: #28a745;
     border: 2px solid #28a745;
@@ -397,6 +406,9 @@
   
   .contact-info {
     align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
   
   .contact-item {
@@ -404,6 +416,7 @@
     flex-direction: column;
     text-align: center;
     gap: 5px;
+    align-items: center;
   }
   
   .contact-icon {
@@ -448,8 +461,8 @@
   }
   
   .footer-logo {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
   }
   
   .brand-description {
@@ -464,14 +477,16 @@
     padding: 20px 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    flex-direction: column;
+    align-items: center;
   }
   
   .social-link {
-    width: 35px;
-    height: 35px;
-    font-size: 14px;
-    min-width: 35px;
-    min-height: 35px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    min-width: 40px;
+    min-height: 40px;
     background-color: #FFFFFF;
     color: #28a745;
     border: 2px solid #28a745;
@@ -535,8 +550,8 @@
   }
   
   .footer-logo {
-    width: 50px;
-    height: 50px;
+    width: 70px;
+    height: 70px;
   }
   
   .brand-description {
@@ -552,11 +567,11 @@
   }
   
   .social-link {
-    width: 32px;
-    height: 32px;
-    font-size: 13px;
-    min-width: 32px;
-    min-height: 32px;
+    width: 38px;
+    height: 38px;
+    font-size: 14px;
+    min-width: 38px;
+    min-height: 38px;
     background-color: #FFFFFF;
     color: #28a745;
     border: 2px solid #28a745;
@@ -610,8 +625,8 @@
   }
   
   .footer-logo {
-    width: 45px;
-    height: 45px;
+    width: 60px;
+    height: 60px;
   }
   
   .brand-description {
@@ -627,11 +642,11 @@
   }
   
   .social-link {
-    width: 30px;
-    height: 30px;
-    font-size: 12px;
-    min-width: 30px;
-    min-height: 30px;
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+    min-width: 36px;
+    min-height: 36px;
     background-color: #FFFFFF;
     color: #28a745;
     border: 2px solid #28a745;
@@ -726,8 +741,8 @@
   }
   
   .footer-logo {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
   }
   
   .brand-description {

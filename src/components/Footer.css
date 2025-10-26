@@ -47,7 +47,7 @@
 .footer-logo-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 20px;
 }
 
@@ -72,17 +72,16 @@
   line-height: 1.6;
   margin: 0;
   max-width: 400px;
-  text-align: center;
+  text-align: left;
 }
 
 .social-links {
   display: flex;
   gap: 8px;
-  flex-wrap: nowrap;
-  justify-content: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: center;
   max-width: 100%;
-  overflow-x: auto;
   padding: 10px 0;
 }
 
@@ -316,7 +315,7 @@
   
   .brand-section {
     grid-column: 1 / -1;
-    text-align: center;
+    text-align: left;
   }
   
   .footer-logo {
@@ -326,23 +325,25 @@
   
   .brand-description {
     max-width: 500px;
-    margin: 0 auto;
+    margin: 0;
+    text-align: left;
   }
   
   .social-links {
-    justify-content: center;
+    justify-content: flex-start;
   }
   
   .footer-section {
-    text-align: center;
+    text-align: left;
   }
   
   .contact-info {
-    align-items: center;
+    align-items: flex-start;
   }
   
   .contact-item {
-    justify-content: center;
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 }
 
@@ -355,12 +356,12 @@
   .footer-content {
     grid-template-columns: 1fr;
     gap: 30px;
-    text-align: center;
+    text-align: left;
     padding: 0 20px;
   }
   
   .footer-logo-container {
-    justify-content: center;
+    justify-content: flex-start;
   }
   
   .footer-logo {
@@ -371,10 +372,11 @@
   .brand-description {
     max-width: none;
     font-size: 0.9rem;
+    text-align: left;
   }
   
   .social-links {
-    justify-content: center;
+    justify-content: flex-start;
     gap: 10px;
     padding: 15px 0;
   }
@@ -393,11 +395,12 @@
   }
   
   .footer-section {
-    text-align: center;
+    text-align: left;
   }
   
   .footer-title {
     font-size: 1rem;
+    text-align: left;
   }
   
   .footer-link {

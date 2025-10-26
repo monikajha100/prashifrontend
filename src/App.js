@@ -48,6 +48,7 @@ import AdminInstaShop from './admin/pages/AdminInstaShop';
 import AdminFooterPages from './admin/pages/AdminFooterPages';
 import AdminContacts from './admin/pages/AdminContacts';
 import AdminReports from './admin/pages/AdminReports';
+import AdminSpecialOffers from './admin/pages/AdminSpecialOffers';
 import AdminSettings from './admin/pages/AdminSettings';
 import AdminLayout from './admin/components/WorkingAdminLayout';
 
@@ -259,6 +260,11 @@ function App() {
             <Route path="/admin/promotional-banners" element={
               <AdminLayout>
                 <AdminPromotionalBanners />
+              </AdminLayout>
+            } />
+            <Route path="/admin/special-offers" element={
+              <AdminLayout>
+                <AdminSpecialOffers />
               </AdminLayout>
             } />
             <Route path="/admin/orders" element={

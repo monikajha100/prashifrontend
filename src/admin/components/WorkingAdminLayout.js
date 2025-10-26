@@ -24,6 +24,7 @@ const WorkingAdminLayout = ({ children }) => {
     { path: '/admin/footer-pages', icon: '📝', label: 'Footer Pages' },
     { path: '/admin/banners', icon: '🖼️', label: 'Banners' },
     { path: '/admin/promotional-banners', icon: '📢', label: 'Promotional Banners' },
+    { path: '/admin/special-offers', icon: '🎁', label: 'Special Offers' },
     { path: '/admin/contacts', icon: '📧', label: 'Contacts' },
     { path: '/admin/reports', icon: '📈', label: 'Reports' },
     { path: '/admin/settings', icon: '⚙️', label: 'Settings' }

@@ -4,6 +4,7 @@ import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { productsAPI, categoriesAPI, bannersAPI, toAbsoluteImageUrl } from '../services/api';
+import axios from 'axios';
 import ProductSlider from '../components/ProductSlider';
 import CategorySlider from '../components/CategorySlider';
 import Newsletter from '../components/Newsletter';
@@ -13,6 +14,7 @@ import '../live-styles.css';
 const Home = () => {
   const [isApiAvailable, setIsApiAvailable] = useState(true);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [specialOffers, setSpecialOffers] = useState([]);
 
   // Fallback data for when API is not available
   const fallbackCategories = [
@@ -180,6 +182,19 @@ const Home = () => {
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fetch special offers
+  useEffect(() => {
+    const fetchSpecialOffers = async () => {
+      try {
+        const response = await axios.get(`${productsAPI.API_BASE_URL?.replace('/products', '')}/special-offers`);
+        setSpecialOffers(response.data || []);
+      } catch (error) {
+        console.error('Error fetching special offers:', error);
+      }
+    };
+    fetchSpecialOffers();
   }, []);
 
   const nextBanner = () => {
@@ -363,52 +378,70 @@ const Home = () => {
         )}
       </section>
 
-      {/* Promotional Offers Section */}
-      <section className="promotional-offers">
-        <div className="container">
-          <div className="offers-header">
-            <h2>🎉 Special Offers & Promotions</h2>
-            <p>Limited time offers on our premium jewelry collections</p>
-          </div>
-          
-          <div className="offers-grid">
-            <div className="offer-card">
-              <div className="offer-icon">🔥</div>
-              <h3>Flash Sale</h3>
-              <p>Up to 70% OFF on selected Victorian sets</p>
-              <div className="offer-timer">
-                <p>⏰ Ends in 24 hours!</p>
-              </div>
-              <Link to="/products?category=victorian&sale=true" className="offer-btn">Shop Now</Link>
+      {/* Special Offers & Promotions Section - Dynamic */}
+      {specialOffers && specialOffers.length > 0 && (
+        <section className="promotional-offers">
+          <div className="container">
+            <div className="offers-header">
+              <h2>🎉 Special Offers & Promotions</h2>
+              <p>Limited time offers on our premium jewelry collections</p>
             </div>
             
-            <div className="offer-card">
-              <div className="offer-icon">🎁</div>
-              <h3>Buy 2 Get 1 Free</h3>
-              <p>Color changing jewelry collection</p>
-              <div className="offer-highlight">
-                <p>✨ Mix & Match Any 3 Items</p>
-              </div>
-              <Link to="/products?category=color-changing&offer=b2g1" className="offer-btn">Shop Now</Link>
+            <div className="offers-grid">
+              {specialOffers.map(offer => (
+                <div key={offer.id} className="offer-card" style={{
+                  backgroundColor: offer.background_color || 'rgba(255, 255, 255, 0.95)',
+                  color: offer.text_color || '#2C2C2C'
+                }}>
+                  <div className="offer-icon">{offer.icon || '🎁'}</div>
+                  <h3>{offer.title}</h3>
+                  <p>{offer.description}</p>
+                  
+                  {offer.discount_text && (
+                    <div className="offer-timer">
+                      <p>{offer.discount_text}</p>
+                    </div>
+                  )}
+                  
+                  {offer.timer_enabled && offer.timer_text && (
+                    <div className="offer-timer">
+                      <p>{offer.timer_text}</p>
+                    </div>
+                  )}
+                  
+                  {offer.highlight_text && (
+                    <div className="offer-highlight">
+                      <p>{offer.highlight_text}</p>
+                    </div>
+                  )}
+                  
+                  {offer.badge_text && (
+                    <div className="offer-badge">
+                      <p>{offer.badge_text}</p>
+                    </div>
+                  )}
+                  
+                  <Link 
+                    to={offer.link_url || '/products'} 
+                    className="offer-btn"
+                    onClick={() => {
+                      // Track click
+                      axios.post(`${productsAPI.API_BASE_URL?.replace('/products', '')}/special-offers/${offer.id}/click`).catch(() => {});
+                    }}
+                  >
+                    {offer.button_text || 'Shop Now'}
+                  </Link>
+                </div>
+              ))}
             </div>
             
-            <div className="offer-card">
-              <div className="offer-icon">💎</div>
-              <h3>New Arrival</h3>
-              <p>Exclusive bridal collection with 50% OFF</p>
-              <div className="offer-badge">
-                <p>👑 Premium Quality Guaranteed</p>
-              </div>
-              <Link to="/products?category=bridal&new=true" className="offer-btn">Shop Now</Link>
+            <div className="offers-footer">
+              <h4>🚚 Free Shipping on Orders Above ₹999</h4>
+              <p>*Terms and conditions apply. Valid for prepaid orders only.</p>
             </div>
           </div>
-          
-          <div className="offers-footer">
-            <h4>🚚 Free Shipping on Orders Above ₹999</h4>
-            <p>*Terms and conditions apply. Valid for prepaid orders only.</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Top Trending Collections */}
       <CategorySlider />

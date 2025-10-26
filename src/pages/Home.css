@@ -77,6 +77,19 @@
   overflow: hidden;
 }
 
+/* Fix text visibility on mobile */
+@media (max-width: 768px) {
+  .promotional-offers {
+    background: linear-gradient(135deg, #F8F9FA 0%, #FFFFFF 50%, #F8F9FA 100%);
+    color: #2C2C2C;
+  }
+  
+  .brand-description {
+    color: #2C2C2C !important;
+    background: transparent !important;
+  }
+}
+
 .promotional-offers::before {
   content: '';
   position: absolute;

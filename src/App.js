@@ -34,7 +34,8 @@ import AdminProducts from './admin/pages/EnhancedAdminProducts';
 import AdminCategories from './admin/pages/AdminCategories';
 import AdminSubcategories from './admin/pages/FullAdminSubcategories';
 import InventoryManagement from './admin/pages/InventoryManagement';
-import AdminBanners from './admin/pages/FullAdminBanners';
+import AdminBanners from './admin/pages/AdminBanners';
+import AdminPromotionalBanners from './admin/pages/AdminPromotionalBanners';
 import AdminOrders from './admin/pages/AdminOrders';
 import AdminInvoices from './admin/pages/AdminInvoices';
 import AdminPaymentSettings from './admin/pages/AdminPaymentSettings';
@@ -253,6 +254,11 @@ function App() {
             <Route path="/admin/banners" element={
               <AdminLayout>
                 <AdminBanners />
+              </AdminLayout>
+            } />
+            <Route path="/admin/promotional-banners" element={
+              <AdminLayout>
+                <AdminPromotionalBanners />
               </AdminLayout>
             } />
             <Route path="/admin/orders" element={

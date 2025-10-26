@@ -403,6 +403,27 @@ img {
 
 .banner-text {
   color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.banner-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+}
+
+.banner-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
 .banner-separator {
@@ -1798,6 +1819,25 @@ img {
   
   .banner-text {
     padding: 6px 0;
+    font-size: 0.8rem;
+  }
+  
+  .banner-button {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+    margin-left: 8px;
+  }
+  
+  .banner-content {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .banner-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
   }
 }
 

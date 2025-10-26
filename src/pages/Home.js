@@ -128,12 +128,20 @@ const Home = () => {
     {
       select: (response) => {
         // Handle both array and object responses
+        let bannerData = [];
         if (Array.isArray(response.data)) {
-          return response.data;
+          bannerData = response.data;
         } else if (Array.isArray(response)) {
-          return response;
+          bannerData = response;
         }
-        return [];
+        
+        // Filter banners based on device type
+        const isMobileCheck = window.innerWidth <= 768;
+        return bannerData.filter(banner => 
+          banner.device_type === 'both' || 
+          (isMobileCheck && banner.device_type === 'mobile') ||
+          (!isMobileCheck && banner.device_type === 'desktop')
+        );
       },
       retry: 1,
       retryDelay: 1000,
@@ -162,6 +170,18 @@ const Home = () => {
     }
   }, [displayBanners]);
 
+  // Handle window resize to refresh banners for device type changes
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const nextBanner = () => {
     setCurrentBannerIndex((prev) => (prev + 1) % displayBanners.length);
   };
@@ -187,71 +207,78 @@ const Home = () => {
       {/* Hero Banner */}
       {/* Hero Banner Slider */}
       <section className="hero-banner-slider" style={{position: 'relative', overflow: 'hidden', height: '600px'}}>
-        {displayBanners && displayBanners.map((banner, index) => (
-          <div 
-            key={banner.id}
-            className={`banner-slide ${index === currentBannerIndex ? 'active' : ''}`}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              opacity: index === currentBannerIndex ? 1 : 0,
-              transition: 'opacity 1s ease-in-out',
-              background: banner.image ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${toAbsoluteImageUrl(banner.image)}) center/cover no-repeat` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              textAlign: 'center'
-            }}
-          >
-            <div className="container">
-              <div className="hero-content">
-                <h1 className="hero-title text-mobile-center" style={{
-                  fontFamily: "'Cormorant Garamond', serif", 
-                  fontSize: '3.5rem', 
-                  fontWeight: '700', 
-                  marginBottom: '20px',
-                  textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
-                }}>
-                  {banner.title}
-                </h1>
-                {banner.subtitle && (
-                  <p className="hero-subtitle" style={{
-                    fontSize: '1.2rem', 
-                    marginBottom: '30px', 
-                    maxWidth: '600px', 
-                    marginLeft: 'auto', 
-                    marginRight: 'auto', 
-                    lineHeight: '1.6',
-                    textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+        {displayBanners && displayBanners.map((banner, index) => {
+          const displayTitle = isMobile && banner.mobile_title ? banner.mobile_title : banner.title;
+          const displaySubtitle = isMobile && banner.mobile_subtitle ? banner.mobile_subtitle : banner.subtitle;
+          const displayImage = isMobile && banner.mobile_image ? banner.mobile_image : banner.image;
+          
+          return (
+            <div 
+              key={banner.id}
+              className={`banner-slide ${index === currentBannerIndex ? 'active' : ''}`}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                opacity: index === currentBannerIndex ? 1 : 0,
+                transition: 'opacity 1s ease-in-out',
+                background: displayImage ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${toAbsoluteImageUrl(displayImage)}) center/cover no-repeat` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                textAlign: 'center'
+              }}
+            >
+              <div className="container">
+                <div className="hero-content">
+                  <h1 className="hero-title text-mobile-center" style={{
+                    fontFamily: "'Cormorant Garamond', serif", 
+                    fontSize: isMobile ? '2.5rem' : '3.5rem', 
+                    fontWeight: '700', 
+                    marginBottom: '20px',
+                    textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
                   }}>
-                    {banner.subtitle}
-                  </p>
-                )}
-                <Link 
-                  to={banner.link_url || '/products'} 
-                  className="hero-btn" 
-                  style={{
-                    background: '#D4AF37', 
-                    color: 'white', 
-                    padding: '15px 30px', 
-                    borderRadius: '25px', 
-                    textDecoration: 'none', 
-                    fontWeight: '600', 
-                    display: 'inline-block', 
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
-                  }}
-                >
-                  {banner.button_text || 'Shop Now'}
-                </Link>
+                    {displayTitle}
+                  </h1>
+                  {displaySubtitle && (
+                    <p className="hero-subtitle" style={{
+                      fontSize: isMobile ? '1rem' : '1.2rem', 
+                      marginBottom: '30px', 
+                      maxWidth: '600px', 
+                      marginLeft: 'auto', 
+                      marginRight: 'auto', 
+                      lineHeight: '1.6',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                    }}>
+                      {displaySubtitle}
+                    </p>
+                  )}
+                  <Link 
+                    to={banner.link_url || '/products'} 
+                    className="hero-btn" 
+                    style={{
+                      background: '#D4AF37', 
+                      color: 'white', 
+                      padding: isMobile ? '12px 25px' : '15px 30px', 
+                      borderRadius: '25px', 
+                      textDecoration: 'none', 
+                      fontWeight: '600', 
+                      display: 'inline-block', 
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
+                      fontSize: isMobile ? '0.9rem' : '1rem'
+                    }}
+                  >
+                    {banner.button_text || 'Shop Now'}
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         
         {/* Navigation Arrows */}
         {displayBanners && displayBanners.length > 1 && (

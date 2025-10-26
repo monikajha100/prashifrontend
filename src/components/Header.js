@@ -2,18 +2,63 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { FaSearch, FaUser, FaShoppingBag, FaBars, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaUser, FaShoppingBag, FaBars, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import '../live-styles.css';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [banners, setBanners] = useState([]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const { user, isAuthenticated, logout } = useAuth();
   const { getCartItemsCount } = useCart();
   const navigate = useNavigate();
 
   const cartItemsCount = getCartItemsCount();
+
+  // Fetch promotional banners
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const response = await fetch('/api/promotional-banners');
+        if (response.ok) {
+          const data = await response.json();
+          setBanners(data);
+        }
+      } catch (error) {
+        console.error('Error fetching promotional banners:', error);
+      }
+    };
+
+    fetchBanners();
+  }, []);
+
+  // Auto-rotate banners
+  useEffect(() => {
+    if (banners.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentBannerIndex((prevIndex) => 
+          (prevIndex + 1) % banners.length
+        );
+      }, 5000); // Change banner every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [banners.length]);
+
+  // Manual banner navigation
+  const goToPreviousBanner = () => {
+    setCurrentBannerIndex((prevIndex) => 
+      prevIndex === 0 ? banners.length - 1 : prevIndex - 1
+    );
+  };
+
+  const goToNextBanner = () => {
+    setCurrentBannerIndex((prevIndex) => 
+      (prevIndex + 1) % banners.length
+    );
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -54,17 +99,30 @@ const Header = () => {
   return (
     <header className="header">
       {/* Promotional Banner */}
-      <div className="promotional-banner-slider d-mobile-none">
-        <div className="banner-slides">
-          <div className="banner-slide active">
-            <div className="container">
-              <div className="banner-content">
-                <span className="banner-text">Free Shipping On Orders ₹ 999 & Above</span>
+      {banners.length > 0 && (
+        <div className="promotional-banner-slider">
+          <div className="banner-slides">
+            {banners.map((banner, index) => (
+              <div 
+                key={banner.id} 
+                className={`banner-slide ${index === currentBannerIndex ? 'active' : ''}`}
+                style={{ 
+                  backgroundColor: banner.background_color,
+                  color: banner.text_color
+                }}
+              >
+                <div className="container">
+                  <div className="banner-content">
+                    <div className="banner-text-container">
+                      <span className="banner-text">{banner.text}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Header */}
       <div className="main-header">

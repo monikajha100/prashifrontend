@@ -206,7 +206,7 @@ const Home = () => {
 
       {/* Hero Banner */}
       {/* Hero Banner Slider */}
-      <section className="hero-banner-slider" style={{position: 'relative', overflow: 'hidden', height: '600px'}}>
+      <section className="hero-banner-slider" style={{position: 'relative', overflow: 'hidden', height: isMobile ? (window.innerWidth <= 480 ? '400px' : '500px') : '600px'}}>
         {displayBanners && displayBanners.map((banner, index) => {
           const displayTitle = isMobile && banner.mobile_title ? banner.mobile_title : banner.title;
           const displaySubtitle = isMobile && banner.mobile_subtitle ? banner.mobile_subtitle : banner.subtitle;
@@ -224,7 +224,7 @@ const Home = () => {
                 height: '100%',
                 opacity: index === currentBannerIndex ? 1 : 0,
                 transition: 'opacity 1s ease-in-out',
-                background: displayImage ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${toAbsoluteImageUrl(displayImage)}) center/cover no-repeat` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+                background: displayImage ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${toAbsoluteImageUrl(displayImage)}) center/${isMobile ? 'contain' : 'cover'} no-repeat` : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

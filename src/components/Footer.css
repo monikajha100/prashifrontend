@@ -194,18 +194,18 @@
 }
 
 .contact-icon {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   color: #28a745;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   margin-top: 2px;
-  font-size: 16px;
+  font-size: 12px;
   background-color: rgba(40, 167, 69, 0.1);
   border-radius: 50%;
-  padding: 4px;
+  padding: 2px;
 }
 
 .contact-details {
@@ -424,9 +424,9 @@
   
   .contact-icon {
     margin-top: 0;
-    font-size: 18px;
-    width: 32px;
-    height: 32px;
+    font-size: 12px;
+    width: 20px;
+    height: 20px;
   }
   
   .contact-details {

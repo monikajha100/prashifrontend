@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { productsAPI, categoriesAPI, bannersAPI, toAbsoluteImageUrl } from '../services/api';
+import { productsAPI, categoriesAPI, bannersAPI, toAbsoluteImageUrl, API_BASE_URL } from '../services/api';
 import axios from 'axios';
 import ProductSlider from '../components/ProductSlider';
 import CategorySlider from '../components/CategorySlider';
@@ -188,7 +188,8 @@ const Home = () => {
   useEffect(() => {
     const fetchSpecialOffers = async () => {
       try {
-        const response = await axios.get(`${productsAPI.API_BASE_URL?.replace('/products', '')}/special-offers`);
+        const response = await axios.get(`${API_BASE_URL.replace('/api', '')}/api/special-offers`);
+        console.log('Special Offers Response:', response.data);
         setSpecialOffers(response.data || []);
       } catch (error) {
         console.error('Error fetching special offers:', error);

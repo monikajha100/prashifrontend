@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { FaBars, FaTimes, FaHome, FaBox, FaTags, FaShoppingCart, FaUsers, FaCog, FaSignOutAlt, FaCreditCard, FaFileInvoice, FaImage, FaBullhorn, FaGift } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaBox, FaTags, FaShoppingCart, FaUsers, FaCog, FaSignOutAlt, FaCreditCard, FaFileInvoice, FaImage, FaBullhorn, FaGift, FaEnvelope } from 'react-icons/fa';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -31,6 +31,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/special-offers', label: 'Special Offers', icon: FaGift },
     { path: '/admin/orders', label: 'Orders', icon: FaShoppingCart },
     { path: '/admin/invoices', label: 'Invoices', icon: FaFileInvoice },
+    { path: '/admin/contacts', label: 'Contacts', icon: FaEnvelope },
     { path: '/admin/payment-settings', label: 'Payment Settings', icon: FaCreditCard },
     { path: '/admin/users', label: 'Users', icon: FaUsers },
     { path: '/admin/settings', label: 'Settings', icon: FaCog }

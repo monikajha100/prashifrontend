@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { usersAPI } from '../../services/api';
 import { Helmet } from 'react-helmet-async';
@@ -81,29 +82,31 @@ const AdminUsers = () => {
         </Helmet>
 
         <div className="admin-users">
-        <div className="page-header">
-          <h1>Users Management</h1>
-          <div className="header-actions">
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowAddUser(true)}
-            >
-              + Add New User
-            </button>
-          </div>
-          <div className="users-stats">
-            <div className="stat-item">
-              <span className="stat-label">Total Users:</span>
-              <span className="stat-value">{users?.length || 0}</span>
+          <div className="page-header">
+            <div>
+              <h1>Users Management</h1>
+              <div className="users-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Total Users:</span>
+                  <span className="stat-value">{users?.length || 0}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Active Users:</span>
+                  <span className="stat-value">
+                    {users?.filter(user => user.is_active).length || 0}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="stat-item">
-              <span className="stat-label">Active Users:</span>
-              <span className="stat-value">
-                {users?.filter(user => user.is_active).length || 0}
-              </span>
+            <div className="header-actions">
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowAddUser(true)}
+              >
+                <i className="fas fa-plus"></i> Add New User
+              </button>
             </div>
           </div>
-        </div>
 
         <div className="users-table-container">
           <table className="users-table">

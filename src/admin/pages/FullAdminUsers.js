@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 const FullAdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [roleFilter, setRoleFilter] = useState('all');
+  const [showAddUser, setShowAddUser] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: users, isLoading, error } = useQuery(
@@ -32,6 +33,24 @@ const FullAdminUsers = () => {
       },
       onError: () => {
         toast.error('Failed to update user status');
+      }
+    }
+  );
+
+  const createUserMutation = useMutation(
+    (userData) => usersAPI.createUser(userData),
+    {
+      onSuccess: (response) => {
+        queryClient.invalidateQueries('users');
+        toast.success('User created successfully!');
+        setShowAddUser(false);
+        // Show temporary password to admin
+        if (response.data.tempPassword) {
+          toast.success(`Temporary password: ${response.data.tempPassword}`, { duration: 10000 });
+        }
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to create user');
       }
     }
   );
@@ -120,6 +139,35 @@ const FullAdminUsers = () => {
               Total Users: {userStats.total}
             </p>
           </div>
+          <button
+            onClick={() => setShowAddUser(true)}
+            style={{
+              background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(212, 175, 55, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 6px 16px rgba(212, 175, 55, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(212, 175, 55, 0.3)';
+            }}
+          >
+            <span style={{ fontSize: '1.2rem' }}>+</span>
+            Add New User
+          </button>
         </div>
 
         {/* User Stats */}
@@ -291,6 +339,15 @@ const FullAdminUsers = () => {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onStatusToggle={handleStatusToggle}
+        />
+      )}
+
+      {/* Add User Modal */}
+      {showAddUser && (
+        <AddUserModal
+          onClose={() => setShowAddUser(false)}
+          onSubmit={createUserMutation.mutate}
+          isLoading={createUserMutation.isLoading}
         />
       )}
     </div>
@@ -465,6 +522,261 @@ const UserDetailsModal = ({ user, onClose, onStatusToggle }) => {
             Close
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const AddUserModal = ({ onClose, onSubmit, isLoading }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'user',
+    address: '',
+    city: '',
+    state: '',
+    pincode: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+      padding: '20px'
+    }}>
+      <div style={{
+        background: 'white',
+        borderRadius: '15px',
+        padding: '30px',
+        maxWidth: '600px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto'
+      }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px'
+        }}>
+          <h2 style={{ margin: 0, color: '#2C2C2C' }}>Add New User</h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              color: '#666'
+            }}
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Phone</label>
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Role *</label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                required
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '15px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Address</label>
+            <textarea
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              rows="3"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '2px solid #e1e1e1',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontFamily: 'inherit'
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>City</label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>State</label>
+              <input
+                type="text"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Pincode</label>
+              <input
+                type="text"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleChange}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  border: '2px solid #e1e1e1',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', paddingTop: '20px', borderTop: '2px solid #f0f0f0' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: isLoading ? '#ccc' : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: isLoading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isLoading ? 'Creating...' : 'Create User'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

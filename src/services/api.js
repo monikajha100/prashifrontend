@@ -147,16 +147,35 @@ export const ordersAPI = {
   create: (orderData) => api.post('/orders', orderData),
   getMyOrders: (params) => api.get('/orders/my-orders', { params }),
   getById: (orderId) => api.get(`/orders/${orderId}`),
-  getOrderDetails: (orderId) => api.get(`/orders/${orderId}/items`),
+  getOrderDetails: (orderId) => api.get(`/orders/${orderId}`), // Changed from /orders/:id/items to /orders/:id
   updateStatus: (orderId, statusData) => api.put(`/orders/${orderId}/status`, statusData),
   updatePaymentStatus: (orderId, paymentData) => api.put(`/orders/${orderId}/payment-status`, paymentData),
   addTracking: (orderId, trackingData) => api.put(`/orders/${orderId}/tracking`, trackingData),
-  getAllOrders: (params) => api.get('/orders/admin/all', { params }),
+  getAllOrders: async (params) => {
+    console.log('🔶 ordersAPI.getAllOrders called with params:', params);
+    try {
+      const response = await api.get('/orders/admin/all', { params });
+      console.log('🔶 ordersAPI.getAllOrders response.data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('🔶 ordersAPI.getAllOrders error:', error);
+      throw error;
+    }
+  },
 };
 
 export const contactAPI = {
   submit: (messageData) => api.post('/contact', messageData),
   subscribeNewsletter: (email) => api.post('/contact/newsletter', { email }),
+  // Admin endpoints
+  getAllMessages: (params) => api.get('/contact/admin/messages', { params }),
+  getMessageById: (id) => api.get(`/contact/admin/messages/${id}`),
+  getStatistics: () => api.get('/contact/admin/statistics'),
+  markAsRead: (id) => api.put(`/contact/admin/messages/${id}/read`),
+  updateStatus: (id, status) => api.put(`/contact/admin/messages/${id}/status`, { status }),
+  updatePriority: (id, priority) => api.put(`/contact/admin/messages/${id}/priority`, { priority }),
+  addNotes: (id, notes) => api.put(`/contact/admin/messages/${id}/notes`, { notes }),
+  deleteMessage: (id) => api.delete(`/contact/admin/messages/${id}`)
 };
 
 export const usersAPI = {
@@ -194,7 +213,18 @@ export const inventoryAPI = {
 };
 
 export const invoicesAPI = {
-  getAllInvoices: (params) => api.get('/invoices', { params }),
+  getAllInvoices: async (params) => {
+    console.log('🔶 invoicesAPI.getAllInvoices called with params:', params);
+    try {
+      const response = await api.get('/invoices', { params });
+      console.log('🔶 invoicesAPI.getAllInvoices response:', response);
+      console.log('🔶 invoicesAPI.getAllInvoices response.data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('🔶 invoicesAPI.getAllInvoices error:', error);
+      throw error;
+    }
+  },
   getMyInvoices: (params) => api.get('/invoices/my-invoices', { params }),
   getInvoiceDetails: (invoiceId) => api.get(`/invoices/${invoiceId}`),
   createInvoice: (orderId) => api.post(`/invoices/create/${orderId}`),

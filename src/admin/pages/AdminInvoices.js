@@ -19,15 +19,34 @@ const AdminInvoices = () => {
 
   const { data: invoicesResponse, isLoading, error } = useQuery(
     ['adminInvoices', filters],
-    () => invoicesAPI.getAllInvoices(filters),
+    async () => {
+      console.log('🔵 Fetching invoices with filters:', filters);
+      const response = await invoicesAPI.getAllInvoices(filters);
+      console.log('🟢 Raw invoices API response:', response);
+      return response;
+    },
     {
       retry: 1,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
+      onSuccess: (data) => {
+        console.log('✅ Invoices data received:', data);
+        console.log('✅ Invoices count:', Array.isArray(data) ? data.length : 'Not an array');
+      },
+      onError: (error) => {
+        console.error('❌ Error fetching invoices:', error);
+        console.error('❌ Error response:', error.response?.data);
+      }
     }
   );
 
-  // Extract invoices array from response
-  const invoices = invoicesResponse?.value || [];
+  // Extract invoices array from response - backend returns array directly
+  const invoices = Array.isArray(invoicesResponse) ? invoicesResponse : [];
+  
+  console.log('=== ADMIN INVOICES DEBUG ===');
+  console.log('invoicesResponse:', invoicesResponse);
+  console.log('invoices array:', invoices);
+  console.log('invoices.length:', invoices.length);
+  console.log('=== END DEBUG ===');
 
   const { data: invoiceDetails } = useQuery(
     ['invoiceDetails', selectedInvoice?.id],
@@ -67,11 +86,98 @@ const AdminInvoices = () => {
 
   const handleViewInvoiceDetails = async (invoiceId) => {
     try {
-      const invoice = await invoicesAPI.getInvoiceDetails(invoiceId);
+      console.log('📄 Fetching invoice details for ID:', invoiceId);
+      const response = await invoicesAPI.getInvoiceDetails(invoiceId);
+      console.log('📄 Invoice details response:', response);
+      
+      // Handle both response.data and direct response
+      const invoice = response.data || response;
+      console.log('📄 Processed invoice details:', invoice);
+      
       setSelectedInvoice(invoice);
       setShowInvoiceDetails(true);
     } catch (error) {
-      console.error('Error fetching invoice details:', error);
+      console.error('❌ Error fetching invoice details:', error);
+      alert('Failed to load invoice details. Please try again.');
+    }
+  };
+
+  const handleDownloadInvoice = async (invoiceId, invoiceNumber) => {
+    try {
+      console.log('⬇️ Downloading invoice:', invoiceId);
+      
+      // Fetch invoice details
+      const response = await invoicesAPI.getInvoiceDetails(invoiceId);
+      const invoice = response.data || response;
+      
+      // Create a temporary container for the invoice
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      document.body.appendChild(tempContainer);
+
+      // Render invoice template in temp container
+      const { createRoot } = await import('react-dom/client');
+      const root = createRoot(tempContainer);
+      
+      await new Promise((resolve) => {
+        root.render(
+          <InvoiceTemplate 
+            invoice={invoice} 
+            company={invoice.company}
+            onRef={(ref) => {
+              if (ref) {
+                setTimeout(async () => {
+                  try {
+                    const canvas = await html2canvas(ref, {
+                      scale: 2,
+                      useCORS: true,
+                      allowTaint: true,
+                      backgroundColor: '#ffffff'
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    
+                    const imgWidth = 210;
+                    const pageHeight = 295;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft >= 0) {
+                      position = heightLeft - imgHeight;
+                      pdf.addPage();
+                      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                      heightLeft -= pageHeight;
+                    }
+
+                    pdf.save(`invoice-${invoiceNumber || invoice.invoice_number}.pdf`);
+                    
+                    // Cleanup
+                    root.unmount();
+                    document.body.removeChild(tempContainer);
+                    resolve();
+                  } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Error downloading invoice');
+                    root.unmount();
+                    document.body.removeChild(tempContainer);
+                    resolve();
+                  }
+                }, 500);
+              }
+            }}
+          />
+        );
+      });
+    } catch (error) {
+      console.error('❌ Error downloading invoice:', error);
+      alert('Failed to download invoice. Please try again.');
     }
   };
 
@@ -275,16 +381,30 @@ const AdminInvoices = () => {
                       <button 
                         className="btn-primary btn-sm"
                         onClick={() => handleViewInvoiceDetails(invoice.id)}
+                        title="View invoice details"
                       >
-                        View
+                        👁️ View
+                      </button>
+                      <button 
+                        className="btn-success btn-sm"
+                        onClick={() => handleDownloadInvoice(invoice.id, invoice.invoice_number)}
+                        title="Download invoice as PDF"
+                        style={{
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: 'white',
+                          border: 'none'
+                        }}
+                      >
+                        ⬇️ Download
                       </button>
                       {!invoice.email_sent && (
                         <button 
                           className="btn-secondary btn-sm"
                           onClick={() => handleSendEmail(invoice.id)}
                           disabled={sendEmailMutation.isLoading}
+                          title="Send invoice via email"
                         >
-                          Send Email
+                          📧 Send Email
                         </button>
                       )}
                     </div>
@@ -316,22 +436,40 @@ const AdminInvoices = () => {
                 <button 
                   className="btn-primary"
                   onClick={handleGeneratePDF}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
                 >
-                  Generate PDF
+                  <span>⬇️</span> Download PDF
                 </button>
                 {!invoiceDetails.email_sent && (
                   <button 
                     className="btn-secondary"
                     onClick={() => handleSendEmail(invoiceDetails.id)}
                     disabled={sendEmailMutation.isLoading}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
                   >
-                    Send Email
+                    <span>📧</span> {sendEmailMutation.isLoading ? 'Sending...' : 'Send Email'}
                   </button>
                 )}
                 <select
                   value={invoiceDetails.payment_status}
                   onChange={(e) => handleUpdatePaymentStatus(invoiceDetails.id, e.target.value)}
                   className="payment-status-select"
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #ddd',
+                    fontSize: '0.95rem',
+                    cursor: 'pointer'
+                  }}
                 >
                   <option value="pending">Pending</option>
                   <option value="paid">Paid</option>

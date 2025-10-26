@@ -14,17 +14,36 @@ const AdminOrders = () => {
 
   const queryClient = useQueryClient();
 
-  const { data: orders, isLoading, error } = useQuery(
+  const { data: ordersData, isLoading, error } = useQuery(
     ['adminOrders', filters],
-    () => ordersAPI.getAllOrders(filters),
+    async () => {
+      console.log('🔵 Fetching orders with filters:', filters);
+      console.log('🔵 API endpoint:', `${process.env.REACT_APP_API_URL || 'http://localhost:5000/api'}/orders/admin/all`);
+      const response = await ordersAPI.getAllOrders(filters);
+      console.log('🟢 Raw API response:', response);
+      return response;
+    },
     {
       retry: 1,
       refetchOnWindowFocus: false,
+      select: (response) => {
+        console.log('🟡 Select function - input response:', response);
+        // Handle both array and object responses
+        if (Array.isArray(response)) {
+          console.log('🟡 Response is array, converting to object');
+          return { orders: response, pagination: null };
+        }
+        console.log('🟡 Response is object, using as-is');
+        return response;
+      },
       onSuccess: (data) => {
-        console.log('Orders data received:', data);
+        console.log('✅ Orders data received:', data);
+        console.log('✅ Orders count:', data?.orders?.length || 0);
       },
       onError: (error) => {
-        console.error('Error fetching orders:', error);
+        console.error('❌ Error fetching orders:', error);
+        console.error('❌ Error response:', error.response?.data);
+        console.error('❌ Error status:', error.response?.status);
       }
     }
   );
@@ -61,11 +80,20 @@ const AdminOrders = () => {
 
   const handleViewOrderDetails = async (orderId) => {
     try {
-      const orderDetails = await ordersAPI.getOrderDetails(orderId);
+      console.log('🔍 Fetching order details for ID:', orderId);
+      const response = await ordersAPI.getOrderDetails(orderId);
+      console.log('🔍 Order details response:', response);
+      
+      // Handle both response.data and direct response
+      const orderDetails = response.data || response;
+      console.log('🔍 Processed order details:', orderDetails);
+      
       setSelectedOrder(orderDetails);
       setShowOrderDetails(true);
     } catch (error) {
-      console.error('Error fetching order details:', error);
+      console.error('❌ Error fetching order details:', error);
+      console.error('❌ Error response:', error.response?.data);
+      alert('Failed to load order details. Please try again.');
     }
   };
 
@@ -155,7 +183,17 @@ const AdminOrders = () => {
   }
 
   // Ensure orders is always an array
-  const ordersArray = Array.isArray(orders) ? orders : [];
+  const ordersArray = Array.isArray(ordersData?.orders) 
+    ? ordersData.orders 
+    : Array.isArray(ordersData) 
+    ? ordersData 
+    : [];
+
+  console.log('=== ADMIN ORDERS DEBUG ===');
+  console.log('ordersData:', ordersData);
+  console.log('ordersArray:', ordersArray);
+  console.log('ordersArray.length:', ordersArray.length);
+  console.log('=== END DEBUG ===');
 
   return (
     <div className="admin-orders">

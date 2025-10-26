@@ -2,11 +2,27 @@ import React from 'react';
 import './InvoiceTemplate.css';
 
 const InvoiceTemplate = ({ invoice, company, onRef }) => {
+  // Default company settings from contact page
+  const defaultCompany = {
+    company_name: 'Praashibysupal',
+    company_address: '203 SF Anikedhya Capital -2, Nr Mahalaxmi Cross Road, Paldi, Ahmedabad, Gujarat, India - 380006',
+    company_phone: '+91 87806 06280',
+    company_email: 'hello@praashibysupal.co.in',
+    company_gstin: '',
+    company_state: 'Gujarat',
+    company_logo: '/logo.png',
+    bank_details: null,
+    invoice_terms: 'Thanks for doing business with us!'
+  };
+
+  // Use provided company data or defaults
+  const companyData = company || defaultCompany;
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR'
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   const formatDate = (dateString) => {
@@ -43,8 +59,9 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
   };
 
   const amountInWords = () => {
-    const amount = Math.floor(invoice.total_amount);
-    const paisa = Math.round((invoice.total_amount - amount) * 100);
+    const totalAmount = invoice?.total_amount || 0;
+    const amount = Math.floor(totalAmount);
+    const paisa = Math.round((totalAmount - amount) * 100);
     let words = convertToWords(amount) + ' Rupees';
     if (paisa > 0) {
       words += ' and ' + convertToWords(paisa) + ' Paisa';
@@ -52,12 +69,17 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
     return words + ' only';
   };
 
+  // Ensure invoice has required data
+  if (!invoice) {
+    return <div className="invoice-template">No invoice data available</div>;
+  }
+
   return (
     <div ref={onRef} className="invoice-template">
       {/* Header */}
       <div className="invoice-header">
         <div className="company-logo">
-          <img src={company.company_logo || '/logo.png'} alt="Company Logo" />
+          <img src={companyData.company_logo} alt="Company Logo" />
         </div>
         <div className="invoice-title">
           <h1>Tax Invoice</h1>
@@ -67,12 +89,11 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
 
       {/* Company Details */}
       <div className="company-details">
-        <h2>{company.company_name || 'Praashibysupal'}</h2>
-        <p>{company.company_address || '123 Business Street, Mumbai, Maharashtra 400001'}</p>
-        <p>Phone: {company.company_phone || '+91 9876543210'}</p>
-        <p>Email: {company.company_email || 'info@praashibysupal.com'}</p>
-        <p>GSTIN: {company.company_gstin || '27AABCU9603R1ZX'}</p>
-        <p>State: {company.company_state || '27-Maharashtra'}</p>
+        <h2>{companyData.company_name}</h2>
+        <p>{companyData.company_address}</p>
+        <p>Phone: {companyData.company_phone}</p>
+        <p>Email: {companyData.company_email}</p>
+        <p>State: {companyData.company_state}</p>
       </div>
 
       {/* Invoice Details Grid */}
@@ -103,7 +124,7 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
           <div className="invoice-meta">
             <p><strong>Invoice No.:</strong> {invoice.invoice_number}</p>
             <p><strong>Date:</strong> {formatDate(invoice.invoice_date)}</p>
-            <p><strong>Place of Supply:</strong> {company.company_state || '27-Maharashtra'}</p>
+            <p><strong>Place of Supply:</strong> {companyData.company_state}</p>
           </div>
         </div>
       </div>
@@ -201,25 +222,25 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
       <div className="bank-terms-section">
         <div className="bank-details">
           <h4>Bank Details</h4>
-          {company.bank_details && (
+          {companyData.bank_details && (
             <div className="bank-info">
-              <p>Bank Name: {company.bank_details.bank_name}</p>
-              <p>Account No.: {company.bank_details.account_number}</p>
-              <p>IFSC Code: {company.bank_details.ifsc_code}</p>
-              <p>Branch: {company.bank_details.branch}</p>
+              <p>Bank Name: {companyData.bank_details.bank_name}</p>
+              <p>Account No.: {companyData.bank_details.account_number}</p>
+              <p>IFSC Code: {companyData.bank_details.ifsc_code}</p>
+              <p>Branch: {companyData.bank_details.branch}</p>
             </div>
           )}
         </div>
 
         <div className="terms-conditions">
           <h4>Terms and Conditions</h4>
-          <p>{company.invoice_terms || 'Thanks for doing business with us!'}</p>
+          <p>{companyData.invoice_terms || 'Thanks for doing business with us!'}</p>
         </div>
 
         <div className="signature">
           <h4>Authorized Signatory</h4>
           <div className="signature-area">
-            <p>For: {company.company_name || 'Praashibysupal'}</p>
+            <p>For: {companyData.company_name}</p>
             <div className="signature-line"></div>
             <p>Authorized Signatory</p>
           </div>

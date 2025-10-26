@@ -189,8 +189,8 @@
 
 .contact-item {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
   background: transparent;
 }
 
@@ -405,30 +405,35 @@
   }
   
   .contact-info {
-    align-items: center;
+    align-items: flex-start;
     display: flex;
     flex-direction: column;
     gap: 15px;
   }
   
   .contact-item {
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
-    gap: 5px;
+    justify-content: flex-start;
+    flex-direction: row;
+    text-align: left;
+    gap: 12px;
     align-items: center;
   }
   
   .contact-icon {
     margin-top: 0;
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
   }
   
   .contact-details {
-    align-items: center;
+    align-items: flex-start;
+    text-align: left;
   }
   
   .address-lines {
-    align-items: center;
+    align-items: flex-start;
+    text-align: left;
   }
   
   .footer-bottom-content {
@@ -505,19 +510,23 @@
   }
   
   .contact-item {
-    gap: 3px;
+    gap: 12px;
+    align-items: center;
   }
   
   .contact-details strong {
-    font-size: 0.9rem;
+    font-size: 1rem;
+    color: #004646;
   }
   
   .address-lines span {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    color: rgba(0, 70, 70, 0.9);
   }
   
   .contact-text {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    color: rgba(0, 70, 70, 0.9);
   }
   
   .footer-bottom-content {
@@ -589,15 +598,18 @@
   }
   
   .contact-details strong {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    color: #004646;
   }
   
   .address-lines span {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    color: rgba(0, 70, 70, 0.9);
   }
   
   .contact-text {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    color: rgba(0, 70, 70, 0.9);
   }
   
   .footer-bottom-content {
@@ -664,15 +676,18 @@
   }
   
   .contact-details strong {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    color: #004646;
   }
   
   .address-lines span {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    color: rgba(0, 70, 70, 0.9);
   }
   
   .contact-text {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    color: rgba(0, 70, 70, 0.9);
   }
   
   .footer-bottom-content {

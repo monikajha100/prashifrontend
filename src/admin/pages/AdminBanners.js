@@ -143,6 +143,15 @@ const AdminBanners = () => {
     setShowModal(true);
   };
 
+  const handleToggleActive = async (id) => {
+    try {
+      await api.patch(`/admin/banners/${id}/toggle`);
+      fetchBanners();
+    } catch (error) {
+      console.error("Error toggling banner status:", error);
+    }
+  };
+
   // Handle delete
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this banner?")) {

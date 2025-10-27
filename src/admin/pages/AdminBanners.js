@@ -58,7 +58,11 @@ const AdminBanners = () => {
       const formData = new FormData();
       formData.append("image", file);
 
-      const response = await api.post("/upload/banner", formData);
+      const response = await api.post("/upload/banner", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       const data = response.data;
       setFormData((prev) => ({
@@ -81,10 +85,19 @@ const AdminBanners = () => {
       if (editingBanner) {
         response = await api.put(
           `/admin/banners/${editingBanner.id}`,
-          formData
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
       } else {
-        response = await api.post("/admin/banners", formData);
+        response = await api.post("/admin/banners", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
       setShowModal(false);

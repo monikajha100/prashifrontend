@@ -55,10 +55,19 @@ const AdminPromotionalBanners = () => {
       if (editingBanner) {
         await api.put(
           `/admin/promotional-banners/${editingBanner.id}`,
-          formData
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
         );
       } else {
-        await api.post("/admin/promotional-banners", formData);
+        await api.post("/admin/promotional-banners", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
       setShowModal(false);

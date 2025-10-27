@@ -304,7 +304,11 @@ const BannerFormModal = ({ banner, onClose, onSuccess }) => {
         const uploadFormData = new FormData();
         uploadFormData.append("image", imageFile);
 
-        const response = await api.post(`/upload/banner`, uploadFormData);
+        const response = await api.post(`/upload/banner`, uploadFormData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         const data = response.data;
         finalFormData.image = data.url;
         toast.success("Image uploaded successfully!");

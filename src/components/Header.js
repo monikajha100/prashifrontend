@@ -12,6 +12,7 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import "../live-styles.css";
+import api from "../services/api";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,7 +30,7 @@ const Header = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await fetch("/promotional-banners");
+        const response = await api.get("/promotional-banners");
         if (response.ok) {
           const data = await response.json();
           setBanners(data);

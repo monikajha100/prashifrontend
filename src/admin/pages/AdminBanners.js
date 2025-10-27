@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaEye, FaEyeSlash } from 'react-icons/fa';
-import './AdminBanners.css';
+import React, { useState, useEffect } from "react";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaToggleOn,
+  FaToggleOff,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import "./AdminBanners.css";
+import api from "../../services/api";
 
 const AdminBanners = () => {
   const [banners, setBanners] = useState([]);
@@ -9,50 +18,46 @@ const AdminBanners = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    subtitle: '',
-    image: '',
-    mobile_title: '',
-    mobile_subtitle: '',
-    mobile_image: '',
-    link_url: '',
-    button_text: '',
+    title: "",
+    subtitle: "",
+    image: "",
+    mobile_title: "",
+    mobile_subtitle: "",
+    mobile_image: "",
+    link_url: "",
+    button_text: "",
     sort_order: 0,
-    device_type: 'both',
-    is_active: true
+    device_type: "both",
+    is_active: true,
   });
   const [uploading, setUploading] = useState(false);
 
   // Fetch banners
   const fetchBanners = async () => {
     try {
-      console.log('Fetching banners from /api/admin/banners/admin');
-      const response = await fetch('/api/admin/banners/admin');
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
+      console.log("Fetching banners from /api/admin/banners/admin");
+      const response = await api.get("/admin/banners/admin");
       if (response.ok) {
-        const text = await response.text();
-        console.log('Raw response text:', text.substring(0, 200));
-        
+        const data = await response.data;
         try {
-          const data = JSON.parse(text);
-          console.log('Parsed data:', data);
           setBanners(data);
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.error('Response text that failed to parse:', text);
-          setError('Failed to parse response from server');
+        } catch (error) {
+          console.error("Error parsing banners:", error);
+          setError("Failed to parse banners data");
         }
       } else {
         const errorText = await response.text();
-        console.error('Failed to fetch banners:', response.status, response.statusText);
-        console.error('Error response:', errorText);
+        console.error(
+          "Failed to fetch banners:",
+          response.status,
+          response.statusText
+        );
+        console.error("Error response:", errorText);
         setError(`Server error: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error fetching banners:', error);
-      setError('Network error: Unable to connect to server');
+      console.error("Error fetching banners:", error);
+      setError("Network error: Unable to connect to server");
     } finally {
       setLoading(false);
     }
@@ -67,25 +72,22 @@ const AdminBanners = () => {
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('image', file);
-      
-      const response = await fetch('/api/upload/banner', {
-        method: 'POST',
-        body: formData
-      });
-      
+      formData.append("image", file);
+
+      const response = await api.post("/upload/banner", formData);
+
       if (response.ok) {
-        const data = await response.json();
-        setFormData(prev => ({
+        const data = await response.data;
+        setFormData((prev) => ({
           ...prev,
-          [type]: data.imageUrl
+          [type]: data.imageUrl,
         }));
       } else {
-        alert('Failed to upload image');
+        alert("Failed to upload image");
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Error uploading image');
+      console.error("Error uploading image:", error);
+      alert("Error uploading image");
     } finally {
       setUploading(false);
     }
@@ -95,36 +97,30 @@ const AdminBanners = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingBanner 
-        ? `/api/admin/banners/${editingBanner.id}`
-        : '/api/admin/banners';
-      
-      const method = editingBanner ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setShowModal(false);
-        setEditingBanner(null);
-        setFormData({
-          title: '',
-          subtitle: '',
-          image: '',
-          link_url: '',
-          button_text: '',
-          sort_order: 0,
-          is_active: true
-        });
-        fetchBanners();
+      let response;
+      if (editingBanner) {
+        response = await api.put(
+          `/admin/banners/${editingBanner.id}`,
+          formData
+        );
+      } else {
+        response = await api.post("/admin/banners", formData);
       }
+
+      setShowModal(false);
+      setEditingBanner(null);
+      setFormData({
+        title: "",
+        subtitle: "",
+        image: "",
+        link_url: "",
+        button_text: "",
+        sort_order: 0,
+        is_active: true,
+      });
+      fetchBanners();
     } catch (error) {
-      console.error('Error saving banner:', error);
+      console.error("Error saving banner:", error);
     }
   };
 
@@ -133,58 +129,38 @@ const AdminBanners = () => {
     setEditingBanner(banner);
     setFormData({
       title: banner.title,
-      subtitle: banner.subtitle || '',
+      subtitle: banner.subtitle || "",
       image: banner.image,
       mobile_title: banner.mobile_title || banner.title,
-      mobile_subtitle: banner.mobile_subtitle || banner.subtitle || '',
+      mobile_subtitle: banner.mobile_subtitle || banner.subtitle || "",
       mobile_image: banner.mobile_image || banner.image,
-      link_url: banner.link_url || '',
-      button_text: banner.button_text || '',
+      link_url: banner.link_url || "",
+      button_text: banner.button_text || "",
       sort_order: banner.sort_order || 0,
-      device_type: banner.device_type || 'both',
-      is_active: banner.is_active
+      device_type: banner.device_type || "both",
+      is_active: banner.is_active,
     });
     setShowModal(true);
   };
 
   // Handle delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this banner?')) {
+    if (window.confirm("Are you sure you want to delete this banner?")) {
       try {
-        const response = await fetch(`/api/admin/banners/${id}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          fetchBanners();
-        }
-      } catch (error) {
-        console.error('Error deleting banner:', error);
-      }
-    }
-  };
-
-  // Handle toggle active status
-  const handleToggleActive = async (id) => {
-    try {
-      const response = await fetch(`/api/admin/banners/${id}/toggle`, {
-        method: 'PATCH',
-      });
-
-      if (response.ok) {
+        await api.delete(`/admin/banners/${id}`);
         fetchBanners();
+      } catch (error) {
+        console.error("Error deleting banner:", error);
       }
-    } catch (error) {
-      console.error('Error toggling banner status:', error);
     }
   };
 
   // Handle input change
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -192,13 +168,13 @@ const AdminBanners = () => {
   const openNewBannerModal = () => {
     setEditingBanner(null);
     setFormData({
-      title: '',
-      subtitle: '',
-      image: '',
-      link_url: '',
-      button_text: '',
+      title: "",
+      subtitle: "",
+      image: "",
+      link_url: "",
+      button_text: "",
       sort_order: 0,
-      is_active: true
+      is_active: true,
     });
     setShowModal(true);
   };
@@ -217,7 +193,9 @@ const AdminBanners = () => {
         <div className="error">
           <h2>Error Loading Banners</h2>
           <p>{error}</p>
-          <button onClick={fetchBanners} className="btn-primary">Retry</button>
+          <button onClick={fetchBanners} className="btn-primary">
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -234,17 +212,20 @@ const AdminBanners = () => {
 
       <div className="banners-grid">
         {banners.map((banner) => (
-          <div key={banner.id} className={`banner-card ${!banner.is_active ? 'inactive' : ''}`}>
+          <div
+            key={banner.id}
+            className={`banner-card ${!banner.is_active ? "inactive" : ""}`}
+          >
             <div className="banner-image">
-              <img 
-                src={banner.image} 
+              <img
+                src={banner.image}
                 alt={banner.title}
                 onError={(e) => {
-                  console.error('Image failed to load:', banner.image);
-                  e.target.style.display = 'none';
+                  console.error("Image failed to load:", banner.image);
+                  e.target.style.display = "none";
                 }}
                 onLoad={() => {
-                  console.log('Image loaded successfully:', banner.image);
+                  console.log("Image loaded successfully:", banner.image);
                 }}
               />
               <div className="banner-overlay">
@@ -261,16 +242,23 @@ const AdminBanners = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="banner-content">
               <h3>{banner.title}</h3>
-              {banner.subtitle && <p className="banner-subtitle">{banner.subtitle}</p>}
-              {banner.button_text && <span className="banner-button">{banner.button_text}</span>}
+              {banner.subtitle && (
+                <p className="banner-subtitle">{banner.subtitle}</p>
+              )}
+              {banner.button_text && (
+                <span className="banner-button">{banner.button_text}</span>
+              )}
               {banner.device_type && (
                 <div className="banner-device-type">
                   <span className={`device-badge ${banner.device_type}`}>
-                    {banner.device_type === 'both' ? 'Desktop & Mobile' : 
-                     banner.device_type === 'desktop' ? 'Desktop Only' : 'Mobile Only'}
+                    {banner.device_type === "both"
+                      ? "Desktop & Mobile"
+                      : banner.device_type === "desktop"
+                      ? "Desktop Only"
+                      : "Mobile Only"}
                   </span>
                 </div>
               )}
@@ -281,27 +269,29 @@ const AdminBanners = () => {
               )}
               <div className="banner-meta">
                 <span>Order: {banner.sort_order}</span>
-                <span>Created: {new Date(banner.created_at).toLocaleDateString()}</span>
+                <span>
+                  Created: {new Date(banner.created_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
 
             <div className="banner-actions">
-              <button 
-                className="btn-toggle" 
+              <button
+                className="btn-toggle"
                 onClick={() => handleToggleActive(banner.id)}
-                title={banner.is_active ? 'Deactivate' : 'Activate'}
+                title={banner.is_active ? "Deactivate" : "Activate"}
               >
                 {banner.is_active ? <FaToggleOn /> : <FaToggleOff />}
               </button>
-              <button 
-                className="btn-edit" 
+              <button
+                className="btn-edit"
                 onClick={() => handleEdit(banner)}
                 title="Edit Banner"
               >
                 <FaEdit />
               </button>
-              <button 
-                className="btn-delete" 
+              <button
+                className="btn-delete"
                 onClick={() => handleDelete(banner.id)}
                 title="Delete Banner"
               >
@@ -323,8 +313,11 @@ const AdminBanners = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingBanner ? 'Edit Banner' : 'Add New Banner'}</h2>
-              <button className="modal-close" onClick={() => setShowModal(false)}>
+              <h2>{editingBanner ? "Edit Banner" : "Add New Banner"}</h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowModal(false)}
+              >
                 ×
               </button>
             </div>
@@ -379,17 +372,19 @@ const AdminBanners = () => {
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files[0];
-                      if (file) handleImageUpload(file, 'image');
+                      if (file) handleImageUpload(file, "image");
                     }}
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                   />
                   <button
                     type="button"
-                    onClick={() => document.getElementById('image-upload').click()}
+                    onClick={() =>
+                      document.getElementById("image-upload").click()
+                    }
                     className="upload-btn"
                     disabled={uploading}
                   >
-                    {uploading ? 'Uploading...' : 'Upload Desktop Image'}
+                    {uploading ? "Uploading..." : "Upload Desktop Image"}
                   </button>
                   <input
                     type="url"
@@ -440,17 +435,19 @@ const AdminBanners = () => {
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files[0];
-                      if (file) handleImageUpload(file, 'mobile_image');
+                      if (file) handleImageUpload(file, "mobile_image");
                     }}
-                    style={{ display: 'none' }}
+                    style={{ display: "none" }}
                   />
                   <button
                     type="button"
-                    onClick={() => document.getElementById('mobile-image-upload').click()}
+                    onClick={() =>
+                      document.getElementById("mobile-image-upload").click()
+                    }
                     className="upload-btn"
                     disabled={uploading}
                   >
-                    {uploading ? 'Uploading...' : 'Upload Mobile Image'}
+                    {uploading ? "Uploading..." : "Upload Mobile Image"}
                   </button>
                   <input
                     type="url"
@@ -520,11 +517,23 @@ const AdminBanners = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary" disabled={uploading}>
-                  {uploading ? 'Uploading...' : (editingBanner ? 'Update Banner' : 'Create Banner')}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={uploading}
+                >
+                  {uploading
+                    ? "Uploading..."
+                    : editingBanner
+                    ? "Update Banner"
+                    : "Create Banner"}
                 </button>
               </div>
             </form>

@@ -1,35 +1,44 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { motion } from 'framer-motion';
-import { FaBuilding, FaHandshake, FaStore, FaCheckCircle, FaUpload, FaUserCheck, FaArrowLeft } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import './Partner.css';
+import React, { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { motion } from "framer-motion";
+import {
+  FaBuilding,
+  FaHandshake,
+  FaStore,
+  FaCheckCircle,
+  FaUpload,
+  FaUserCheck,
+  FaArrowLeft,
+} from "react-icons/fa";
+import { Link } from "react-router-dom";
+import "./Partner.css";
+import api from "../services/api";
 
 const Partner = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    business: '',
-    partnershipType: '',
-    experience: '',
-    documents: null
+    name: "",
+    email: "",
+    phone: "",
+    business: "",
+    partnershipType: "",
+    experience: "",
+    documents: null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleFileChange = (e) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      documents: e.target.files[0]
+      documents: e.target.files[0],
     }));
   };
 
@@ -40,34 +49,29 @@ const Partner = () => {
 
     try {
       const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
+      Object.keys(formData).forEach((key) => {
         if (formData[key] !== null) {
           formDataToSend.append(key, formData[key]);
         }
       });
 
-      const response = await fetch('/api/partners/apply', {
-        method: 'POST',
-        body: formDataToSend
+      await api.post("/partners/apply", {
+        formDataToSend,
       });
 
-      if (response.ok) {
-        setSubmitStatus('success');
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          business: '',
-          partnershipType: '',
-          experience: '',
-          documents: null
-        });
-      } else {
-        setSubmitStatus('error');
-      }
+      setSubmitStatus("success");
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        business: "",
+        partnershipType: "",
+        experience: "",
+        documents: null,
+      });
     } catch (error) {
-      console.error('Error submitting application:', error);
-      setSubmitStatus('error');
+      console.error("Error submitting application:", error);
+      setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
     }
@@ -77,11 +81,14 @@ const Partner = () => {
     <div className="partner-page">
       <Helmet>
         <title>Join Praashibysupal Network - Become a Partner</title>
-        <meta name="description" content="Join Praashi by Supal as a Franchise Partner, Agency Partner, or Reseller Partner. Choose your role and start your journey with us." />
+        <meta
+          name="description"
+          content="Join Praashi by Supal as a Franchise Partner, Agency Partner, or Reseller Partner. Choose your role and start your journey with us."
+        />
       </Helmet>
 
       <div className="container">
-        <motion.div 
+        <motion.div
           className="partner-container"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -100,7 +107,7 @@ const Partner = () => {
 
           {/* Partnership Types */}
           <div className="partnership-types">
-            <motion.div 
+            <motion.div
               className="partnership-card franchise"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -110,7 +117,10 @@ const Partner = () => {
                 <FaBuilding />
               </div>
               <h3>Franchise Partner</h3>
-              <p>Open your own store with full support and exclusive territory rights.</p>
+              <p>
+                Open your own store with full support and exclusive territory
+                rights.
+              </p>
               <ul className="partnership-benefits">
                 <li>Exclusive territory rights</li>
                 <li>Complete store setup support</li>
@@ -123,12 +133,20 @@ const Partner = () => {
                 <span className="rate">15-25%</span>
                 <span className="label">Commission Rate</span>
               </div>
-              <button className="apply-btn" onClick={() => setFormData(prev => ({ ...prev, partnershipType: 'franchise' }))}>
+              <button
+                className="apply-btn"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    partnershipType: "franchise",
+                  }))
+                }
+              >
                 Apply as Franchise
               </button>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="partnership-card agency"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -138,7 +156,10 @@ const Partner = () => {
                 <FaHandshake />
               </div>
               <h3>Agency Partner</h3>
-              <p>Manage multiple resellers and earn higher commissions through your network.</p>
+              <p>
+                Manage multiple resellers and earn higher commissions through
+                your network.
+              </p>
               <ul className="partnership-benefits">
                 <li>Manage multiple resellers</li>
                 <li>Higher commission rates</li>
@@ -150,12 +171,20 @@ const Partner = () => {
                 <span className="rate">10-20%</span>
                 <span className="label">Commission Rate</span>
               </div>
-              <button className="apply-btn" onClick={() => setFormData(prev => ({ ...prev, partnershipType: 'agency' }))}>
+              <button
+                className="apply-btn"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    partnershipType: "agency",
+                  }))
+                }
+              >
                 Apply as Agency
               </button>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="partnership-card reseller"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -165,7 +194,10 @@ const Partner = () => {
                 <FaStore />
               </div>
               <h3>Reseller Partner</h3>
-              <p>Start selling products with minimal investment and maximum flexibility.</p>
+              <p>
+                Start selling products with minimal investment and maximum
+                flexibility.
+              </p>
               <ul className="partnership-benefits">
                 <li>Low startup investment</li>
                 <li>Flexible working hours</li>
@@ -178,14 +210,22 @@ const Partner = () => {
                 <span className="rate">10-15%</span>
                 <span className="label">Commission Rate</span>
               </div>
-              <button className="apply-btn" onClick={() => setFormData(prev => ({ ...prev, partnershipType: 'reseller' }))}>
+              <button
+                className="apply-btn"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    partnershipType: "reseller",
+                  }))
+                }
+              >
                 Apply as Reseller
               </button>
             </motion.div>
           </div>
 
           {/* Digital Contract Process */}
-          <motion.div 
+          <motion.div
             className="contract-process"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -195,29 +235,41 @@ const Partner = () => {
             <div className="process-note">
               <FaUserCheck className="note-icon" />
               <span>Admin Approval Required</span>
-              <p>All applications go through our approval process to ensure quality partnerships</p>
+              <p>
+                All applications go through our approval process to ensure
+                quality partnerships
+              </p>
             </div>
-            
+
             <div className="process-steps">
               <div className="process-step">
                 <div className="step-number">1</div>
                 <div className="step-content">
                   <h4>Apply Online</h4>
-                  <p>Fill out the application form with your details and business information</p>
+                  <p>
+                    Fill out the application form with your details and business
+                    information
+                  </p>
                 </div>
               </div>
               <div className="process-step">
                 <div className="step-number">2</div>
                 <div className="step-content">
                   <h4>Upload Documents</h4>
-                  <p>Upload required documents like ID proof, business registration, and bank details</p>
+                  <p>
+                    Upload required documents like ID proof, business
+                    registration, and bank details
+                  </p>
                 </div>
               </div>
               <div className="process-step">
                 <div className="step-number">3</div>
                 <div className="step-content">
                   <h4>Digital Contract</h4>
-                  <p>Review and sign the digital contract with terms and conditions</p>
+                  <p>
+                    Review and sign the digital contract with terms and
+                    conditions
+                  </p>
                 </div>
               </div>
               <div className="process-step">
@@ -231,41 +283,54 @@ const Partner = () => {
                 <div className="step-number">5</div>
                 <div className="step-content">
                   <h4>Approval & Access</h4>
-                  <p>Once approved, you'll get access to your partner dashboard</p>
+                  <p>
+                    Once approved, you'll get access to your partner dashboard
+                  </p>
                 </div>
               </div>
             </div>
           </motion.div>
 
           {/* Application Form */}
-          <motion.div 
+          <motion.div
             className="application-form-section"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             <h2>Partnership Application</h2>
-            <p>Fill out the form below to start your partnership journey with us.</p>
-            
-            {submitStatus === 'success' && (
+            <p>
+              Fill out the form below to start your partnership journey with us.
+            </p>
+
+            {submitStatus === "success" && (
               <div className="success-message">
                 <FaCheckCircle />
                 <h3>Application Submitted Successfully!</h3>
-                <p>Thank you for your interest in partnering with us. Our team will review your application and get back to you within 24 hours.</p>
+                <p>
+                  Thank you for your interest in partnering with us. Our team
+                  will review your application and get back to you within 24
+                  hours.
+                </p>
               </div>
             )}
 
-            {submitStatus === 'error' && (
+            {submitStatus === "error" && (
               <div className="error-message">
                 <h3>Submission Failed</h3>
-                <p>There was an error submitting your application. Please try again or contact us directly.</p>
+                <p>
+                  There was an error submitting your application. Please try
+                  again or contact us directly.
+                </p>
               </div>
             )}
 
             <form className="partnership-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="name" className="form-label">Full Name *</label>
+                  <label htmlFor="name" className="form-label">
+                    Full Name *
+                  </label>
                   <input
                     type="text"
                     id="name"
@@ -278,7 +343,9 @@ const Partner = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="email" className="form-label">Email Address *</label>
+                  <label htmlFor="email" className="form-label">
+                    Email Address *
+                  </label>
                   <input
                     type="email"
                     id="email"
@@ -294,7 +361,9 @@ const Partner = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="phone" className="form-label">Phone Number *</label>
+                  <label htmlFor="phone" className="form-label">
+                    Phone Number *
+                  </label>
                   <input
                     type="tel"
                     id="phone"
@@ -307,7 +376,9 @@ const Partner = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="business" className="form-label">Business Name *</label>
+                  <label htmlFor="business" className="form-label">
+                    Business Name *
+                  </label>
                   <input
                     type="text"
                     id="business"
@@ -322,13 +393,15 @@ const Partner = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="partnershipType" className="form-label">Partnership Type *</label>
-                <select 
-                  id="partnershipType" 
-                  name="partnershipType" 
+                <label htmlFor="partnershipType" className="form-label">
+                  Partnership Type *
+                </label>
+                <select
+                  id="partnershipType"
+                  name="partnershipType"
                   value={formData.partnershipType}
                   onChange={handleInputChange}
-                  className="form-input" 
+                  className="form-input"
                   required
                 >
                   <option value="">Select partnership type</option>
@@ -339,7 +412,9 @@ const Partner = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="experience" className="form-label">Business Experience</label>
+                <label htmlFor="experience" className="form-label">
+                  Business Experience
+                </label>
                 <textarea
                   id="experience"
                   name="experience"
@@ -363,15 +438,18 @@ const Partner = () => {
                   className="form-file"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
-                <small className="file-help">Upload ID proof, business registration, or other relevant documents (PDF, DOC, or images)</small>
+                <small className="file-help">
+                  Upload ID proof, business registration, or other relevant
+                  documents (PDF, DOC, or images)
+                </small>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary submit-btn"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                {isSubmitting ? "Submitting..." : "Submit Application"}
               </button>
             </form>
           </motion.div>

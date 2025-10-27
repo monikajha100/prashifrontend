@@ -1,14 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { FaEye, FaCheck, FaTimes, FaTrash, FaDownload, FaSearch, FaUser, FaBuilding, FaStore, FaHandshake } from 'react-icons/fa';
-import './AdminPartners.css';
+import React, { useState, useEffect } from "react";
+import {
+  FaEye,
+  FaCheck,
+  FaTimes,
+  FaTrash,
+  FaDownload,
+  FaSearch,
+  FaUser,
+  FaBuilding,
+  FaStore,
+  FaHandshake,
+} from "react-icons/fa";
+import "./AdminPartners.css";
+import api from "../../services/api";
 
 const AdminPartners = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState({});
 
   useEffect(() => {
@@ -18,13 +30,11 @@ const AdminPartners = () => {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch('/api/admin/partners/applications');
-      const data = await response.json();
-      if (data.success) {
-        setApplications(data.applications);
-      }
+      const response = await api.get("/admin/partners/applications");
+      const data = response.data;
+      setApplications(data.applications);
     } catch (error) {
-      console.error('Error fetching applications:', error);
+      console.error("Error fetching applications:", error);
     } finally {
       setLoading(false);
     }
@@ -32,73 +42,56 @@ const AdminPartners = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/admin/partners/stats');
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.stats);
-      }
+      const response = await api.get("/admin/partners/stats");
+      const data = response.data;
+      setStats(data.stats);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error("Error fetching stats:", error);
     }
   };
 
   const updateApplicationStatus = async (id, status) => {
     try {
-      const response = await fetch(`/api/admin/partners/applications/${id}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
+      await api.put(`/admin/partners/applications/${id}/status`, { status });
 
-      if (response.ok) {
-        fetchApplications();
-        fetchStats();
-        setShowModal(false);
-      }
+      fetchApplications();
+      fetchStats();
+      setShowModal(false);
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error("Error updating status:", error);
     }
   };
 
   const deleteApplication = async (id) => {
-    if (window.confirm('Are you sure you want to delete this application?')) {
+    if (window.confirm("Are you sure you want to delete this application?")) {
       try {
-        const response = await fetch(`/api/admin/partners/applications/${id}`, {
-          method: 'DELETE',
-        });
-
-        if (response.ok) {
-          fetchApplications();
-          fetchStats();
-        }
+        await api.delete(`/admin/partners/applications/${id}`);
+        fetchApplications();
+        fetchStats();
       } catch (error) {
-        console.error('Error deleting application:', error);
+        console.error("Error deleting application:", error);
       }
     }
   };
 
   const viewApplication = async (id) => {
     try {
-      const response = await fetch(`/api/admin/partners/applications/${id}`);
-      const data = await response.json();
-      if (data.success) {
-        setSelectedApplication(data.application);
-        setShowModal(true);
-      }
+      const response = await api.get(`/admin/partners/applications/${id}`);
+      const data = response.data;
+      setSelectedApplication(data.application);
+      setShowModal(true);
     } catch (error) {
-      console.error('Error fetching application:', error);
+      console.error("Error fetching application:", error);
     }
   };
 
   const getPartnershipTypeIcon = (type) => {
     switch (type) {
-      case 'franchise':
+      case "franchise":
         return <FaBuilding className="type-icon franchise" />;
-      case 'agency':
+      case "agency":
         return <FaHandshake className="type-icon agency" />;
-      case 'reseller':
+      case "reseller":
         return <FaStore className="type-icon reseller" />;
       default:
         return <FaUser className="type-icon" />;
@@ -107,18 +100,19 @@ const AdminPartners = () => {
 
   const getStatusBadge = (status) => {
     const statusClasses = {
-      pending: 'status-badge pending',
-      approved: 'status-badge approved',
-      rejected: 'status-badge rejected'
+      pending: "status-badge pending",
+      approved: "status-badge approved",
+      rejected: "status-badge rejected",
     };
     return <span className={statusClasses[status]}>{status}</span>;
   };
 
-  const filteredApplications = applications.filter(app => {
-    const matchesFilter = filter === 'all' || app.status === filter;
-    const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         app.business.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredApplications = applications.filter((app) => {
+    const matchesFilter = filter === "all" || app.status === filter;
+    const matchesSearch =
+      app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.business.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -184,26 +178,26 @@ const AdminPartners = () => {
         </div>
         <div className="filter-buttons">
           <button
-            className={filter === 'all' ? 'active' : ''}
-            onClick={() => setFilter('all')}
+            className={filter === "all" ? "active" : ""}
+            onClick={() => setFilter("all")}
           >
             All ({stats.total || 0})
           </button>
           <button
-            className={filter === 'pending' ? 'active' : ''}
-            onClick={() => setFilter('pending')}
+            className={filter === "pending" ? "active" : ""}
+            onClick={() => setFilter("pending")}
           >
             Pending ({stats.pending || 0})
           </button>
           <button
-            className={filter === 'approved' ? 'active' : ''}
-            onClick={() => setFilter('approved')}
+            className={filter === "approved" ? "active" : ""}
+            onClick={() => setFilter("approved")}
           >
             Approved ({stats.approved || 0})
           </button>
           <button
-            className={filter === 'rejected' ? 'active' : ''}
-            onClick={() => setFilter('rejected')}
+            className={filter === "rejected" ? "active" : ""}
+            onClick={() => setFilter("rejected")}
           >
             Rejected ({stats.rejected || 0})
           </button>
@@ -242,16 +236,12 @@ const AdminPartners = () => {
                     {app.partnership_type}
                   </span>
                 </div>
-                <div className="business-name">
-                  {app.business}
-                </div>
+                <div className="business-name">{app.business}</div>
                 <div className="contact-info">
                   <div>{app.email}</div>
                   <div>{app.phone}</div>
                 </div>
-                <div>
-                  {getStatusBadge(app.status)}
-                </div>
+                <div>{getStatusBadge(app.status)}</div>
                 <div className="date">
                   {new Date(app.created_at).toLocaleDateString()}
                 </div>
@@ -263,18 +253,22 @@ const AdminPartners = () => {
                   >
                     <FaEye />
                   </button>
-                  {app.status === 'pending' && (
+                  {app.status === "pending" && (
                     <>
                       <button
                         className="action-btn approve"
-                        onClick={() => updateApplicationStatus(app.id, 'approved')}
+                        onClick={() =>
+                          updateApplicationStatus(app.id, "approved")
+                        }
                         title="Approve"
                       >
                         <FaCheck />
                       </button>
                       <button
                         className="action-btn reject"
-                        onClick={() => updateApplicationStatus(app.id, 'rejected')}
+                        onClick={() =>
+                          updateApplicationStatus(app.id, "rejected")
+                        }
                         title="Reject"
                       >
                         <FaTimes />
@@ -333,7 +327,9 @@ const AdminPartners = () => {
                 <div className="detail-grid">
                   <div>
                     <label>Type:</label>
-                    <span className={`type-badge ${selectedApplication.partnership_type}`}>
+                    <span
+                      className={`type-badge ${selectedApplication.partnership_type}`}
+                    >
                       {selectedApplication.partnership_type}
                     </span>
                   </div>
@@ -343,7 +339,11 @@ const AdminPartners = () => {
                   </div>
                   <div>
                     <label>Applied:</label>
-                    <span>{new Date(selectedApplication.created_at).toLocaleString()}</span>
+                    <span>
+                      {new Date(
+                        selectedApplication.created_at
+                      ).toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -373,17 +373,27 @@ const AdminPartners = () => {
                 </div>
               )}
 
-              {selectedApplication.status === 'pending' && (
+              {selectedApplication.status === "pending" && (
                 <div className="modal-actions">
                   <button
                     className="btn approve"
-                    onClick={() => updateApplicationStatus(selectedApplication.id, 'approved')}
+                    onClick={() =>
+                      updateApplicationStatus(
+                        selectedApplication.id,
+                        "approved"
+                      )
+                    }
                   >
                     <FaCheck /> Approve Application
                   </button>
                   <button
                     className="btn reject"
-                    onClick={() => updateApplicationStatus(selectedApplication.id, 'rejected')}
+                    onClick={() =>
+                      updateApplicationStatus(
+                        selectedApplication.id,
+                        "rejected"
+                      )
+                    }
                   >
                     <FaTimes /> Reject Application
                   </button>

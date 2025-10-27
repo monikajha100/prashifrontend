@@ -1,13 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import { FaSearch, FaUser, FaShoppingBag, FaBars, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import '../live-styles.css';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
+import {
+  FaSearch,
+  FaUser,
+  FaShoppingBag,
+  FaBars,
+  FaTimes,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
+import "../live-styles.css";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [banners, setBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -21,13 +29,13 @@ const Header = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const response = await fetch('/api/promotional-banners');
+        const response = await fetch("/promotional-banners");
         if (response.ok) {
           const data = await response.json();
           setBanners(data);
         }
       } catch (error) {
-        console.error('Error fetching promotional banners:', error);
+        console.error("Error fetching promotional banners:", error);
       }
     };
 
@@ -38,9 +46,7 @@ const Header = () => {
   useEffect(() => {
     if (banners.length > 1) {
       const interval = setInterval(() => {
-        setCurrentBannerIndex((prevIndex) => 
-          (prevIndex + 1) % banners.length
-        );
+        setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
       }, 5000); // Change banner every 5 seconds
 
       return () => clearInterval(interval);
@@ -49,29 +55,27 @@ const Header = () => {
 
   // Manual banner navigation
   const goToPreviousBanner = () => {
-    setCurrentBannerIndex((prevIndex) => 
+    setCurrentBannerIndex((prevIndex) =>
       prevIndex === 0 ? banners.length - 1 : prevIndex - 1
     );
   };
 
   const goToNextBanner = () => {
-    setCurrentBannerIndex((prevIndex) => 
-      (prevIndex + 1) % banners.length
-    );
+    setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+      setSearchQuery("");
       setIsSearchOpen(false);
     }
   };
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   const toggleMenu = () => {
@@ -85,14 +89,14 @@ const Header = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest('.mobile-menu')) {
+      if (isMenuOpen && !event.target.closest(".mobile-menu")) {
         setIsMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isMenuOpen]);
 
@@ -103,12 +107,14 @@ const Header = () => {
         <div className="promotional-banner-slider">
           <div className="banner-slides">
             {banners.map((banner, index) => (
-              <div 
-                key={banner.id} 
-                className={`banner-slide ${index === currentBannerIndex ? 'active' : ''}`}
-                style={{ 
+              <div
+                key={banner.id}
+                className={`banner-slide ${
+                  index === currentBannerIndex ? "active" : ""
+                }`}
+                style={{
                   backgroundColor: banner.background_color,
-                  color: banner.text_color
+                  color: banner.text_color,
                 }}
               >
                 <div className="container">
@@ -130,26 +136,50 @@ const Header = () => {
           <div className="header-content">
             {/* Logo */}
             <Link to="/" className="logo-container">
-              <img src="/logo.png" alt="Praashi by Supal" className="logo-image" />
+              <img
+                src="/logo.png"
+                alt="Praashi by Supal"
+                className="logo-image"
+              />
             </Link>
 
             {/* Navigation */}
             <nav className="navigation d-mobile-none">
-              <Link to="/" className="nav-link active">Home</Link>
-              <Link to="/products?category=necklaces" className="nav-link">Necklace Sets</Link>
-              <Link to="/products?category=earrings" className="nav-link">Earrings</Link>
-              <Link to="/products?category=watches" className="nav-link">Watches</Link>
-              <Link to="/products?category=rings" className="nav-link">Rings</Link>
-              <Link to="/products?category=bracelets" className="nav-link">Bracelets</Link>
-              <Link to="/products?category=fragrance" className="nav-link">Fragrance</Link>
-              <Link to="/partner" className="nav-link partner-link">Become a Partner</Link>
+              <Link to="/" className="nav-link active">
+                Home
+              </Link>
+              <Link to="/products?category=necklaces" className="nav-link">
+                Necklace Sets
+              </Link>
+              <Link to="/products?category=earrings" className="nav-link">
+                Earrings
+              </Link>
+              <Link to="/products?category=watches" className="nav-link">
+                Watches
+              </Link>
+              <Link to="/products?category=rings" className="nav-link">
+                Rings
+              </Link>
+              <Link to="/products?category=bracelets" className="nav-link">
+                Bracelets
+              </Link>
+              <Link to="/products?category=fragrance" className="nav-link">
+                Fragrance
+              </Link>
+              <Link to="/partner" className="nav-link partner-link">
+                Become a Partner
+              </Link>
             </nav>
 
             {/* Header Actions */}
             <div className="header-actions">
               {/* Search */}
               <div className="search-container d-mobile-none">
-                <button className="icon-button" onClick={toggleSearch} aria-label="Search">
+                <button
+                  className="icon-button"
+                  onClick={toggleSearch}
+                  aria-label="Search"
+                >
                   <FaSearch />
                 </button>
                 {isSearchOpen && (
@@ -179,12 +209,20 @@ const Header = () => {
                       <FaUser />
                     </button>
                     <div className="dropdown-menu">
-                      <Link to="/profile" className="dropdown-item">Profile</Link>
-                      <Link to="/orders" className="dropdown-item">My Orders</Link>
-                      {user?.role === 'admin' && (
-                        <Link to="/admin" className="dropdown-item">Admin Panel</Link>
+                      <Link to="/profile" className="dropdown-item">
+                        Profile
+                      </Link>
+                      <Link to="/orders" className="dropdown-item">
+                        My Orders
+                      </Link>
+                      {user?.role === "admin" && (
+                        <Link to="/admin" className="dropdown-item">
+                          Admin Panel
+                        </Link>
                       )}
-                      <button onClick={handleLogout} className="dropdown-item">Logout</button>
+                      <button onClick={handleLogout} className="dropdown-item">
+                        Logout
+                      </button>
                     </div>
                   </div>
                 ) : (
@@ -195,7 +233,11 @@ const Header = () => {
               </div>
 
               {/* Shopping Cart */}
-              <Link to="/cart" className="icon-button cart-button" aria-label="Shopping cart">
+              <Link
+                to="/cart"
+                className="icon-button cart-button"
+                aria-label="Shopping cart"
+              >
                 <FaShoppingBag />
                 {cartItemsCount > 0 && (
                   <span className="cart-badge">{cartItemsCount}</span>
@@ -203,7 +245,11 @@ const Header = () => {
               </Link>
 
               {/* Mobile Menu Toggle */}
-              <button className="mobile-menu-toggle d-mobile-block" onClick={toggleMenu} aria-label="Toggle mobile menu">
+              <button
+                className="mobile-menu-toggle d-mobile-block"
+                onClick={toggleMenu}
+                aria-label="Toggle mobile menu"
+              >
                 {isMenuOpen ? <FaTimes /> : <FaBars />}
               </button>
             </div>
@@ -224,13 +270,17 @@ const Header = () => {
         <div className="mobile-menu active">
           <div className="mobile-menu-header">
             <Link to="/" className="logo-container" onClick={toggleMenu}>
-              <img src="/logo.png" alt="Praashi by Supal" className="logo-image" />
+              <img
+                src="/logo.png"
+                alt="Praashi by Supal"
+                className="logo-image"
+              />
             </Link>
             <button className="icon-button" onClick={toggleMenu}>
               <FaTimes />
             </button>
           </div>
-          
+
           {/* Mobile Search */}
           <div className="mobile-search">
             <form onSubmit={handleSearch} className="mobile-search-form">
@@ -248,32 +298,120 @@ const Header = () => {
           </div>
 
           <div className="mobile-nav-links">
-            {user?.role === 'admin' && (
-              <Link to="/admin" className="mobile-nav-link" onClick={toggleMenu}>Admin Panel</Link>
+            {user?.role === "admin" && (
+              <Link
+                to="/admin"
+                className="mobile-nav-link"
+                onClick={toggleMenu}
+              >
+                Admin Panel
+              </Link>
             )}
-            <Link to="/" className="mobile-nav-link" onClick={toggleMenu}>Home</Link>
-            <Link to="/products?category=necklaces" className="mobile-nav-link" onClick={toggleMenu}>Necklace Sets</Link>
-            <Link to="/products?category=earrings" className="mobile-nav-link" onClick={toggleMenu}>Earrings</Link>
-            <Link to="/products?category=watches" className="mobile-nav-link" onClick={toggleMenu}>Watches</Link>
-            <Link to="/products?category=rings" className="mobile-nav-link" onClick={toggleMenu}>Rings</Link>
-            <Link to="/products?category=bracelets" className="mobile-nav-link" onClick={toggleMenu}>Bracelets</Link>
-            <Link to="/products?category=fragrance" className="mobile-nav-link" onClick={toggleMenu}>Fragrance</Link>
-            <Link to="/partner" className="mobile-nav-link partner-link" onClick={toggleMenu}>Become a Partner</Link>
+            <Link to="/" className="mobile-nav-link" onClick={toggleMenu}>
+              Home
+            </Link>
+            <Link
+              to="/products?category=necklaces"
+              className="mobile-nav-link"
+              onClick={toggleMenu}
+            >
+              Necklace Sets
+            </Link>
+            <Link
+              to="/products?category=earrings"
+              className="mobile-nav-link"
+              onClick={toggleMenu}
+            >
+              Earrings
+            </Link>
+            <Link
+              to="/products?category=watches"
+              className="mobile-nav-link"
+              onClick={toggleMenu}
+            >
+              Watches
+            </Link>
+            <Link
+              to="/products?category=rings"
+              className="mobile-nav-link"
+              onClick={toggleMenu}
+            >
+              Rings
+            </Link>
+            <Link
+              to="/products?category=bracelets"
+              className="mobile-nav-link"
+              onClick={toggleMenu}
+            >
+              Bracelets
+            </Link>
+            <Link
+              to="/products?category=fragrance"
+              className="mobile-nav-link"
+              onClick={toggleMenu}
+            >
+              Fragrance
+            </Link>
+            <Link
+              to="/partner"
+              className="mobile-nav-link partner-link"
+              onClick={toggleMenu}
+            >
+              Become a Partner
+            </Link>
           </div>
-          
+
           {isAuthenticated ? (
             <div className="mobile-user-section">
-              <Link to="/profile" className="mobile-nav-link" onClick={toggleMenu}>Profile</Link>
-              <Link to="/orders" className="mobile-nav-link" onClick={toggleMenu}>My Orders</Link>
-              {user?.role === 'admin' && (
-                <Link to="/admin" className="mobile-nav-link" onClick={toggleMenu}>Admin Panel</Link>
+              <Link
+                to="/profile"
+                className="mobile-nav-link"
+                onClick={toggleMenu}
+              >
+                Profile
+              </Link>
+              <Link
+                to="/orders"
+                className="mobile-nav-link"
+                onClick={toggleMenu}
+              >
+                My Orders
+              </Link>
+              {user?.role === "admin" && (
+                <Link
+                  to="/admin"
+                  className="mobile-nav-link"
+                  onClick={toggleMenu}
+                >
+                  Admin Panel
+                </Link>
               )}
-              <button onClick={() => { handleLogout(); toggleMenu(); }} className="mobile-nav-link">Logout</button>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  toggleMenu();
+                }}
+                className="mobile-nav-link"
+              >
+                Logout
+              </button>
             </div>
           ) : (
             <div className="mobile-user-section">
-              <Link to="/login" className="mobile-nav-link" onClick={toggleMenu}>Login</Link>
-              <Link to="/register" className="mobile-nav-link" onClick={toggleMenu}>Register</Link>
+              <Link
+                to="/login"
+                className="mobile-nav-link"
+                onClick={toggleMenu}
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="mobile-nav-link"
+                onClick={toggleMenu}
+              >
+                Register
+              </Link>
             </div>
           )}
         </div>

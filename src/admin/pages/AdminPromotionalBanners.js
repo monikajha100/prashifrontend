@@ -1,6 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaEye, FaEyeSlash, FaBullhorn } from 'react-icons/fa';
-import './AdminPromotionalBanners.css';
+import React, { useState, useEffect } from "react";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaToggleOn,
+  FaToggleOff,
+  FaEye,
+  FaEyeSlash,
+  FaBullhorn,
+} from "react-icons/fa";
+import "./AdminPromotionalBanners.css";
+import api from "../../services/api";
 
 const AdminPromotionalBanners = () => {
   const [banners, setBanners] = useState([]);
@@ -9,44 +19,50 @@ const AdminPromotionalBanners = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null);
   const [formData, setFormData] = useState({
-    text: '',
-    background_color: '#000000',
-    text_color: '#FFFFFF',
+    text: "",
+    background_color: "#000000",
+    text_color: "#FFFFFF",
     sort_order: 0,
     display_duration: 5000,
-    is_active: true
+    is_active: true,
   });
 
   // Fetch promotional banners
   const fetchBanners = async () => {
     try {
-      console.log('Fetching promotional banners from /api/admin/promotional-banners/admin');
-      const response = await fetch('/api/admin/promotional-banners/admin');
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
+      console.log(
+        "Fetching promotional banners from /api/admin/promotional-banners/admin"
+      );
+      const response = await api.get("/api/admin/promotional-banners/admin");
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
       if (response.ok) {
         const text = await response.text();
-        console.log('Raw response text:', text.substring(0, 200));
-        
+        console.log("Raw response text:", text.substring(0, 200));
+
         try {
           const data = JSON.parse(text);
-          console.log('Parsed data:', data);
+          console.log("Parsed data:", data);
           setBanners(data);
         } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.error('Response text that failed to parse:', text);
-          setError('Failed to parse response from server');
+          console.error("JSON parse error:", parseError);
+          console.error("Response text that failed to parse:", text);
+          setError("Failed to parse response from server");
         }
       } else {
         const errorText = await response.text();
-        console.error('Failed to fetch promotional banners:', response.status, response.statusText);
-        console.error('Error response:', errorText);
+        console.error(
+          "Failed to fetch promotional banners:",
+          response.status,
+          response.statusText
+        );
+        console.error("Error response:", errorText);
         setError(`Server error: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
-      console.error('Error fetching promotional banners:', error);
-      setError('Network error: Unable to connect to server');
+      console.error("Error fetching promotional banners:", error);
+      setError("Network error: Unable to connect to server");
     } finally {
       setLoading(false);
     }
@@ -60,16 +76,16 @@ const AdminPromotionalBanners = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const url = editingBanner 
+      const url = editingBanner
         ? `/api/admin/promotional-banners/${editingBanner.id}`
-        : '/api/admin/promotional-banners';
-      
-      const method = editingBanner ? 'PUT' : 'POST';
-      
+        : "/api/admin/promotional-banners";
+
+      const method = editingBanner ? "PUT" : "POST";
+
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -78,17 +94,17 @@ const AdminPromotionalBanners = () => {
         setShowModal(false);
         setEditingBanner(null);
         setFormData({
-          text: '',
-          background_color: '#000000',
-          text_color: '#FFFFFF',
+          text: "",
+          background_color: "#000000",
+          text_color: "#FFFFFF",
           sort_order: 0,
           display_duration: 5000,
-          is_active: true
+          is_active: true,
         });
         fetchBanners();
       }
     } catch (error) {
-      console.error('Error saving promotional banner:', error);
+      console.error("Error saving promotional banner:", error);
     }
   };
 
@@ -97,28 +113,30 @@ const AdminPromotionalBanners = () => {
     setEditingBanner(banner);
     setFormData({
       text: banner.text,
-      background_color: banner.background_color || '#000000',
-      text_color: banner.text_color || '#FFFFFF',
+      background_color: banner.background_color || "#000000",
+      text_color: banner.text_color || "#FFFFFF",
       sort_order: banner.sort_order || 0,
       display_duration: banner.display_duration || 5000,
-      is_active: banner.is_active
+      is_active: banner.is_active,
     });
     setShowModal(true);
   };
 
   // Handle delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this promotional banner?')) {
+    if (
+      window.confirm("Are you sure you want to delete this promotional banner?")
+    ) {
       try {
         const response = await fetch(`/api/admin/promotional-banners/${id}`, {
-          method: 'DELETE',
+          method: "DELETE",
         });
 
         if (response.ok) {
           fetchBanners();
         }
       } catch (error) {
-        console.error('Error deleting promotional banner:', error);
+        console.error("Error deleting promotional banner:", error);
       }
     }
   };
@@ -126,24 +144,27 @@ const AdminPromotionalBanners = () => {
   // Handle toggle active status
   const handleToggleActive = async (id) => {
     try {
-      const response = await fetch(`/api/admin/promotional-banners/${id}/toggle`, {
-        method: 'PATCH',
-      });
+      const response = await fetch(
+        `/api/admin/promotional-banners/${id}/toggle`,
+        {
+          method: "PATCH",
+        }
+      );
 
       if (response.ok) {
         fetchBanners();
       }
     } catch (error) {
-      console.error('Error toggling promotional banner status:', error);
+      console.error("Error toggling promotional banner status:", error);
     }
   };
 
   // Handle input change
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -151,12 +172,12 @@ const AdminPromotionalBanners = () => {
   const openNewBannerModal = () => {
     setEditingBanner(null);
     setFormData({
-      text: '',
-      background_color: '#000000',
-      text_color: '#FFFFFF',
+      text: "",
+      background_color: "#000000",
+      text_color: "#FFFFFF",
       sort_order: 0,
       display_duration: 5000,
-      is_active: true
+      is_active: true,
     });
     setShowModal(true);
   };
@@ -175,7 +196,9 @@ const AdminPromotionalBanners = () => {
         <div className="error">
           <h2>Error Loading Promotional Banners</h2>
           <p>{error}</p>
-          <button onClick={fetchBanners} className="btn-primary">Retry</button>
+          <button onClick={fetchBanners} className="btn-primary">
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -190,7 +213,9 @@ const AdminPromotionalBanners = () => {
             <h1>Promotional Banners</h1>
           </div>
           <p className="header-description">
-            Manage promotional banners that appear in the website header. These banners rotate automatically and can include links to specific pages.
+            Manage promotional banners that appear in the website header. These
+            banners rotate automatically and can include links to specific
+            pages.
           </p>
         </div>
         <button className="btn-primary" onClick={openNewBannerModal}>
@@ -200,11 +225,18 @@ const AdminPromotionalBanners = () => {
 
       <div className="banners-grid">
         {banners.map((banner) => (
-          <div key={banner.id} className={`banner-card ${!banner.is_active ? 'inactive' : ''}`}>
-            <div className="banner-preview" style={{ backgroundColor: banner.background_color, color: banner.text_color }}>
-              <div className="banner-text-preview">
-                {banner.text}
-              </div>
+          <div
+            key={banner.id}
+            className={`banner-card ${!banner.is_active ? "inactive" : ""}`}
+          >
+            <div
+              className="banner-preview"
+              style={{
+                backgroundColor: banner.background_color,
+                color: banner.text_color,
+              }}
+            >
+              <div className="banner-text-preview">{banner.text}</div>
               <div className="banner-overlay">
                 <div className="banner-status">
                   {banner.is_active ? (
@@ -219,45 +251,53 @@ const AdminPromotionalBanners = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="banner-content">
               <h3>{banner.text}</h3>
               <div className="banner-colors">
                 <div className="color-info">
                   <span className="color-label">Background:</span>
-                  <span className="color-value" style={{ backgroundColor: banner.background_color }}></span>
+                  <span
+                    className="color-value"
+                    style={{ backgroundColor: banner.background_color }}
+                  ></span>
                   <span className="color-text">{banner.background_color}</span>
                 </div>
                 <div className="color-info">
                   <span className="color-label">Text:</span>
-                  <span className="color-value" style={{ backgroundColor: banner.text_color }}></span>
+                  <span
+                    className="color-value"
+                    style={{ backgroundColor: banner.text_color }}
+                  ></span>
                   <span className="color-text">{banner.text_color}</span>
                 </div>
               </div>
               <div className="banner-meta">
                 <span>Order: {banner.sort_order}</span>
                 <span>Duration: {banner.display_duration}ms</span>
-                <span>Created: {new Date(banner.created_at).toLocaleDateString()}</span>
+                <span>
+                  Created: {new Date(banner.created_at).toLocaleDateString()}
+                </span>
               </div>
             </div>
 
             <div className="banner-actions">
-              <button 
-                className="btn-toggle" 
+              <button
+                className="btn-toggle"
                 onClick={() => handleToggleActive(banner.id)}
-                title={banner.is_active ? 'Deactivate' : 'Activate'}
+                title={banner.is_active ? "Deactivate" : "Activate"}
               >
                 {banner.is_active ? <FaToggleOn /> : <FaToggleOff />}
               </button>
-              <button 
-                className="btn-edit" 
+              <button
+                className="btn-edit"
                 onClick={() => handleEdit(banner)}
                 title="Edit Banner"
               >
                 <FaEdit />
               </button>
-              <button 
-                className="btn-delete" 
+              <button
+                className="btn-delete"
                 onClick={() => handleDelete(banner.id)}
                 title="Delete Banner"
               >
@@ -272,7 +312,9 @@ const AdminPromotionalBanners = () => {
         <div className="no-banners">
           <FaBullhorn className="no-banners-icon" />
           <h3>No Promotional Banners</h3>
-          <p>Create your first promotional banner to start promoting your offers!</p>
+          <p>
+            Create your first promotional banner to start promoting your offers!
+          </p>
           <button className="btn-primary" onClick={openNewBannerModal}>
             <FaPlus /> Create First Banner
           </button>
@@ -284,8 +326,15 @@ const AdminPromotionalBanners = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingBanner ? 'Edit Promotional Banner' : 'Add New Promotional Banner'}</h2>
-              <button className="modal-close" onClick={() => setShowModal(false)}>
+              <h2>
+                {editingBanner
+                  ? "Edit Promotional Banner"
+                  : "Add New Promotional Banner"}
+              </h2>
+              <button
+                className="modal-close"
+                onClick={() => setShowModal(false)}
+              >
                 ×
               </button>
             </div>
@@ -354,7 +403,9 @@ const AdminPromotionalBanners = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="display_duration">Display Duration (ms)</label>
+                  <label htmlFor="display_duration">
+                    Display Duration (ms)
+                  </label>
                   <input
                     type="number"
                     id="display_duration"
@@ -384,11 +435,15 @@ const AdminPromotionalBanners = () => {
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary">
-                  {editingBanner ? 'Update Banner' : 'Create Banner'}
+                  {editingBanner ? "Update Banner" : "Create Banner"}
                 </button>
               </div>
             </form>

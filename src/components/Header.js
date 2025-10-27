@@ -31,10 +31,8 @@ const Header = () => {
     const fetchBanners = async () => {
       try {
         const response = await api.get("/promotional-banners");
-        if (response.ok) {
-          const data = await response.json();
-          setBanners(data);
-        }
+        const data = response.data;
+        setBanners(data);
       } catch (error) {
         console.error("Error fetching promotional banners:", error);
       }

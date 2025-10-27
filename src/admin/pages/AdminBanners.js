@@ -37,24 +37,8 @@ const AdminBanners = () => {
     try {
       console.log("Fetching banners from /api/admin/banners/admin");
       const response = await api.get("/admin/banners/admin");
-      if (response.ok) {
-        const data = await response.data;
-        try {
-          setBanners(data);
-        } catch (error) {
-          console.error("Error parsing banners:", error);
-          setError("Failed to parse banners data");
-        }
-      } else {
-        const errorText = await response.text();
-        console.error(
-          "Failed to fetch banners:",
-          response.status,
-          response.statusText
-        );
-        console.error("Error response:", errorText);
-        setError(`Server error: ${response.status} ${response.statusText}`);
-      }
+      const data = response.data;
+      setBanners(data);
     } catch (error) {
       console.error("Error fetching banners:", error);
       setError("Network error: Unable to connect to server");
@@ -76,15 +60,11 @@ const AdminBanners = () => {
 
       const response = await api.post("/upload/banner", formData);
 
-      if (response.ok) {
-        const data = await response.data;
-        setFormData((prev) => ({
-          ...prev,
-          [type]: data.imageUrl,
-        }));
-      } else {
-        alert("Failed to upload image");
-      }
+      const data = response.data;
+      setFormData((prev) => ({
+        ...prev,
+        [type]: data.imageUrl,
+      }));
     } catch (error) {
       console.error("Error uploading image:", error);
       alert("Error uploading image");

@@ -188,7 +188,7 @@ const Home = () => {
   useEffect(() => {
     const fetchSpecialOffers = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL.replace('/api', '')}/api/special-offers`);
+        const response = await axios.get(`/special-offers`);
         console.log('Special Offers Response:', response.data);
         setSpecialOffers(response.data || []);
       } catch (error) {

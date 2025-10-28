@@ -8,8 +8,6 @@ import {
   FaShoppingBag,
   FaBars,
   FaTimes,
-  FaChevronLeft,
-  FaChevronRight,
 } from "react-icons/fa";
 import "../live-styles.css";
 import api from "../services/api";
@@ -52,17 +50,6 @@ const Header = () => {
     }
   }, [banners.length]);
 
-  // Manual banner navigation
-  const goToPreviousBanner = () => {
-    setCurrentBannerIndex((prevIndex) =>
-      prevIndex === 0 ? banners.length - 1 : prevIndex - 1
-    );
-  };
-
-  const goToNextBanner = () => {
-    setCurrentBannerIndex((prevIndex) => (prevIndex + 1) % banners.length);
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -78,6 +65,7 @@ const Header = () => {
   };
 
   const toggleMenu = () => {
+    console.log("Toggling menu. Current state:", isMenuOpen);
     setIsMenuOpen(!isMenuOpen);
   };
 
@@ -88,7 +76,8 @@ const Header = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest(".mobile-menu")) {
+      if (isMenuOpen && !event.target.closest(".mobile-menu") && !event.target.closest(".mobile-menu-toggle")) {
+        console.log("Click outside detected, closing menu");
         setIsMenuOpen(false);
       }
     };
@@ -97,6 +86,19 @@ const Header = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, [isMenuOpen]);
+
+  // Close mobile menu on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && isMenuOpen) {
+        console.log("Window resized to desktop, closing menu");
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [isMenuOpen]);
 
   return (
@@ -248,6 +250,7 @@ const Header = () => {
                 className="mobile-menu-toggle d-mobile-block"
                 onClick={toggleMenu}
                 aria-label="Toggle mobile menu"
+                aria-expanded={isMenuOpen}
               >
                 {isMenuOpen ? <FaTimes /> : <FaBars />}
               </button>
@@ -261,12 +264,12 @@ const Header = () => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="mobile-menu-overlay active" onClick={toggleMenu}></div>
+        <div className="mobile-menu-overlay active" onClick={toggleMenu} aria-hidden="true"></div>
       )}
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="mobile-menu active">
+        <div className="mobile-menu active" role="dialog" aria-label="Mobile navigation menu">
           <div className="mobile-menu-header">
             <Link to="/" className="logo-container" onClick={toggleMenu}>
               <img
@@ -275,14 +278,17 @@ const Header = () => {
                 className="logo-image"
               />
             </Link>
-            <button className="icon-button" onClick={toggleMenu}>
+            <button className="icon-button" onClick={toggleMenu} aria-label="Close menu">
               <FaTimes />
             </button>
           </div>
 
           {/* Mobile Search */}
           <div className="mobile-search">
-            <form onSubmit={handleSearch} className="mobile-search-form">
+            <form onSubmit={(e) => {
+              handleSearch(e);
+              toggleMenu();
+            }} className="mobile-search-form">
               <input
                 type="text"
                 placeholder="Search products..."

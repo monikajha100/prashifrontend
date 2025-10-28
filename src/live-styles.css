@@ -689,6 +689,7 @@ img {
   align-items: center;
   gap: 15px;
   position: relative;
+  min-height: 44px; /* Ensure touch target size */
 }
 
 .mobile-nav-link:hover {
@@ -706,6 +707,7 @@ img {
   border: none;
   margin-top: 20px;
   justify-content: center;
+  min-height: 44px; /* Ensure touch target size */
 }
 
 .mobile-nav-link.partner-link:hover {
@@ -734,6 +736,7 @@ img {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease;
+  min-height: 44px; /* Ensure touch target size */
 }
 
 .mobile-search-input:focus {
@@ -772,6 +775,7 @@ img {
   border-bottom: none;
   padding: 15px 0;
   font-size: 1rem;
+  min-height: 44px; /* Ensure touch target size */
 }
 
 .mobile-user-section .mobile-nav-link:hover {
@@ -795,6 +799,7 @@ img {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
+  touch-action: manipulation; /* Improve touch response */
 }
 
 .mobile-menu-toggle:hover {
@@ -804,6 +809,71 @@ img {
 
 .mobile-menu-toggle:active {
   transform: scale(0.95);
+}
+
+/* Display utility classes for responsive behavior */
+.d-mobile-none {
+  display: none;
+}
+
+.d-mobile-block {
+  display: block;
+}
+
+/* Ensure mobile menu toggle is visible on mobile */
+@media (max-width: 768px) {
+  .navigation {
+    display: none !important;
+  }
+  
+  .d-mobile-block {
+    display: block !important;
+  }
+  
+  .d-mobile-none {
+    display: none !important;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex !important; /* Force display on mobile */
+  }
+}
+
+/* Improve mobile menu visibility and usability */
+@media (max-width: 480px) {
+  .mobile-menu {
+    padding: 15px;
+  }
+  
+  .mobile-menu-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+  }
+  
+  .mobile-nav-links {
+    gap: 0;
+    margin-bottom: 20px;
+  }
+  
+  .mobile-nav-link {
+    padding: 15px 0;
+    font-size: 1rem;
+  }
+  
+  .mobile-search {
+    margin-bottom: 20px;
+    padding: 15px 0;
+  }
+  
+  .mobile-user-section {
+    padding-top: 15px;
+    gap: 10px;
+  }
+  
+  .mobile-user-section .mobile-nav-link {
+    padding: 12px 0;
+    font-size: 0.95rem;
+  }
 }
 
 /* Promotional Offers Section - Light Pink/Peach Design */

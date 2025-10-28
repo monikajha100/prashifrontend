@@ -67,11 +67,11 @@ const AdminBanners = () => {
       const data = response.data;
       setFormData((prev) => ({
         ...prev,
-        [type]: data.imageUrl,
+        [type]: data.url,
       }));
     } catch (error) {
       console.error("Error uploading image:", error);
-      alert("Error uploading image");
+      alert("Error uploading image: " + (error.response?.data?.message || error.message));
     } finally {
       setUploading(false);
     }
@@ -83,21 +83,14 @@ const AdminBanners = () => {
     try {
       let response;
       if (editingBanner) {
+        // Fix: Remove multipart/form-data header for JSON data
         response = await api.put(
           `/admin/banners/${editingBanner.id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
+          formData
         );
       } else {
-        response = await api.post("/admin/banners", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        // Fix: Remove multipart/form-data header for JSON data
+        response = await api.post("/admin/banners", formData);
       }
 
       setShowModal(false);
@@ -106,14 +99,19 @@ const AdminBanners = () => {
         title: "",
         subtitle: "",
         image: "",
+        mobile_title: "",
+        mobile_subtitle: "",
+        mobile_image: "",
         link_url: "",
         button_text: "",
         sort_order: 0,
+        device_type: "both",
         is_active: true,
       });
       fetchBanners();
     } catch (error) {
       console.error("Error saving banner:", error);
+      alert("Error saving banner: " + (error.response?.data?.message || error.message));
     }
   };
 

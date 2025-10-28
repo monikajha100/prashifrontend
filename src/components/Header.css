@@ -505,7 +505,7 @@
   }
   
   .mobile-menu-toggle {
-    display: block;
+    display: flex;
   }
   
   .header-content {

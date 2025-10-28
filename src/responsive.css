@@ -83,10 +83,6 @@
     display: none;
   }
   
-  .mobile-menu-toggle {
-    display: block;
-  }
-  
   .mobile-menu {
     position: fixed;
     top: 0;
@@ -297,10 +293,6 @@
   /* Navigation */
   .navigation {
     display: flex;
-  }
-  
-  .mobile-menu-toggle {
-    display: none;
   }
   
   /* Product Grid */

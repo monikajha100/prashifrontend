@@ -795,7 +795,6 @@ img {
   transition: all 0.3s ease;
   min-width: 44px;
   min-height: 44px;
-  display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
@@ -809,15 +808,6 @@ img {
 
 .mobile-menu-toggle:active {
   transform: scale(0.95);
-}
-
-/* Display utility classes for responsive behavior */
-.d-mobile-none {
-  display: none;
-}
-
-.d-mobile-block {
-  display: block;
 }
 
 /* Ensure mobile menu toggle is visible on mobile */
@@ -1450,7 +1440,7 @@ img {
   }
   
   .mobile-menu-toggle {
-    display: block;
+    display: flex;
   }
   
   .header-content {

@@ -64,7 +64,8 @@ const Header = () => {
     navigate("/");
   };
 
-  const toggleMenu = () => {
+  const toggleMenu = (e) => {
+    e.stopPropagation();
     console.log("Toggling menu. Current state:", isMenuOpen);
     setIsMenuOpen(!isMenuOpen);
   };
@@ -116,6 +117,14 @@ const Header = () => {
       document.body.style.overflow = 'unset';
     };
   }, [isMenuOpen]);
+
+  // Handle mobile menu item clicks
+  const handleMobileMenuItemClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Mobile menu item clicked");
+    setIsMenuOpen(false);
+  };
 
   return (
     <header className="header">
@@ -287,7 +296,7 @@ const Header = () => {
       {isMenuOpen && (
         <div className="mobile-menu active" role="dialog" aria-label="Mobile navigation menu">
           <div className="mobile-menu-header">
-            <Link to="/" className="logo-container" onClick={toggleMenu}>
+            <Link to="/" className="logo-container" onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/');}}>
               <img
                 src="/logo.png"
                 alt="Praashi by Supal"
@@ -304,7 +313,7 @@ const Header = () => {
             <form onSubmit={(e) => {
               e.preventDefault();
               handleSearch(e);
-              toggleMenu();
+              setIsMenuOpen(false);
             }} className="mobile-search-form">
               <input
                 type="text"
@@ -324,60 +333,60 @@ const Header = () => {
               <Link
                 to="/admin"
                 className="mobile-nav-link"
-                onClick={toggleMenu}
+                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/admin');}}
               >
                 Admin Panel
               </Link>
             )}
-            <Link to="/" className="mobile-nav-link" onClick={toggleMenu}>
+            <Link to="/" className="mobile-nav-link" onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/');}}>
               Home
             </Link>
             <Link
               to="/products?category=necklaces"
               className="mobile-nav-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=necklaces');}}
             >
               Necklace Sets
             </Link>
             <Link
               to="/products?category=earrings"
               className="mobile-nav-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=earrings');}}
             >
               Earrings
             </Link>
             <Link
               to="/products?category=watches"
               className="mobile-nav-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=watches');}}
             >
               Watches
             </Link>
             <Link
               to="/products?category=rings"
               className="mobile-nav-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=rings');}}
             >
               Rings
             </Link>
             <Link
               to="/products?category=bracelets"
               className="mobile-nav-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=bracelets');}}
             >
               Bracelets
             </Link>
             <Link
               to="/products?category=fragrance"
               className="mobile-nav-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=fragrance');}}
             >
               Fragrance
             </Link>
             <Link
               to="/partner"
               className="mobile-nav-link partner-link"
-              onClick={toggleMenu}
+              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/partner');}}
             >
               Become a Partner
             </Link>
@@ -388,14 +397,14 @@ const Header = () => {
               <Link
                 to="/profile"
                 className="mobile-nav-link"
-                onClick={toggleMenu}
+                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/profile');}}
               >
                 Profile
               </Link>
               <Link
                 to="/orders"
                 className="mobile-nav-link"
-                onClick={toggleMenu}
+                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/orders');}}
               >
                 My Orders
               </Link>
@@ -403,7 +412,7 @@ const Header = () => {
                 <Link
                   to="/admin"
                   className="mobile-nav-link"
-                  onClick={toggleMenu}
+                  onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/admin');}}
                 >
                   Admin Panel
                 </Link>
@@ -411,7 +420,7 @@ const Header = () => {
               <button
                 onClick={() => {
                   handleLogout();
-                  toggleMenu();
+                  setIsMenuOpen(false);
                 }}
                 className="mobile-nav-link"
               >
@@ -423,14 +432,14 @@ const Header = () => {
               <Link
                 to="/login"
                 className="mobile-nav-link"
-                onClick={toggleMenu}
+                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/login');}}
               >
                 Login
               </Link>
               <Link
                 to="/register"
                 className="mobile-nav-link"
-                onClick={toggleMenu}
+                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/register');}}
               >
                 Register
               </Link>

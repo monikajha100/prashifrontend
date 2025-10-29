@@ -118,6 +118,13 @@ const CategorySlider = () => {
                   <Link 
                     to={`/products?category=${category.slug}`}
                     className="collection-card"
+                    onClick={(e) => {
+                      // Ensure proper navigation on mobile
+                      if (window.innerWidth <= 768) {
+                        e.preventDefault();
+                        window.location.href = `/products?category=${category.slug}`;
+                      }
+                    }}
                   >
                     <div className="collection-icon">
                       {category.image ? (
@@ -131,6 +138,10 @@ const CategorySlider = () => {
                             if (e.target.nextElementSibling) {
                               e.target.nextElementSibling.style.display = 'inline';
                             }
+                          }}
+                          onLoad={(e) => {
+                            // Ensure image is visible when loaded
+                            e.target.style.display = 'block';
                           }}
                         />
                       ) : null}

@@ -1897,6 +1897,16 @@ img {
     min-height: 44px;
     touch-action: manipulation;
   }
+  
+  /* Ensure form elements are touch-friendly */
+  input, textarea, select, button {
+    touch-action: manipulation;
+  }
+  
+  /* Ensure links are touch-friendly */
+  a {
+    touch-action: manipulation;
+  }
 }
 
 /* Prevent zoom on input focus for mobile */

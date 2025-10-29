@@ -23,12 +23,14 @@ const CategorySlider = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setItemsPerView(2);
+      if (window.innerWidth < 480) {
+        setItemsPerView(1); // Show 1 item on very small screens
+      } else if (window.innerWidth < 768) {
+        setItemsPerView(2); // Show 2 items on mobile
       } else if (window.innerWidth < 1024) {
-        setItemsPerView(3);
+        setItemsPerView(3); // Show 3 items on tablets
       } else {
-        setItemsPerView(4);
+        setItemsPerView(4); // Show 4 items on desktop
       }
     };
 
@@ -96,6 +98,7 @@ const CategorySlider = () => {
             className={`slider-btn prev-btn ${!canGoPrev ? 'disabled' : ''}`}
             onClick={prevSlide}
             disabled={!canGoPrev}
+            aria-label="Previous collections"
           >
             ‹
           </button>
@@ -111,31 +114,34 @@ const CategorySlider = () => {
               {categories.map((category) => {
                 console.log('Category:', category.name, 'Image:', category.image, 'Absolute URL:', category.image ? toAbsoluteImageUrl(category.image) : 'No image');
                 return (
-                <Link 
-                  key={category.id} 
-                  to={`/products?category=${category.slug}`}
-                  className="collection-card"
-                >
-                  <div className="collection-icon">
-                    {category.image ? (
-                      <img 
-                        src={toAbsoluteImageUrl(category.image)} 
-                        alt={category.name}
-                        className="category-image"
-                        onError={(e) => {
-                          console.error('Image failed to load:', category.image, '->', toAbsoluteImageUrl(category.image));
-                          e.target.style.display = 'none';
-                          e.target.nextElementSibling.style.display = 'inline';
-                        }}
-                      />
-                    ) : null}
-                    <span className="default-icon" style={{display: category.image ? 'none' : 'inline'}}>💎</span>
-                  </div>
-                  <h3 className="collection-name">{category.name}</h3>
-                  <p className="collection-subtitle">
-                    {category.description || 'Explore Collection'}
-                  </p>
-                </Link>
+                <div key={category.id} className="collection-card-wrapper" style={{ flex: `0 0 ${100 / itemsPerView}%` }}>
+                  <Link 
+                    to={`/products?category=${category.slug}`}
+                    className="collection-card"
+                  >
+                    <div className="collection-icon">
+                      {category.image ? (
+                        <img 
+                          src={toAbsoluteImageUrl(category.image)} 
+                          alt={category.name}
+                          className="category-image"
+                          onError={(e) => {
+                            console.error('Image failed to load:', category.image, '->', toAbsoluteImageUrl(category.image));
+                            e.target.style.display = 'none';
+                            if (e.target.nextElementSibling) {
+                              e.target.nextElementSibling.style.display = 'inline';
+                            }
+                          }}
+                        />
+                      ) : null}
+                      <span className="default-icon" style={{display: category.image ? 'none' : 'inline'}}>💎</span>
+                    </div>
+                    <h3 className="collection-name">{category.name}</h3>
+                    <p className="collection-subtitle">
+                      {category.description || 'Explore Collection'}
+                    </p>
+                  </Link>
+                </div>
                 );
               })}
             </div>
@@ -145,6 +151,7 @@ const CategorySlider = () => {
             className={`slider-btn next-btn ${!canGoNext ? 'disabled' : ''}`}
             onClick={nextSlide}
             disabled={!canGoNext}
+            aria-label="Next collections"
           >
             ›
           </button>
@@ -157,6 +164,7 @@ const CategorySlider = () => {
                 key={index}
                 className={`dot ${Math.floor(currentIndex / itemsPerView) === index ? 'active' : ''}`}
                 onClick={() => setCurrentIndex(index * itemsPerView)}
+                aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>

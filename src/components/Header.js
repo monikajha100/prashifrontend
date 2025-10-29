@@ -76,7 +76,10 @@ const Header = () => {
   // Close mobile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMenuOpen && !event.target.closest(".mobile-menu") && !event.target.closest(".mobile-menu-toggle")) {
+      // Check if click is outside mobile menu and not on the toggle button
+      if (isMenuOpen && 
+          !event.target.closest(".mobile-menu") && 
+          !event.target.closest(".mobile-menu-toggle")) {
         console.log("Click outside detected, closing menu");
         setIsMenuOpen(false);
       }
@@ -99,6 +102,19 @@ const Header = () => {
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, [isMenuOpen]);
+
+  // Ensure body scroll is locked when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, [isMenuOpen]);
 
   return (
@@ -136,7 +152,7 @@ const Header = () => {
         <div className="container">
           <div className="header-content">
             {/* Logo */}
-            <Link to="/" className="logo-container">
+            <Link to="/" className="logo-container" onClick={() => setIsMenuOpen(false)}>
               <img
                 src="/logo.png"
                 alt="Praashi by Supal"
@@ -286,6 +302,7 @@ const Header = () => {
           {/* Mobile Search */}
           <div className="mobile-search">
             <form onSubmit={(e) => {
+              e.preventDefault();
               handleSearch(e);
               toggleMenu();
             }} className="mobile-search-form">

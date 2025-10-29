@@ -272,22 +272,11 @@ img {
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
 }
 
 .logo-icon {
   width: 2.5rem;
   height: 2.5rem;
-  background: var(--theme-gradient);
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  color: var(--white);
-  font-weight: 700;
-  box-shadow: var(--theme-shadow-light);
-  transition: all 0.3s ease;
 }
 
 .logo-icon:hover {
@@ -300,20 +289,74 @@ img {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--brand-charcoal);
-  transition: color 0.3s ease;
+  margin-left: 10px;
+  text-decoration: none;
 }
 
 /* Enhanced Footer Logo */
 .footer-logo-container .logo-icon {
   width: 3.75rem;
   height: 3.75rem;
-  font-size: 1.8rem;
-  box-shadow: var(--theme-shadow);
 }
 
 .footer-logo-container .logo-text {
   font-size: 2rem;
   color: var(--white);
+}
+
+/* Main Header Logo */
+.logo-image {
+  height: 90px;
+  width: auto;
+}
+
+.logo-image:hover {
+  transform: scale(1.05);
+}
+
+.logo-text {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--brand-charcoal);
+  margin-left: 10px;
+  text-decoration: none;
+}
+
+.mobile-menu-header .logo-image {
+  height: 70px; /* Increased from 50px to 70px for better visibility */
+  width: auto;
+}
+
+/* Responsive Logo Sizes */
+@media (max-width: 768px) {
+  .logo-image {
+    height: 70px; /* Increased from 50px to 70px for better visibility */
+  }
+  
+  .logo-text {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-image {
+    height: 60px; /* Increased from 45px to 60px for better visibility */
+  }
+  
+  .logo-text {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo-image {
+    height: 50px; /* Increased from 40px to 50px for better visibility */
+  }
+  
+  .logo-text {
+    font-size: 1.1rem;
+  }
 }
 
 /* Theme Button Styles */
@@ -1845,6 +1888,13 @@ img {
   }
   
   .mobile-menu-overlay {
+    touch-action: manipulation;
+  }
+  
+  /* Ensure slider buttons are touch-friendly on mobile */
+  .slider-btn {
+    min-width: 44px;
+    min-height: 44px;
     touch-action: manipulation;
   }
 }

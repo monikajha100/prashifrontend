@@ -148,6 +148,100 @@
   color: #6b7280;
 }
 
+/* Coupon Section Styles */
+.coupon-section {
+  margin-top: 16px;
+}
+
+.coupon-input-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.coupon-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.coupon-input:focus {
+  outline: none;
+  border-color: #1A362B;
+  box-shadow: 0 0 0 3px rgba(26, 54, 43, 0.1);
+}
+
+.btn-apply-coupon {
+  padding: 12px 20px;
+  background: #1A362B;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-apply-coupon:hover:not(:disabled) {
+  background: #0f2419;
+}
+
+.btn-apply-coupon:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.coupon-applied {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.coupon-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coupon-code {
+  font-weight: 600;
+  color: #1A362B;
+}
+
+.discount-amount {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.btn-remove-coupon {
+  padding: 8px 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-remove-coupon:hover {
+  background: #dc2626;
+}
+
+.coupon-error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
 .checkout-actions {
   display: flex;
   gap: 12px;
@@ -276,6 +370,10 @@
   align-items: center;
   padding: 8px 0;
   font-size: 14px;
+}
+
+.summary-row.discount {
+  color: #dc2626;
 }
 
 .summary-row.total {
@@ -408,6 +506,16 @@
   .payment-desc {
     font-size: 12px;
   }
+  
+  /* Coupon section mobile styles */
+  .coupon-input-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn-apply-coupon {
+    width: 100%;
+  }
 }
 
 /* Small Mobile Devices */
@@ -480,5 +588,17 @@
     font-size: 15px;
     padding-top: 12px;
     margin-top: 8px;
+  }
+  
+  .coupon-applied {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .coupon-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 }

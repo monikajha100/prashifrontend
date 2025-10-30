@@ -18,6 +18,9 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [cartTotals, setCartTotals] = useState({});
+  const [couponCode, setCouponCode] = useState('');
+  const [couponData, setCouponData] = useState(null);
+  const [couponError, setCouponError] = useState('');
 
   // Calculate cart totals from items
   const calculateCartTotals = (items) => {
@@ -118,6 +121,47 @@ const Checkout = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Validate coupon
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/coupons/validate/${couponCode}?orderAmount=${cartTotals.totalAmount}`);
+      const data = await response.json();
+      
+      if (data.valid) {
+        setCouponData(data.coupon);
+        setCouponError('');
+        // Update cart totals with discount
+        const discountAmount = data.coupon.discount_amount;
+        const newTotal = cartTotals.totalAmount - discountAmount;
+        setCartTotals(prev => ({
+          ...prev,
+          totalAmount: newTotal
+        }));
+      } else {
+        setCouponData(null);
+        setCouponError(data.message || 'Invalid coupon code');
+      }
+    } catch (error) {
+      console.error('Error validating coupon:', error);
+      setCouponError('Error validating coupon. Please try again.');
+    }
+  };
+
+  // Remove coupon
+  const removeCoupon = () => {
+    setCouponCode('');
+    setCouponData(null);
+    setCouponError('');
+    // Reset cart totals to original
+    const totals = calculateCartTotals(cartItems);
+    setCartTotals(totals);
   };
 
   const initiateRazorpayPayment = async (orderData) => {
@@ -312,8 +356,15 @@ const Checkout = () => {
         taxAmount: totals.taxAmount,
         shippingAmount: totals.shippingAmount,
         totalAmount: totals.totalAmount,
+        discountAmount: couponData ? couponData.discount_amount : 0,
         notes: formData.notes
       };
+
+      // Add coupon data if available
+      if (couponData) {
+        orderData.couponCode = couponData.code;
+        orderData.couponDiscount = couponData.discount_amount;
+      }
 
       console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
       await createOrderMutation.mutateAsync(orderData);
@@ -469,6 +520,46 @@ const Checkout = () => {
             </div>
 
             <div className="form-section">
+              <h2>Coupon Code</h2>
+              <div className="coupon-section">
+                {couponData ? (
+                  <div className="coupon-applied">
+                    <div className="coupon-details">
+                      <span className="coupon-code">{couponData.code}</span>
+                      <span className="discount-amount">-₹{couponData.discount_amount.toFixed(2)}</span>
+                    </div>
+                    <button 
+                      type="button" 
+                      className="btn-remove-coupon"
+                      onClick={removeCoupon}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="coupon-input-container">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Enter coupon code"
+                      className="coupon-input"
+                    />
+                    <button 
+                      type="button" 
+                      className="btn-apply-coupon"
+                      onClick={validateCoupon}
+                      disabled={!couponCode.trim()}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                )}
+                {couponError && <div className="coupon-error">{couponError}</div>}
+              </div>
+            </div>
+
+            <div className="form-section">
               <div className="form-group">
                 <label>Order Notes (Optional)</label>
                 <textarea
@@ -525,6 +616,12 @@ const Checkout = () => {
                 <span>Tax (GST):</span>
                 <span>₹{cartTotals.taxAmount?.toFixed(2)}</span>
               </div>
+              {couponData && (
+                <div className="summary-row discount">
+                  <span>Discount ({couponData.code}):</span>
+                  <span>-₹{couponData.discount_amount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="summary-row total">
                 <span>Total:</span>
                 <span>₹{cartTotals.totalAmount?.toFixed(2)}</span>

@@ -119,11 +119,10 @@ const Header = () => {
   }, [isMenuOpen]);
 
   // Handle mobile menu item clicks
-  const handleMobileMenuItemClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("Mobile menu item clicked");
+  const handleMobileMenuItemClick = (path) => {
+    console.log("Mobile menu item clicked, navigating to:", path);
     setIsMenuOpen(false);
+    navigate(path);
   };
 
   return (
@@ -296,7 +295,7 @@ const Header = () => {
       {isMenuOpen && (
         <div className="mobile-menu active" role="dialog" aria-label="Mobile navigation menu">
           <div className="mobile-menu-header">
-            <Link to="/" className="logo-container" onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/');}}>
+            <Link to="/" className="logo-container" onClick={(e) => {e.preventDefault(); handleMobileMenuItemClick('/');}}>
               <img
                 src="/logo.png"
                 alt="Praashi by Supal"
@@ -330,92 +329,81 @@ const Header = () => {
 
           <div className="mobile-nav-links">
             {user?.role === "admin" && (
-              <Link
-                to="/admin"
+              <div
                 className="mobile-nav-link"
-                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/admin');}}
+                onClick={() => handleMobileMenuItemClick('/admin')}
               >
                 Admin Panel
-              </Link>
+              </div>
             )}
-            <Link to="/" className="mobile-nav-link" onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/');}}>
+            <div className="mobile-nav-link" onClick={() => handleMobileMenuItemClick('/')}>
               Home
-            </Link>
-            <Link
-              to="/products?category=necklaces"
+            </div>
+            <div
               className="mobile-nav-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=necklaces');}}
+              onClick={() => handleMobileMenuItemClick('/products?category=necklaces')}
             >
               Necklace Sets
-            </Link>
-            <Link
-              to="/products?category=earrings"
+            </div>
+            <div
               className="mobile-nav-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=earrings');}}
+              onClick={() => handleMobileMenuItemClick('/products?category=earrings')}
             >
               Earrings
-            </Link>
-            <Link
-              to="/products?category=watches"
+            </div>
+            <div
               className="mobile-nav-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=watches');}}
+              onClick={() => handleMobileMenuItemClick('/products?category=watches')}
             >
               Watches
-            </Link>
-            <Link
-              to="/products?category=rings"
+            </div>
+            <div
               className="mobile-nav-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=rings');}}
+              onClick={() => handleMobileMenuItemClick('/products?category=rings')}
             >
               Rings
-            </Link>
-            <Link
-              to="/products?category=bracelets"
+            </div>
+            <div
               className="mobile-nav-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=bracelets');}}
+              onClick={() => handleMobileMenuItemClick('/products?category=bracelets')}
             >
               Bracelets
-            </Link>
-            <Link
-              to="/products?category=fragrance"
+            </div>
+            <div
               className="mobile-nav-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/products?category=fragrance');}}
+              onClick={() => handleMobileMenuItemClick('/products?category=fragrance')}
             >
               Fragrance
-            </Link>
-            <Link
-              to="/partner"
+            </div>
+            <div
               className="mobile-nav-link partner-link"
-              onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/partner');}}
+              onClick={() => handleMobileMenuItemClick('/partner')}
             >
               Become a Partner
-            </Link>
+            </div>
           </div>
 
           {isAuthenticated ? (
             <div className="mobile-user-section">
-              <Link
-                to="/profile"
+              <div
                 className="mobile-nav-link"
-                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/profile');}}
+                onClick={() => handleMobileMenuItemClick('/profile')}
               >
                 Profile
-              </Link>
-              <Link
-                to="/orders"
+              </div>
+              <div
                 className="mobile-nav-link"
-                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/orders');}}
+                onClick={() => handleMobileMenuItemClick('/orders')}
               >
                 My Orders
-              </Link>
+              </div>
               {user?.role === "admin" && (
-                <Link
-                  to="/admin"
+                <div
                   className="mobile-nav-link"
-                  onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/admin');}}
+                  onClick={() => handleMobileMenuItemClick('/admin')}
                 >
                   Admin Panel
-                </Link>
+                </div>
               )}
               <button
                 onClick={() => {
@@ -429,20 +417,18 @@ const Header = () => {
             </div>
           ) : (
             <div className="mobile-user-section">
-              <Link
-                to="/login"
+              <div
                 className="mobile-nav-link"
-                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/login');}}
+                onClick={() => handleMobileMenuItemClick('/login')}
               >
                 Login
-              </Link>
-              <Link
-                to="/register"
+              </div>
+              <div
                 className="mobile-nav-link"
-                onClick={(e) => {e.preventDefault(); setIsMenuOpen(false); navigate('/register');}}
+                onClick={() => handleMobileMenuItemClick('/register')}
               >
                 Register
-              </Link>
+              </div>
             </div>
           )}
         </div>

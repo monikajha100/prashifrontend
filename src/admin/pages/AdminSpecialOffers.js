@@ -24,7 +24,7 @@ const AdminSpecialOffers = () => {
       timer_text: "",
       start_date: "",
       end_date: "",
-      link_url: "/products",
+      link_url: "",
       button_text: "Shop Now",
       background_color: "",
       text_color: "",
@@ -60,19 +60,23 @@ const AdminSpecialOffers = () => {
     e.preventDefault();
 
     try {
+      // Validate required fields
+      if (!formData.title || !formData.description || !formData.link_url) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        discount_percentage: formData.discount_percentage ? parseInt(formData.discount_percentage) : null,
+        sort_order: parseInt(formData.sort_order) || 0
+      };
+
       if (editingOffer) {
-        await api.put(`/special-offers/${editingOffer.id}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        await api.put(`/special-offers/${editingOffer.id}`, payload);
         toast.success("Offer updated successfully!");
       } else {
-        await api.post(`/special-offers`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
+        await api.post(`/special-offers`, payload);
         toast.success("Offer created successfully!");
       }
 
@@ -104,11 +108,11 @@ const AdminSpecialOffers = () => {
       end_date: offer.end_date
         ? new Date(offer.end_date).toISOString().split("T")[0]
         : "",
-      link_url: offer.link_url,
-      button_text: offer.button_text,
+      link_url: offer.link_url || "",
+      button_text: offer.button_text || "Shop Now",
       background_color: offer.background_color || "",
       text_color: offer.text_color || "",
-      sort_order: offer.sort_order,
+      sort_order: offer.sort_order || 0,
       is_active: offer.is_active,
     });
     setShowForm(true);
@@ -412,7 +416,7 @@ const AdminSpecialOffers = () => {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        sort_order: parseInt(e.target.value),
+                        sort_order: parseInt(e.target.value) || 0,
                       })
                     }
                     placeholder="0"

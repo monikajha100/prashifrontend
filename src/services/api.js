@@ -226,13 +226,9 @@ export const usersAPI = {
 };
 
 export const inventoryAPI = {
-  // Warehouses
-  getWarehouses: () => api.get('/inventory/warehouses'),
-  createWarehouse: (warehouseData) => api.post('/inventory/warehouses', warehouseData),
-  
   // Stock Levels
   getStockLevels: (params) => api.get('/inventory/stock-levels', { params }),
-  updateStockLevel: (productId, warehouseId, stockData) => api.put(`/inventory/stock-levels/${productId}/${warehouseId}`, stockData),
+  updateStockLevel: (productId, stockData) => api.put(`/inventory/stock-levels/${productId}`, stockData),
   
   // Stock Movements
   getStockMovements: (params) => api.get('/inventory/stock-movements', { params }),

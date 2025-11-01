@@ -9,22 +9,12 @@ import './InventoryManagement.css';
 
 const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedWarehouse, setSelectedWarehouse] = useState('all');
   const queryClient = useQueryClient();
-
-  // Fetch warehouses
-  const { data: warehouses, isLoading: warehousesLoading } = useQuery(
-    'warehouses',
-    () => adminAPI.getWarehouses(),
-    {
-      select: (response) => response.data
-    }
-  );
 
   // Fetch inventory summary
   const { data: summary, isLoading: summaryLoading } = useQuery(
-    ['inventorySummary', selectedWarehouse],
-    () => adminAPI.getInventorySummary({ warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse }),
+    'inventorySummary',
+    () => adminAPI.getInventorySummary(),
     {
       select: (response) => response.data
     }
@@ -32,9 +22,8 @@ const InventoryManagement = () => {
 
   // Fetch stock levels
   const { data: stockLevels, isLoading: stockLevelsLoading } = useQuery(
-    ['stockLevels', selectedWarehouse],
+    ['stockLevels'],
     () => adminAPI.getStockLevels({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse,
       low_stock: 'true'
     }),
     {
@@ -44,9 +33,8 @@ const InventoryManagement = () => {
 
   // Fetch low stock alerts
   const { data: lowStockAlerts, isLoading: alertsLoading } = useQuery(
-    ['lowStockAlerts', selectedWarehouse],
+    ['lowStockAlerts'],
     () => adminAPI.getLowStockAlerts({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse,
       is_resolved: 'false'
     }),
     {
@@ -56,15 +44,14 @@ const InventoryManagement = () => {
 
   const tabs = [
     { id: 'overview', label: '📊 Overview', component: <InventoryOverview summary={summary} stockLevels={stockLevels} lowStockAlerts={lowStockAlerts} /> },
-    { id: 'stock-levels', label: '📦 Stock Levels', component: <StockLevelsManagement selectedWarehouse={selectedWarehouse} warehouses={warehouses} /> },
-    { id: 'movements', label: '📈 Movements', component: <StockMovementsManagement selectedWarehouse={selectedWarehouse} warehouses={warehouses} /> },
-    { id: 'adjustments', label: '📋 Adjustments', component: <StockAdjustmentsManagement selectedWarehouse={selectedWarehouse} warehouses={warehouses} /> },
-    { id: 'alerts', label: '⚠️ Alerts', component: <LowStockAlertsManagement selectedWarehouse={selectedWarehouse} warehouses={warehouses} /> },
-    { id: 'warehouses', label: '🏬 Warehouses', component: <WarehousesManagement warehouses={warehouses} /> },
-    { id: 'reports', label: '📊 Reports', component: <InventoryReports selectedWarehouse={selectedWarehouse} warehouses={warehouses} /> }
+    { id: 'stock-levels', label: '📦 Stock Levels', component: <StockLevelsManagement /> },
+    { id: 'movements', label: '📈 Movements', component: <StockMovementsManagement /> },
+    { id: 'adjustments', label: '📋 Adjustments', component: <StockAdjustmentsManagement /> },
+    { id: 'alerts', label: '⚠️ Alerts', component: <LowStockAlertsManagement /> },
+    { id: 'reports', label: '📊 Reports', component: <InventoryReports /> }
   ];
 
-  if (warehousesLoading || summaryLoading) {
+  if (summaryLoading) {
     return (
       <AdminLayout>
         <LoadingSpinner text="Loading inventory data..." />
@@ -82,21 +69,6 @@ const InventoryManagement = () => {
         <div className="inventory-management">
           <div className="page-header">
             <h1>📦 Inventory Management</h1>
-            <div className="warehouse-filter">
-              <label>Warehouse:</label>
-              <select 
-                value={selectedWarehouse} 
-                onChange={(e) => setSelectedWarehouse(e.target.value)}
-                className="warehouse-select"
-              >
-                <option value="all">All Warehouses</option>
-                {warehouses?.map(warehouse => (
-                  <option key={warehouse.id} value={warehouse.id}>
-                    {warehouse.name} ({warehouse.code})
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div className="inventory-tabs">
@@ -190,7 +162,7 @@ const InventoryOverview = ({ summary, stockLevels, lowStockAlerts }) => {
           <div className="stock-list">
             {stockLevels?.length > 0 ? (
               stockLevels.slice(0, 5).map(stock => (
-                <div key={`${stock.product_id}-${stock.warehouse_id}`} className="stock-item">
+                <div key={stock.product_id} className="stock-item">
                   <span className="product-name">{stock.product_name}</span>
                   <span className={`stock-status ${stock.stock_status}`}>
                     {stock.current_stock} units
@@ -208,23 +180,21 @@ const InventoryOverview = ({ summary, stockLevels, lowStockAlerts }) => {
 };
 
 // Stock Levels Management Component
-const StockLevelsManagement = ({ selectedWarehouse, warehouses }) => {
+const StockLevelsManagement = () => {
   const [showAddStock, setShowAddStock] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: stockLevels, isLoading } = useQuery(
-    ['stockLevels', selectedWarehouse],
-    () => adminAPI.getStockLevels({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse
-    }),
+    ['stockLevels'],
+    () => adminAPI.getStockLevels(),
     {
       select: (response) => response.data
     }
   );
 
   const updateStockMutation = useMutation(
-    ({ productId, warehouseId, stockData }) => adminAPI.updateStockLevel(productId, warehouseId, stockData),
+    ({ productId, stockData }) => adminAPI.updateStockLevel(productId, stockData),
     {
       onSuccess: () => {
         queryClient.invalidateQueries('stockLevels');
@@ -239,8 +209,8 @@ const StockLevelsManagement = ({ selectedWarehouse, warehouses }) => {
     }
   );
 
-  const handleUpdateStock = (productId, warehouseId, stockData) => {
-    updateStockMutation.mutate({ productId, warehouseId, stockData });
+  const handleUpdateStock = (productId, stockData) => {
+    updateStockMutation.mutate({ productId, stockData });
   };
 
   if (isLoading) {
@@ -265,7 +235,6 @@ const StockLevelsManagement = ({ selectedWarehouse, warehouses }) => {
             <tr>
               <th>Product</th>
               <th>SKU</th>
-              <th>Warehouse</th>
               <th>Current Stock</th>
               <th>Min Level</th>
               <th>Max Level</th>
@@ -276,10 +245,9 @@ const StockLevelsManagement = ({ selectedWarehouse, warehouses }) => {
           </thead>
           <tbody>
             {stockLevels?.map(stock => (
-              <tr key={`${stock.product_id}-${stock.warehouse_id}`}>
+              <tr key={stock.product_id}>
                 <td>{stock.product_name}</td>
                 <td>{stock.sku}</td>
-                <td>{stock.warehouse_name}</td>
                 <td>{stock.current_stock}</td>
                 <td>{stock.min_stock_level}</td>
                 <td>{stock.max_stock_level}</td>
@@ -309,7 +277,6 @@ const StockLevelsManagement = ({ selectedWarehouse, warehouses }) => {
       {showAddStock && (
         <UpdateStockModal
           product={selectedProduct}
-          warehouses={warehouses}
           onClose={() => {
             setShowAddStock(false);
             setSelectedProduct(null);
@@ -323,10 +290,9 @@ const StockLevelsManagement = ({ selectedWarehouse, warehouses }) => {
 };
 
 // Update Stock Modal Component
-const UpdateStockModal = ({ product, warehouses, onClose, onSubmit, isLoading }) => {
+const UpdateStockModal = ({ product, onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     product_id: product?.product_id || '',
-    warehouse_id: product?.warehouse_id || '',
     current_stock: product?.current_stock || 0,
     min_stock_level: product?.min_stock_level || 0,
     max_stock_level: product?.max_stock_level || 0,
@@ -335,7 +301,7 @@ const UpdateStockModal = ({ product, warehouses, onClose, onSubmit, isLoading })
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData.product_id, formData.warehouse_id, {
+    onSubmit(formData.product_id, {
       current_stock: parseInt(formData.current_stock),
       min_stock_level: parseInt(formData.min_stock_level),
       max_stock_level: parseInt(formData.max_stock_level),
@@ -369,24 +335,6 @@ const UpdateStockModal = ({ product, warehouses, onClose, onSubmit, isLoading })
               required
               disabled={!!product}
             />
-          </div>
-
-          <div className="form-group">
-            <label>Warehouse *</label>
-            <select
-              name="warehouse_id"
-              value={formData.warehouse_id}
-              onChange={handleChange}
-              required
-              disabled={!!product}
-            >
-              <option value="">Select Warehouse</option>
-              {warehouses?.map(warehouse => (
-                <option key={warehouse.id} value={warehouse.id}>
-                  {warehouse.name} ({warehouse.code})
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="form-row">
@@ -451,7 +399,7 @@ const UpdateStockModal = ({ product, warehouses, onClose, onSubmit, isLoading })
 };
 
 // Stock Movements Management Component
-const StockMovementsManagement = ({ selectedWarehouse, warehouses }) => {
+const StockMovementsManagement = () => {
   const [showAddMovement, setShowAddMovement] = useState(false);
   const [filters, setFilters] = useState({
     movement_type: '',
@@ -461,9 +409,8 @@ const StockMovementsManagement = ({ selectedWarehouse, warehouses }) => {
   const queryClient = useQueryClient();
 
   const { data: movements, isLoading } = useQuery(
-    ['stockMovements', selectedWarehouse, filters],
+    ['stockMovements', filters],
     () => adminAPI.getStockMovements({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse,
       ...filters
     }),
     {
@@ -546,7 +493,6 @@ const StockMovementsManagement = ({ selectedWarehouse, warehouses }) => {
             <tr>
               <th>Date</th>
               <th>Product</th>
-              <th>Warehouse</th>
               <th>Type</th>
               <th>Quantity</th>
               <th>Reference</th>
@@ -559,7 +505,6 @@ const StockMovementsManagement = ({ selectedWarehouse, warehouses }) => {
               <tr key={movement.id}>
                 <td>{new Date(movement.created_at).toLocaleDateString()}</td>
                 <td>{movement.product_name}</td>
-                <td>{movement.warehouse_name}</td>
                 <td>
                   <span className={`movement-type ${movement.movement_type}`}>
                     {movement.movement_type}
@@ -579,7 +524,6 @@ const StockMovementsManagement = ({ selectedWarehouse, warehouses }) => {
 
       {showAddMovement && (
         <AddStockMovementModal
-          warehouses={warehouses}
           onClose={() => setShowAddMovement(false)}
           onSubmit={handleCreateMovement}
           isLoading={createMovementMutation.isLoading}
@@ -590,15 +534,14 @@ const StockMovementsManagement = ({ selectedWarehouse, warehouses }) => {
 };
 
 // Stock Adjustments Management Component
-const StockAdjustmentsManagement = ({ selectedWarehouse, warehouses }) => {
+const StockAdjustmentsManagement = () => {
   const [showAddAdjustment, setShowAddAdjustment] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const queryClient = useQueryClient();
 
   const { data: adjustments, isLoading } = useQuery(
-    ['stockAdjustments', selectedWarehouse, statusFilter],
+    ['stockAdjustments', statusFilter],
     () => adminAPI.getStockAdjustments({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse,
       status: statusFilter || undefined
     }),
     {
@@ -683,7 +626,6 @@ const StockAdjustmentsManagement = ({ selectedWarehouse, warehouses }) => {
             <tr>
               <th>Adjustment #</th>
               <th>Product</th>
-              <th>Warehouse</th>
               <th>Type</th>
               <th>Quantity</th>
               <th>Reason</th>
@@ -698,7 +640,6 @@ const StockAdjustmentsManagement = ({ selectedWarehouse, warehouses }) => {
               <tr key={adjustment.id}>
                 <td>{adjustment.adjustment_number}</td>
                 <td>{adjustment.product_name}</td>
-                <td>{adjustment.warehouse_name}</td>
                 <td>
                   <span className={`adjustment-type ${adjustment.adjustment_type}`}>
                     {adjustment.adjustment_type}
@@ -732,7 +673,6 @@ const StockAdjustmentsManagement = ({ selectedWarehouse, warehouses }) => {
 
       {showAddAdjustment && (
         <AddStockAdjustmentModal
-          warehouses={warehouses}
           onClose={() => setShowAddAdjustment(false)}
           onSubmit={handleCreateAdjustment}
           isLoading={createAdjustmentMutation.isLoading}
@@ -743,14 +683,13 @@ const StockAdjustmentsManagement = ({ selectedWarehouse, warehouses }) => {
 };
 
 // Low Stock Alerts Management Component
-const LowStockAlertsManagement = ({ selectedWarehouse, warehouses }) => {
+const LowStockAlertsManagement = () => {
   const [statusFilter, setStatusFilter] = useState('false'); // Show unresolved by default
   const queryClient = useQueryClient();
 
   const { data: alerts, isLoading } = useQuery(
-    ['lowStockAlerts', selectedWarehouse, statusFilter],
+    ['lowStockAlerts', statusFilter],
     () => adminAPI.getLowStockAlerts({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse,
       is_resolved: statusFilter
     }),
     {
@@ -817,7 +756,6 @@ const LowStockAlertsManagement = ({ selectedWarehouse, warehouses }) => {
             <tr>
               <th>Product</th>
               <th>SKU</th>
-              <th>Warehouse</th>
               <th>Current Stock</th>
               <th>Min Level</th>
               <th>Alert Type</th>
@@ -831,7 +769,6 @@ const LowStockAlertsManagement = ({ selectedWarehouse, warehouses }) => {
               <tr key={alert.id} className={alert.is_resolved ? 'resolved' : 'unresolved'}>
                 <td>{alert.product_name}</td>
                 <td>{alert.sku}</td>
-                <td>{alert.warehouse_name}</td>
                 <td className="stock-amount">{alert.current_stock}</td>
                 <td className="min-level">{alert.min_stock_level}</td>
                 <td>
@@ -883,79 +820,8 @@ const LowStockAlertsManagement = ({ selectedWarehouse, warehouses }) => {
   );
 };
 
-// Warehouses Management Component
-const WarehousesManagement = ({ warehouses }) => {
-  const [showAddWarehouse, setShowAddWarehouse] = useState(false);
-  const queryClient = useQueryClient();
-
-  const createWarehouseMutation = useMutation(
-    (warehouseData) => adminAPI.createWarehouse(warehouseData),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries('warehouses');
-        toast.success('Warehouse created successfully');
-        setShowAddWarehouse(false);
-      },
-      onError: (error) => {
-        toast.error(error.response?.data?.message || 'Failed to create warehouse');
-      }
-    }
-  );
-
-  const handleCreateWarehouse = (warehouseData) => {
-    createWarehouseMutation.mutate(warehouseData);
-  };
-
-  return (
-    <div className="warehouses-management">
-      <div className="section-header">
-        <h2>🏬 Warehouses Management</h2>
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowAddWarehouse(true)}
-        >
-          + Add Warehouse
-        </button>
-      </div>
-
-      <div className="warehouses-grid">
-        {warehouses?.map(warehouse => (
-          <div key={warehouse.id} className="warehouse-card">
-            <div className="warehouse-header">
-              <h3>{warehouse.name}</h3>
-              <span className="warehouse-code">{warehouse.code}</span>
-            </div>
-            <div className="warehouse-details">
-              <p><strong>Address:</strong> {warehouse.address || 'Not specified'}</p>
-              <p><strong>City:</strong> {warehouse.city || 'Not specified'}</p>
-              <p><strong>State:</strong> {warehouse.state || 'Not specified'}</p>
-              <p><strong>Pincode:</strong> {warehouse.pincode || 'Not specified'}</p>
-              {warehouse.phone && <p><strong>Phone:</strong> {warehouse.phone}</p>}
-              {warehouse.email && <p><strong>Email:</strong> {warehouse.email}</p>}
-              {warehouse.manager_name && <p><strong>Manager:</strong> {warehouse.manager_name}</p>}
-            </div>
-            <div className="warehouse-status">
-              <span className={`status-badge ${warehouse.is_active ? 'active' : 'inactive'}`}>
-                {warehouse.is_active ? 'Active' : 'Inactive'}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {showAddWarehouse && (
-        <AddWarehouseModal
-          onClose={() => setShowAddWarehouse(false)}
-          onSubmit={handleCreateWarehouse}
-          isLoading={createWarehouseMutation.isLoading}
-        />
-      )}
-    </div>
-  );
-};
-
 // Inventory Reports Component
-const InventoryReports = ({ selectedWarehouse, warehouses }) => {
+const InventoryReports = () => {
   const [reportType, setReportType] = useState('summary');
   const [dateRange, setDateRange] = useState({
     from: '',
@@ -963,18 +829,16 @@ const InventoryReports = ({ selectedWarehouse, warehouses }) => {
   });
 
   const { data: summary, isLoading: summaryLoading } = useQuery(
-    ['inventorySummary', selectedWarehouse],
-    () => adminAPI.getInventorySummary({ warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse }),
+    'inventorySummary',
+    () => adminAPI.getInventorySummary(),
     {
       select: (response) => response.data
     }
   );
 
   const { data: stockLevels, isLoading: stockLevelsLoading } = useQuery(
-    ['stockLevels', selectedWarehouse],
-    () => adminAPI.getStockLevels({ 
-      warehouse_id: selectedWarehouse === 'all' ? undefined : selectedWarehouse
-    }),
+    ['stockLevels'],
+    () => adminAPI.getStockLevels(),
     {
       select: (response) => response.data
     }
@@ -1054,7 +918,6 @@ const InventoryReports = ({ selectedWarehouse, warehouses }) => {
                   <tr>
                     <th>Product</th>
                     <th>SKU</th>
-                    <th>Warehouse</th>
                     <th>Current Stock</th>
                     <th>Min Level</th>
                     <th>Max Level</th>
@@ -1065,10 +928,9 @@ const InventoryReports = ({ selectedWarehouse, warehouses }) => {
                 </thead>
                 <tbody>
                   {stockLevels?.map(stock => (
-                    <tr key={`${stock.product_id}-${stock.warehouse_id}`}>
+                    <tr key={stock.product_id}>
                       <td>{stock.product_name}</td>
                       <td>{stock.sku}</td>
-                      <td>{stock.warehouse_name}</td>
                       <td>{stock.current_stock}</td>
                       <td>{stock.min_stock_level}</td>
                       <td>{stock.max_stock_level}</td>
@@ -1096,7 +958,6 @@ const InventoryReports = ({ selectedWarehouse, warehouses }) => {
                   <tr>
                     <th>Product</th>
                     <th>SKU</th>
-                    <th>Warehouse</th>
                     <th>Current Stock</th>
                     <th>Min Level</th>
                     <th>Deficit</th>
@@ -1106,10 +967,9 @@ const InventoryReports = ({ selectedWarehouse, warehouses }) => {
                 </thead>
                 <tbody>
                   {stockLevels?.filter(stock => stock.current_stock <= stock.min_stock_level).map(stock => (
-                    <tr key={`${stock.product_id}-${stock.warehouse_id}`}>
+                    <tr key={stock.product_id}>
                       <td>{stock.product_name}</td>
                       <td>{stock.sku}</td>
-                      <td>{stock.warehouse_name}</td>
                       <td className="stock-amount">{stock.current_stock}</td>
                       <td className="min-level">{stock.min_stock_level}</td>
                       <td className="deficit">{stock.min_stock_level - stock.current_stock}</td>
@@ -1136,10 +996,9 @@ const InventoryReports = ({ selectedWarehouse, warehouses }) => {
 };
 
 // Modal Components
-const AddStockMovementModal = ({ warehouses, onClose, onSubmit, isLoading }) => {
+const AddStockMovementModal = ({ onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     product_id: '',
-    warehouse_id: '',
     movement_type: 'in',
     quantity: '',
     reference_type: 'initial',
@@ -1183,22 +1042,6 @@ const AddStockMovementModal = ({ warehouses, onClose, onSubmit, isLoading }) => 
                 onChange={handleChange}
                 required
               />
-            </div>
-            <div className="form-group">
-              <label>Warehouse *</label>
-              <select
-                name="warehouse_id"
-                value={formData.warehouse_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Warehouse</option>
-                {warehouses?.map(warehouse => (
-                  <option key={warehouse.id} value={warehouse.id}>
-                    {warehouse.name} ({warehouse.code})
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
@@ -1283,10 +1126,9 @@ const AddStockMovementModal = ({ warehouses, onClose, onSubmit, isLoading }) => 
   );
 };
 
-const AddStockAdjustmentModal = ({ warehouses, onClose, onSubmit, isLoading }) => {
+const AddStockAdjustmentModal = ({ onClose, onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     product_id: '',
-    warehouse_id: '',
     adjustment_type: 'increase',
     quantity: '',
     reason: 'correction',
@@ -1329,22 +1171,6 @@ const AddStockAdjustmentModal = ({ warehouses, onClose, onSubmit, isLoading }) =
                 onChange={handleChange}
                 required
               />
-            </div>
-            <div className="form-group">
-              <label>Warehouse *</label>
-              <select
-                name="warehouse_id"
-                value={formData.warehouse_id}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Warehouse</option>
-                {warehouses?.map(warehouse => (
-                  <option key={warehouse.id} value={warehouse.id}>
-                    {warehouse.name} ({warehouse.code})
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
@@ -1407,150 +1233,6 @@ const AddStockAdjustmentModal = ({ warehouses, onClose, onSubmit, isLoading }) =
             </button>
             <button type="submit" className="btn btn-primary" disabled={isLoading}>
               {isLoading ? 'Creating...' : 'Create Adjustment'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const AddWarehouseModal = ({ onClose, onSubmit, isLoading }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    phone: '',
-    email: '',
-    manager_name: ''
-  });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData);
-  };
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h2>Add New Warehouse</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="add-warehouse-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label>Warehouse Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Warehouse Code *</label>
-              <input
-                type="text"
-                name="code"
-                value={formData.code}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>Address</label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              rows="2"
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>City</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>State</label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Pincode</label>
-              <input
-                type="text"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Phone</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Manager Name</label>
-              <input
-                type="text"
-                name="manager_name"
-                value={formData.manager_name}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Warehouse'}
             </button>
           </div>
         </form>

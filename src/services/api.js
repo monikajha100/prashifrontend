@@ -62,16 +62,23 @@ api.interceptors.response.use(
 
     if (status === 401) {
       const message = error.response?.data?.message || '';
-      const tokenInvalid = message.toLowerCase().includes('invalid') || message.toLowerCase().includes('expired');
+      const tokenInvalid = message.toLowerCase().includes('invalid') || 
+                          message.toLowerCase().includes('expired') ||
+                          message.toLowerCase().includes('token');
 
-      if (!isDev && tokenInvalid) {
+      // Only auto-logout on token errors, not on other 401 errors (like invalid credentials)
+      // and only in production or if explicitly a token error
+      if (tokenInvalid) {
         if (isAdminRoute) {
           localStorage.removeItem('adminToken');
           localStorage.removeItem('adminUser');
+          if (!isDev) {
           window.location.href = '/admin/login';
+          }
         } else {
           localStorage.removeItem('token');
-          window.location.href = '/login';
+          // Don't redirect immediately - let AuthContext handle it
+          console.warn('Token invalid, will be cleared by AuthContext');
         }
       }
     }
@@ -138,9 +145,41 @@ export const settingsAPI = {
 export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
-  getProfile: () => api.get('/auth/me'),
+  getProfile: () => api.get('/auth/profile'),
   updateProfile: (profileData) => api.put('/auth/profile', profileData),
   changePassword: (passwordData) => api.put('/auth/change-password', passwordData),
+};
+
+export const addressesAPI = {
+  getAll: () => api.get('/addresses'),
+  getById: (id) => api.get(`/addresses/${id}`),
+  create: (addressData) => api.post('/addresses', addressData),
+  update: (id, addressData) => api.put(`/addresses/${id}`, addressData),
+  delete: (id) => api.delete(`/addresses/${id}`),
+  setDefault: (id) => api.put(`/addresses/${id}/set-default`),
+};
+
+export const wishlistAPI = {
+  getAll: () => api.get('/wishlist'),
+  add: (productId) => api.post('/wishlist', { product_id: productId }),
+  remove: (productId) => api.delete(`/wishlist/${productId}`),
+  check: (productId) => api.get(`/wishlist/check/${productId}`),
+  clear: () => api.delete('/wishlist'),
+};
+
+export const promotionalOffersAPI = {
+  getAll: () => api.get('/promotional-offers'),
+  getById: (id) => api.get(`/promotional-offers/${id}`),
+  getAllAdmin: (params) => api.get('/admin/promotional-offers/admin/all', { params }),
+  create: (offerData) => api.post('/admin/promotional-offers', offerData),
+  update: (id, offerData) => api.put(`/admin/promotional-offers/${id}`, offerData),
+  delete: (id) => api.delete(`/admin/promotional-offers/${id}`),
+};
+
+export const cashbackAPI = {
+  getBalance: () => api.get('/cashback/balance'),
+  getOffers: () => api.get('/cashback/offers'),
+  apply: (data) => api.post('/cashback/apply', data),
 };
 
 export const ordersAPI = {
@@ -226,6 +265,7 @@ export const invoicesAPI = {
     }
   },
   getMyInvoices: (params) => api.get('/invoices/my-invoices', { params }),
+  getInvoiceByOrderId: (orderId) => api.get(`/invoices/order/${orderId}`),
   getInvoiceDetails: (invoiceId) => api.get(`/invoices/${invoiceId}`),
   createInvoice: (orderId) => api.post(`/invoices/create/${orderId}`),
   sendInvoiceEmail: (invoiceId) => api.post(`/invoices/${invoiceId}/send-email`),
@@ -241,6 +281,58 @@ export const paymentsAPI = {
   updatePaymentSettings: (settings) => api.put('/payments/settings', settings)
 };
 
+export const customersAPI = {
+  getAllCustomers: async (params) => {
+    console.log('🔶 customersAPI.getAllCustomers called with params:', params);
+    try {
+      const response = await api.get('/customers', { params });
+      console.log('🔶 customersAPI.getAllCustomers response.data:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('🔶 customersAPI.getAllCustomers error:', error);
+      throw error;
+    }
+  },
+  getCustomerDetails: (customerId) => api.get(`/customers/${customerId}`)
+};
+
+export const partnersAPI = {
+  // Public endpoint - apply for partnership
+  apply: (formData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post('/partners/apply', formData, config);
+  },
+  
+  // Admin endpoints
+  getAllApplications: () => api.get('/admin/partners/applications'),
+  getApplicationById: (id) => api.get(`/admin/partners/applications/${id}`),
+  updateApplicationStatus: (id, status) => api.put(`/admin/partners/applications/${id}/status`, { status }),
+  deleteApplication: (id) => api.delete(`/admin/partners/applications/${id}`),
+  getStats: () => api.get('/admin/partners/stats'),
+  
+  // Admin partner management
+  createPartner: (formData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post('/admin/partners/admin/create', formData, config);
+  },
+  updatePartner: (id, formData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.put(`/admin/partners/admin/${id}`, formData, config);
+  },
+};
+
 export const contractsAPI = {
   getAllContracts: (params) => api.get('/contracts', { params }),
   getContractById: (contractId) => api.get(`/contracts/${contractId}`),
@@ -254,20 +346,24 @@ export const contractsAPI = {
 };
 
 export const couponsAPI = {
-  getAllCoupons: (params) => api.get('/coupons', { params }),
-  getCouponById: (couponId) => api.get(`/coupons/${couponId}`),
-  createCoupon: (couponData) => api.post('/coupons', couponData),
-  updateCoupon: (couponId, couponData) => api.put(`/coupons/${couponId}`, couponData),
+  getAllCoupons: (params) => api.get('/admin/coupons', { params }),
+  getCouponById: (couponId) => api.get(`/admin/coupons/${couponId}`),
+  createCoupon: (couponData) => api.post('/admin/coupons', couponData),
+  updateCoupon: (couponId, couponData) => api.put(`/admin/coupons/${couponId}`, couponData),
+  deleteCoupon: (couponId) => api.delete(`/admin/coupons/${couponId}`),
+  toggleCouponStatus: (couponId) => api.patch(`/admin/coupons/${couponId}/toggle-status`),
   validateCoupon: (code, params) => api.get(`/coupons/validate/${code}`, { params }),
   applyCoupon: (couponData) => api.post('/coupons/apply', couponData),
-  getAnalytics: () => api.get('/coupons/analytics/overview'),
-  getCampaigns: () => api.get('/coupons/campaigns/all'),
-  createCampaign: (campaignData) => api.post('/coupons/campaigns', campaignData)
+  getUsageHistory: (params) => api.get('/admin/coupons/usage', { params }),
+  getAnalytics: () => api.get('/admin/coupons/analytics/overview'),
+  getCampaigns: () => api.get('/admin/coupons/campaigns/all'),
+  createCampaign: (campaignData) => api.post('/admin/coupons/campaigns', campaignData)
 };
 
 export const storefrontAPI = {
   getSettings: () => api.get('/storefront/settings'),
   updateSettings: (settingsData) => api.put('/storefront/settings', settingsData),
+  getTaxSettings: () => api.get('/storefront/tax-settings'),
   getThemes: () => api.get('/storefront/themes'),
   createTheme: (themeData) => api.post('/storefront/themes', themeData),
   getSections: () => api.get('/storefront/sections'),
@@ -338,6 +434,9 @@ export const adminAPI = {
   // Settings
   getSettings: () => api.get('/admin/settings'),
   updateSettings: (settingsData) => api.put('/admin/settings', settingsData),
+  
+  // Partners
+  ...partnersAPI,
 };
 
 export default api;

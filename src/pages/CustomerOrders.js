@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
-import { ordersAPI } from '../services/api';
+import { ordersAPI, invoicesAPI, toAbsoluteImageUrl } from '../services/api';
+import InvoiceTemplate from '../components/InvoiceTemplate';
 import './CustomerOrders.css';
 
 const CustomerOrders = () => {
@@ -9,15 +10,31 @@ const CustomerOrders = () => {
 
   const { data: orders, isLoading, error } = useQuery(
     'customerOrders',
-    () => ordersAPI.getMyOrders(),
+    async () => {
+      try {
+        const response = await ordersAPI.getMyOrders();
+        // axios response has data property, react-query should extract it automatically
+        // But let's be explicit to handle edge cases
+        const ordersData = response?.data || response;
+        console.log('Raw API response:', response);
+        console.log('Orders data:', ordersData);
+        return Array.isArray(ordersData) ? ordersData : (ordersData ? [ordersData] : []);
+      } catch (err) {
+        console.error('Error in query function:', err);
+        return [];
+      }
+    },
     {
       retry: 1,
       refetchOnWindowFocus: false,
       onSuccess: (data) => {
-        console.log('Customer orders data:', data);
+        console.log('Customer orders data (success):', data);
+        console.log('Customer orders count:', Array.isArray(data) ? data.length : 0);
       },
       onError: (error) => {
         console.error('Error fetching customer orders:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Error status:', error.response?.status);
       }
     }
   );
@@ -27,15 +44,130 @@ const CustomerOrders = () => {
 
   const handleViewOrderDetails = async (orderId) => {
     try {
-      const orderDetails = await ordersAPI.getOrderDetails(orderId);
+      const response = await ordersAPI.getOrderDetails(orderId);
+      // Handle both wrapped response and direct data
+      const orderDetails = response?.data || response;
+      console.log('Order details fetched:', orderDetails);
       setSelectedOrder(orderDetails);
       setShowOrderDetails(true);
     } catch (error) {
       console.error('Error fetching order details:', error);
+      console.error('Error response:', error.response?.data);
+    }
+  };
+
+  const handleDownloadInvoice = async (invoiceId, invoiceNumber, orderId) => {
+    try {
+      if (!invoiceId) {
+        // Try to get invoice by order ID
+        try {
+          const invoiceResponse = await invoicesAPI.getInvoiceByOrderId(orderId);
+          invoiceId = invoiceResponse?.data?.invoice_id || invoiceResponse?.invoice_id;
+          invoiceNumber = invoiceResponse?.data?.invoice_number || invoiceResponse?.invoice_number;
+        } catch (err) {
+          alert('Invoice not found for this order. Please contact support.');
+          return;
+        }
+      }
+
+      if (!invoiceId) {
+        alert('Invoice not found for this order. Please contact support.');
+        return;
+      }
+
+      console.log('⬇️ Downloading invoice:', invoiceId);
+      
+      // Fetch invoice details
+      const response = await invoicesAPI.getInvoiceDetails(invoiceId);
+      const invoice = response?.data || response;
+      
+      // Dynamically import required libraries
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ]);
+
+      // Create a temporary container for the invoice
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.top = '0';
+      document.body.appendChild(tempContainer);
+
+      // Render invoice template in temp container
+      const { createRoot } = await import('react-dom/client');
+      const root = createRoot(tempContainer);
+      
+      await new Promise((resolve) => {
+        root.render(
+          <InvoiceTemplate 
+            invoice={invoice} 
+            company={invoice.company}
+            onRef={(ref) => {
+              if (ref) {
+                setTimeout(async () => {
+                  try {
+                    // Wait a bit more for all content to render, especially images and text
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                    const canvas = await html2canvas(ref, {
+                      scale: 2,
+                      useCORS: true,
+                      allowTaint: true,
+                      backgroundColor: '#ffffff',
+                      logging: false,
+                      windowWidth: ref.scrollWidth,
+                      windowHeight: ref.scrollHeight
+                    });
+
+                    const imgData = canvas.toDataURL('image/png');
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    
+                    const imgWidth = 210;
+                    const pageHeight = 295;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    // Only add new page if there's significant content left (> 10mm)
+                    while (heightLeft > 10) {
+                      position = heightLeft - imgHeight;
+                      pdf.addPage();
+                      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                      heightLeft -= pageHeight;
+                    }
+
+                    pdf.save(`invoice-${invoiceNumber || invoice.invoice_number}.pdf`);
+                    
+                    // Cleanup
+                    root.unmount();
+                    document.body.removeChild(tempContainer);
+                    resolve();
+                  } catch (error) {
+                    console.error('Error generating PDF:', error);
+                    alert('Error downloading invoice');
+                    root.unmount();
+                    document.body.removeChild(tempContainer);
+                    resolve();
+                  }
+                }, 500);
+              }
+            }}
+          />
+        );
+      });
+    } catch (error) {
+      console.error('❌ Error downloading invoice:', error);
+      alert('Failed to download invoice. Please try again.');
     }
   };
 
   const getStatusColor = (status) => {
+    if (!status) return '#6b7280';
+    const statusLower = String(status).toLowerCase();
     const colors = {
       pending: '#f59e0b',
       confirmed: '#3b82f6',
@@ -45,10 +177,12 @@ const CustomerOrders = () => {
       cancelled: '#ef4444',
       refunded: '#6b7280'
     };
-    return colors[status] || '#6b7280';
+    return colors[statusLower] || '#6b7280';
   };
 
   const getPaymentStatusColor = (status) => {
+    if (!status) return '#6b7280';
+    const statusLower = String(status).toLowerCase();
     const colors = {
       pending: '#f59e0b',
       paid: '#10b981',
@@ -56,7 +190,7 @@ const CustomerOrders = () => {
       refunded: '#6b7280',
       partially_refunded: '#f59e0b'
     };
-    return colors[status] || '#6b7280';
+    return colors[statusLower] || '#6b7280';
   };
 
   const formatDate = (dateString) => {
@@ -74,6 +208,12 @@ const CustomerOrders = () => {
       style: 'currency',
       currency: 'INR'
     }).format(amount);
+  };
+
+  const formatStatus = (status) => {
+    if (!status) return 'Unknown';
+    const statusStr = String(status).toLowerCase();
+    return statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
   };
 
   if (isLoading) {
@@ -127,15 +267,15 @@ const CustomerOrders = () => {
                 <div className="order-status">
                   <span 
                     className="status-badge"
-                    style={{ backgroundColor: getStatusColor(order.status) }}
+                    style={{ backgroundColor: getStatusColor(order.status || order.order_status) }}
                   >
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    {formatStatus(order.status || order.order_status)}
                   </span>
                   <span 
                     className="payment-status-badge"
                     style={{ backgroundColor: getPaymentStatusColor(order.payment_status) }}
                   >
-                    {order.payment_status.charAt(0).toUpperCase() + order.payment_status.slice(1)}
+                    {formatStatus(order.payment_status)}
                   </span>
                 </div>
               </div>
@@ -156,13 +296,22 @@ const CustomerOrders = () => {
                 >
                   View Details
                 </button>
+                {order.invoice_id && (
+                  <button 
+                    className="btn-primary"
+                    onClick={() => handleDownloadInvoice(order.invoice_id, order.invoice_number, order.id)}
+                    style={{ marginLeft: '8px' }}
+                  >
+                    📥 Download Invoice
+                  </button>
+                )}
                 {order.tracking_number && (
-                  <button className="btn-outline">
+                  <button className="btn-outline" style={{ marginLeft: '8px' }}>
                     Track Package
                   </button>
                 )}
-                {order.status === 'delivered' && (
-                  <button className="btn-outline">
+                {(order.status === 'delivered' || order.order_status === 'delivered') && (
+                  <button className="btn-outline" style={{ marginLeft: '8px' }}>
                     Reorder
                   </button>
                 )}
@@ -202,9 +351,9 @@ const CustomerOrders = () => {
                     <span>Status:</span>
                     <span 
                       className="status-badge"
-                      style={{ backgroundColor: getStatusColor(selectedOrder.status) }}
+                      style={{ backgroundColor: getStatusColor(selectedOrder.status || selectedOrder.order_status) }}
                     >
-                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                      {formatStatus(selectedOrder.status || selectedOrder.order_status)}
                     </span>
                   </div>
                   <div className="info-row">
@@ -213,7 +362,7 @@ const CustomerOrders = () => {
                       className="payment-status-badge"
                       style={{ backgroundColor: getPaymentStatusColor(selectedOrder.payment_status) }}
                     >
-                      {selectedOrder.payment_status.charAt(0).toUpperCase() + selectedOrder.payment_status.slice(1)}
+                      {formatStatus(selectedOrder.payment_status)}
                     </span>
                   </div>
                   {selectedOrder.tracking_number && (
@@ -245,15 +394,32 @@ const CustomerOrders = () => {
                     {selectedOrder.items.map((item, index) => (
                       <div key={index} className="order-item">
                         <div className="item-image">
-                          {item.product_image ? (
-                            <img src={item.product_image} alt={item.product_name} />
-                          ) : (
-                            <div className="no-image">📦</div>
-                          )}
+                          {(() => {
+                            // Try multiple possible image paths
+                            const imageUrl = item.product_image || 
+                                           item.product?.primary_image || 
+                                           item.primary_image || 
+                                           null;
+                            const absoluteImageUrl = imageUrl ? toAbsoluteImageUrl(imageUrl) : null;
+                            
+                            return absoluteImageUrl ? (
+                              <img 
+                                src={absoluteImageUrl} 
+                                alt={item.product_name || 'Product'} 
+                                onError={(e) => {
+                                  // Fallback to placeholder if image fails to load
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = '<div class="no-image">📦</div>';
+                                }}
+                              />
+                            ) : (
+                              <div className="no-image">📦</div>
+                            );
+                          })()}
                         </div>
                         <div className="item-details">
                           <h4>{item.product_name}</h4>
-                          <p>SKU: {item.product_sku || 'N/A'}</p>
+                          <p>SKU: {item.product_sku || item.product?.sku || 'N/A'}</p>
                           <p>Quantity: {item.quantity}</p>
                           <p>Price: {formatCurrency(item.product_price)}</p>
                         </div>
@@ -303,8 +469,17 @@ const CustomerOrders = () => {
               >
                 Close
               </button>
+              {selectedOrder.invoice_id && (
+                <button 
+                  className="btn-primary"
+                  onClick={() => handleDownloadInvoice(selectedOrder.invoice_id, selectedOrder.invoice_number, selectedOrder.id)}
+                  style={{ marginLeft: '8px' }}
+                >
+                  📥 Download Invoice
+                </button>
+              )}
               {selectedOrder.tracking_number && (
-                <button className="btn-primary">
+                <button className="btn-primary" style={{ marginLeft: '8px' }}>
                   Track Package
                 </button>
               )}

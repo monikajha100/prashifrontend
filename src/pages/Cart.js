@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import { FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
+import { storefrontAPI } from '../services/api';
 import './Cart.css';
 
 const Cart = () => {
@@ -11,6 +13,18 @@ const Cart = () => {
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+
+  // Get tax settings
+  const { data: taxSettings } = useQuery(
+    'taxSettings',
+    storefrontAPI.getTaxSettings,
+    {
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      onError: (error) => {
+        console.error('Error loading tax settings:', error);
+      }
+    }
+  );
 
   // Sync cart state when component mounts
   useEffect(() => {
@@ -48,7 +62,9 @@ const Cart = () => {
   const calculateTotals = () => {
     const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
     const shippingAmount = 0; // Free shipping for all orders
-    const taxAmount = Math.round(subtotal * 0.18); // 18% GST
+    const taxEnabled = taxSettings?.tax_enabled || false;
+    const taxRate = taxSettings?.tax_rate || 18;
+    const taxAmount = taxEnabled ? Math.round(subtotal * taxRate / 100) : 0;
     const totalAmount = subtotal + shippingAmount + taxAmount;
     
     return { subtotal, shippingAmount, taxAmount, totalAmount };
@@ -110,17 +126,23 @@ const Cart = () => {
                   
                   <div className="item-quantity">
                     <button 
-                      className="quantity-btn"
+                      className="quantity-btn quantity-btn-minus"
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      aria-label="Decrease quantity"
+                      type="button"
                     >
                       <FaMinus />
+                      <span className="icon-fallback-minus">−</span>
                     </button>
                     <span className="quantity">{item.quantity}</span>
                     <button 
-                      className="quantity-btn"
+                      className="quantity-btn quantity-btn-plus"
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      aria-label="Increase quantity"
+                      type="button"
                     >
                       <FaPlus />
+                      <span className="icon-fallback-plus">+</span>
                     </button>
                   </div>
                   
@@ -156,10 +178,12 @@ const Cart = () => {
                 <span>{shippingAmount === 0 ? 'Free' : `₹${shippingAmount.toFixed(2)}`}</span>
               </div>
               
-              <div className="summary-row">
-                <span>Tax (GST):</span>
-                <span>₹{taxAmount.toFixed(2)}</span>
-              </div>
+              {taxSettings?.tax_enabled && (
+                <div className="summary-row">
+                  <span>Tax ({taxSettings?.tax_rate || 18}% GST):</span>
+                  <span>₹{taxAmount.toFixed(2)}</span>
+                </div>
+              )}
               
               <div className="summary-row total">
                 <span>Total:</span>

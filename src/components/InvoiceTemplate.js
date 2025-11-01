@@ -19,10 +19,12 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
   const companyData = company || defaultCompany;
 
   const formatCurrency = (amount) => {
+    const numAmount = parseFloat(amount) || 0;
+    if (isNaN(numAmount)) return '₹0.00';
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR'
-    }).format(amount || 0);
+    }).format(numAmount);
   };
 
   const formatDate = (dateString) => {
@@ -59,7 +61,8 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
   };
 
   const amountInWords = () => {
-    const totalAmount = invoice?.total_amount || 0;
+    const totalAmount = parseFloat(invoice?.total_amount) || 0;
+    if (isNaN(totalAmount)) return 'Zero Rupees only';
     const amount = Math.floor(totalAmount);
     const paisa = Math.round((totalAmount - amount) * 100);
     let words = convertToWords(amount) + ' Rupees';
@@ -101,21 +104,20 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
         <div className="bill-to">
           <h3>Bill To:</h3>
           <div className="customer-details">
-            <p><strong>{invoice.customer_name}</strong></p>
-            <p>{invoice.customer_email}</p>
-            <p>{invoice.customer_phone}</p>
-            <p>GSTIN: {invoice.customer_gstin || 'N/A'}</p>
-            <p>State: {invoice.customer_state || 'N/A'}</p>
-          </div>
-        </div>
-
-        <div className="transportation-details">
-          <h3>Transportation Details</h3>
-          <div className="transport-info">
-            <p>Transport Name: {invoice.transport_name || 'N/A'}</p>
-            <p>Vehicle Number: {invoice.vehicle_number || 'N/A'}</p>
-            <p>Delivery Date: {invoice.delivery_date ? formatDate(invoice.delivery_date) : 'N/A'}</p>
-            <p>Delivery Location: {invoice.delivery_location || 'N/A'}</p>
+            <p><strong>{invoice.customer_name || 'N/A'}</strong></p>
+            {invoice.customer_email && <p>{invoice.customer_email}</p>}
+            {invoice.customer_phone && <p>{invoice.customer_phone}</p>}
+            {invoice.customer_address && (
+              <p>{invoice.customer_address}{invoice.customer_city ? `, ${invoice.customer_city}` : ''}{invoice.customer_pincode ? ` - ${invoice.customer_pincode}` : ''}</p>
+            )}
+            {invoice.customer_state && <p>State: {invoice.customer_state}</p>}
+            {invoice.customer_gstin && <p>GSTIN: {invoice.customer_gstin}</p>}
+            {invoice.shipping_address && (
+              <div className="shipping-address-section">
+                <p><strong>Shipping Address:</strong></p>
+                <p className="shipping-address-text">{invoice.shipping_address}</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -135,14 +137,12 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
           <thead>
             <tr>
               <th>#</th>
+              <th>Image</th>
               <th>Item name</th>
               <th>HSN/SAC</th>
               <th>Quantity</th>
               <th>Price/ unit</th>
               <th>Discount</th>
-              <th>Taxable amount</th>
-              <th>CGST (9.0%)</th>
-              <th>SGST (9.0%)</th>
               <th>Amount</th>
             </tr>
           </thead>
@@ -150,15 +150,27 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
             {invoice.items && invoice.items.map((item, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
+                <td>
+                  {item.product_image ? (
+                    <img 
+                      src={item.product_image.startsWith('http') || item.product_image.startsWith('/') ? item.product_image : `/uploads/products/${item.product_image}`} 
+                      alt={item.product_name || 'Product'} 
+                      style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<span>📦</span>';
+                      }}
+                    />
+                  ) : (
+                    <span>📦</span>
+                  )}
+                </td>
                 <td>{item.product_name}</td>
                 <td>{item.hsn_sac}</td>
                 <td>{item.quantity}</td>
-                <td>{formatCurrency(item.unit_price)}</td>
-                <td>{formatCurrency(item.discount_amount)} ({item.discount_percentage}%)</td>
-                <td>{formatCurrency(item.taxable_amount)}</td>
-                <td>{formatCurrency(item.cgst_amount)}</td>
-                <td>{formatCurrency(item.sgst_amount)}</td>
-                <td>{formatCurrency(item.total_amount)}</td>
+                <td>{formatCurrency(item.unit_price || 0)}</td>
+                <td>{formatCurrency(item.discount_amount || 0)} ({parseFloat(item.discount_percentage || 0).toFixed(2)}%)</td>
+                <td>{formatCurrency(item.total_amount || 0)}</td>
               </tr>
             ))}
           </tbody>
@@ -170,34 +182,8 @@ const InvoiceTemplate = ({ invoice, company, onRef }) => {
         <div className="totals-row">
           <div className="total-label">Total</div>
           <div className="total-quantity">{invoice.items?.reduce((sum, item) => sum + item.quantity, 0) || 0}</div>
-          <div className="total-discount">{formatCurrency(invoice.items?.reduce((sum, item) => sum + item.discount_amount, 0) || 0)}</div>
-          <div className="total-taxable">{formatCurrency(invoice.subtotal)}</div>
-          <div className="total-cgst">{formatCurrency(invoice.items?.reduce((sum, item) => sum + item.cgst_amount, 0) || 0)}</div>
-          <div className="total-sgst">{formatCurrency(invoice.items?.reduce((sum, item) => sum + item.sgst_amount, 0) || 0)}</div>
-          <div className="total-amount">{formatCurrency(invoice.total_amount)}</div>
-        </div>
-      </div>
-
-      {/* Tax Details and Amounts */}
-      <div className="tax-amounts-section">
-        <div className="tax-details">
-          <h4>Tax details</h4>
-          <div className="tax-breakdown">
-            <p>CGST: {formatCurrency(invoice.items?.reduce((sum, item) => sum + item.cgst_amount, 0) || 0)} (9.0%)</p>
-            <p>SGST: {formatCurrency(invoice.items?.reduce((sum, item) => sum + item.sgst_amount, 0) || 0)} (9.0%)</p>
-          </div>
-        </div>
-
-        <div className="amounts-summary">
-          <h4>Amounts</h4>
-          <div className="amount-breakdown">
-            <p>Sub Total: {formatCurrency(invoice.subtotal)}</p>
-            <p>Tax: {formatCurrency(invoice.tax_amount)}</p>
-            <p>Shipping: {formatCurrency(invoice.shipping_amount)}</p>
-            <p><strong>Total: {formatCurrency(invoice.total_amount)}</strong></p>
-            <p>Received: {formatCurrency(invoice.received_amount || 0)}</p>
-            <p>Balance: {formatCurrency(invoice.total_amount - (invoice.received_amount || 0))}</p>
-          </div>
+          <div className="total-discount">{formatCurrency(invoice.items?.reduce((sum, item) => sum + (parseFloat(item.discount_amount) || 0), 0) || 0)}</div>
+          <div className="total-amount">{formatCurrency(invoice.total_amount || 0)}</div>
         </div>
       </div>
 

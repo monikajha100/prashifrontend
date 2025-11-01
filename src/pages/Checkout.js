@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import { paymentsAPI, ordersAPI } from '../services/api';
+import { paymentsAPI, ordersAPI, storefrontAPI, couponsAPI } from '../services/api';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -22,42 +22,93 @@ const Checkout = () => {
   const [couponData, setCouponData] = useState(null);
   const [couponError, setCouponError] = useState('');
 
+  // Get tax settings
+  const { data: taxSettings } = useQuery(
+    'taxSettings',
+    storefrontAPI.getTaxSettings,
+    {
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      onError: (error) => {
+        console.error('Error loading tax settings:', error);
+      }
+    }
+  );
+
   // Calculate cart totals from items
-  const calculateCartTotals = (items) => {
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const calculateCartTotals = (items, taxEnabled = false, taxRate = 18) => {
+    if (!items || items.length === 0) {
+      return {
+        subtotal: 0,
+        shippingAmount: 0,
+        taxAmount: 0,
+        totalAmount: 0
+      };
+    }
+    
+    const subtotal = items.reduce((sum, item) => {
+      const price = parseFloat(item.price || 0);
+      const quantity = parseInt(item.quantity || 1);
+      return sum + (price * quantity);
+    }, 0);
+    
     const shippingAmount = 0; // Free shipping for all orders
-    const taxAmount = subtotal * 0.18; // 18% GST
+    const taxAmount = taxEnabled ? (subtotal * taxRate / 100) : 0;
     const totalAmount = subtotal + shippingAmount + taxAmount;
     
     return {
-      subtotal,
-      shippingAmount,
-      taxAmount,
-      totalAmount
+      subtotal: Math.max(0, subtotal),
+      shippingAmount: Math.max(0, shippingAmount),
+      taxAmount: Math.max(0, taxAmount),
+      totalAmount: Math.max(0, totalAmount)
     };
   };
 
-  // Load cart data from localStorage
+  // Load cart data from localStorage and recalculate totals when tax settings change
   useEffect(() => {
     const savedCartItems = localStorage.getItem('cartItems');
-    const savedCartTotals = localStorage.getItem('cartTotals');
     
     if (savedCartItems) {
       const items = JSON.parse(savedCartItems);
       setCartItems(items);
       
-      if (savedCartTotals) {
-        setCartTotals(JSON.parse(savedCartTotals));
-      } else {
-        // Calculate totals if not available
-        const totals = calculateCartTotals(items);
+      // Recalculate totals with current tax settings
+      if (taxSettings !== undefined) {
+        const totals = calculateCartTotals(
+          items,
+          taxSettings.tax_enabled || false,
+          taxSettings.tax_rate || 18
+        );
         setCartTotals(totals);
+        // Update localStorage with new totals
+        localStorage.setItem('cartTotals', JSON.stringify(totals));
+      } else {
+        // Fallback: use existing totals if available, otherwise calculate with defaults
+        const savedCartTotals = localStorage.getItem('cartTotals');
+        if (savedCartTotals) {
+          try {
+            const parsedTotals = JSON.parse(savedCartTotals);
+            setCartTotals({
+              subtotal: parsedTotals.subtotal || 0,
+              shippingAmount: parsedTotals.shippingAmount ?? 0,
+              taxAmount: parsedTotals.taxAmount || 0,
+              totalAmount: parsedTotals.totalAmount || 0
+            });
+          } catch (error) {
+            // If parsing fails, calculate fresh totals
+            const totals = calculateCartTotals(items, false, 18);
+            setCartTotals(totals);
+          }
+        } else {
+          // Calculate with default (no tax)
+          const totals = calculateCartTotals(items, false, 18);
+          setCartTotals(totals);
+        }
       }
     } else {
       // Redirect to cart if no items
       navigate('/cart');
     }
-  }, [navigate]);
+  }, [navigate, taxSettings]);
 
   // Get payment settings
   const { data: paymentSettings, isLoading: settingsLoading } = useQuery(
@@ -131,26 +182,58 @@ const Checkout = () => {
     }
 
     try {
-      const response = await fetch(`/api/coupons/validate/${couponCode}?orderAmount=${cartTotals.totalAmount}`);
-      const data = await response.json();
+      setCouponError('');
+      const userId = localStorage.getItem('userId') || null;
+      const params = {
+        orderAmount: cartTotals?.subtotal || 0,
+        ...(userId && { userId })
+      };
+
+      const response = await couponsAPI.validateCoupon(couponCode.trim().toUpperCase(), params);
+      const data = response.data;
       
       if (data.valid) {
-        setCouponData(data.coupon);
-        setCouponError('');
-        // Update cart totals with discount
-        const discountAmount = data.coupon.discount_amount;
-        const newTotal = cartTotals.totalAmount - discountAmount;
-        setCartTotals(prev => ({
-          ...prev,
-          totalAmount: newTotal
-        }));
+        const discountAmount = parseFloat(data.coupon.discount_amount || 0);
+        
+        // Recalculate totals with discount
+        const newTotals = calculateCartTotals(
+          cartItems,
+          taxSettings?.tax_enabled || false,
+          taxSettings?.tax_rate || 18
+        );
+        
+        // Apply discount to subtotal before tax
+        const discountedSubtotal = Math.max(0, newTotals.subtotal - discountAmount);
+        const newTaxAmount = taxSettings?.tax_enabled 
+          ? (discountedSubtotal * (taxSettings?.tax_rate || 18) / 100)
+          : 0;
+        const newTotalAmount = discountedSubtotal + newTotals.shippingAmount + newTaxAmount;
+
+        setCouponData({
+          ...data.coupon,
+          discount_amount: discountAmount
+        });
+        
+        setCartTotals({
+          ...newTotals,
+          subtotal: newTotals.subtotal,
+          discountAmount: discountAmount,
+          taxAmount: newTaxAmount,
+          totalAmount: newTotalAmount
+        });
       } else {
         setCouponData(null);
         setCouponError(data.message || 'Invalid coupon code');
       }
     } catch (error) {
       console.error('Error validating coupon:', error);
-      setCouponError('Error validating coupon. Please try again.');
+      console.error('Error details:', error.response?.data);
+      setCouponData(null);
+      const errorMsg = error.response?.data?.message || 
+                      error.response?.data?.error || 
+                      error.message || 
+                      'Error validating coupon. Please try again.';
+      setCouponError(errorMsg);
     }
   };
 
@@ -159,9 +242,18 @@ const Checkout = () => {
     setCouponCode('');
     setCouponData(null);
     setCouponError('');
-    // Reset cart totals to original
-    const totals = calculateCartTotals(cartItems);
-    setCartTotals(totals);
+    
+    // Recalculate totals without discount
+    const newTotals = calculateCartTotals(
+      cartItems,
+      taxSettings?.tax_enabled || false,
+      taxSettings?.tax_rate || 18
+    );
+    
+    setCartTotals({
+      ...newTotals,
+      discountAmount: 0
+    });
   };
 
   const initiateRazorpayPayment = async (orderData) => {
@@ -335,35 +427,54 @@ const Checkout = () => {
       const totals = cartTotals && cartTotals.totalAmount ? cartTotals : calculateCartTotals(cartItems);
       console.log('Using totals:', totals);
       
+      // Calculate final totals with coupon discount
+      let finalSubtotal = totals.subtotal;
+      let finalDiscount = couponData ? parseFloat(couponData.discount_amount || 0) : 0;
+      let finalTaxAmount = totals.taxAmount;
+      let finalTotalAmount = totals.totalAmount;
+
+      if (couponData && finalDiscount > 0) {
+        // Discount is applied to subtotal (before tax)
+        finalSubtotal = Math.max(0, totals.subtotal - finalDiscount);
+        
+        // Recalculate tax on discounted amount if tax is enabled
+        if (taxSettings?.tax_enabled) {
+          const taxRate = taxSettings?.tax_rate || 18;
+          finalTaxAmount = finalSubtotal * (taxRate / 100);
+        }
+        
+        finalTotalAmount = finalSubtotal + totals.shippingAmount + finalTaxAmount;
+      }
+
       const orderData = {
         items: cartItems.map(item => ({
           productId: item.id,
           productName: item.name,
-          productPrice: parseFloat(item.price),
-          quantity: item.quantity,
-          totalPrice: parseFloat(item.price) * item.quantity
+          productPrice: parseFloat(item.price || 0),
+          quantity: item.quantity || 1,
+          totalPrice: parseFloat(item.price || 0) * (item.quantity || 1)
         })),
         customerName: formData.customerName,
         customerEmail: formData.customerEmail,
         customerPhone: formData.customerPhone,
         shippingAddress: formData.shippingAddress,
         billingAddress: formData.billingAddress || formData.shippingAddress,
-        city: 'Mumbai', // Default city for demo
-        state: 'Maharashtra', // Default state for demo
-        pincode: '400001', // Default pincode for demo
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        pincode: '400001',
         paymentMethod: paymentMethod,
-        subtotal: totals.subtotal,
-        taxAmount: totals.taxAmount,
+        subtotal: finalSubtotal + finalDiscount, // Original subtotal before discount
+        discountAmount: finalDiscount,
+        taxAmount: finalTaxAmount,
         shippingAmount: totals.shippingAmount,
-        totalAmount: totals.totalAmount,
-        discountAmount: couponData ? couponData.discount_amount : 0,
+        totalAmount: finalTotalAmount,
         notes: formData.notes
       };
 
       // Add coupon data if available
-      if (couponData) {
+      if (couponData && finalDiscount > 0) {
         orderData.couponCode = couponData.code;
-        orderData.couponDiscount = couponData.discount_amount;
+        orderData.couponDiscount = finalDiscount;
       }
 
       console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
@@ -591,40 +702,50 @@ const Checkout = () => {
             <h2>Order Summary</h2>
             
             <div className="order-items">
-              {cartItems.map(item => (
-                <div key={item.id} className="order-item">
-                  <img src={item.image} alt={item.name} />
-                  <div className="item-info">
-                    <h4>{item.name}</h4>
-                    <p>₹{item.price} × {item.quantity}</p>
+              {cartItems && cartItems.length > 0 ? (
+                cartItems.map(item => (
+                  <div key={item.id || `${item.name}-${item.price}`} className="order-item">
+                    <img src={item.image || '/placeholder-image.jpg'} alt={item.name || 'Product'} />
+                    <div className="item-info">
+                      <h4>{item.name || 'Unnamed Product'}</h4>
+                      <p>₹{parseFloat(item.price || 0).toFixed(2)} × {item.quantity || 1}</p>
+                    </div>
+                    <span className="item-total">₹{(parseFloat(item.price || 0) * (item.quantity || 1)).toFixed(2)}</span>
                   </div>
-                  <span className="item-total">₹{(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>No items in cart</p>
+              )}
             </div>
 
             <div className="summary-totals">
               <div className="summary-row">
-                <span>Subtotal:</span>
-                <span>₹{cartTotals.subtotal?.toFixed(2)}</span>
+                <span className="summary-label">Subtotal:</span>
+                <span className="summary-value">₹{parseFloat(cartTotals?.subtotal || 0).toFixed(2)}</span>
               </div>
-              <div className="summary-row">
-                <span>Shipping:</span>
-                <span>{cartTotals.shippingAmount === 0 ? 'Free' : `₹${cartTotals.shippingAmount?.toFixed(2)}`}</span>
-              </div>
-              <div className="summary-row">
-                <span>Tax (GST):</span>
-                <span>₹{cartTotals.taxAmount?.toFixed(2)}</span>
-              </div>
-              {couponData && (
+              {couponData && (cartTotals?.discountAmount || couponData.discount_amount || 0) > 0 && (
                 <div className="summary-row discount">
-                  <span>Discount ({couponData.code}):</span>
-                  <span>-₹{couponData.discount_amount.toFixed(2)}</span>
+                  <span className="summary-label">Discount ({couponData.code}):</span>
+                  <span className="summary-value">-₹{parseFloat(cartTotals?.discountAmount || couponData.discount_amount || 0).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="summary-row">
+                <span className="summary-label">Shipping:</span>
+                <span className="summary-value">
+                  {cartTotals?.shippingAmount === 0 || cartTotals?.shippingAmount === undefined || cartTotals?.shippingAmount === null 
+                    ? 'Free' 
+                    : `₹${parseFloat(cartTotals?.shippingAmount || 0).toFixed(2)}`}
+                </span>
+              </div>
+              {taxSettings?.tax_enabled && (
+                <div className="summary-row">
+                  <span className="summary-label">Tax ({taxSettings?.tax_rate || 18}%):</span>
+                  <span className="summary-value">₹{parseFloat(cartTotals?.taxAmount || 0).toFixed(2)}</span>
                 </div>
               )}
               <div className="summary-row total">
-                <span>Total:</span>
-                <span>₹{cartTotals.totalAmount?.toFixed(2)}</span>
+                <span className="summary-label">Total:</span>
+                <span className="summary-value">₹{parseFloat(cartTotals?.totalAmount || 0).toFixed(2)}</span>
               </div>
             </div>
           </div>

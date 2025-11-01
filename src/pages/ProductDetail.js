@@ -4,8 +4,11 @@ import { useQuery } from 'react-query';
 import { Helmet } from 'react-helmet-async';
 import { productsAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ProductSlider from '../components/ProductSlider';
+import { FaHeart } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import './ProductDetail.css';
 
@@ -13,6 +16,8 @@ const ProductDetail = () => {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState('description');
   const [quantity, setQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -26,6 +31,8 @@ const ProductDetail = () => {
       select: (response) => response.data
     }
   );
+
+  const inWishlist = product ? isInWishlist(product.id) : false;
 
   const handleAddToCart = () => {
     console.log('Add to cart clicked!', product, quantity);
@@ -69,6 +76,7 @@ const ProductDetail = () => {
         }}>
           {/* Main Image */}
           <div style={{
+            position: 'relative',
             width: '100%',
             maxWidth: '500px',
             height: '400px',
@@ -78,6 +86,48 @@ const ProductDetail = () => {
             backgroundColor: '#f5f5f5',
             marginBottom: '20px'
           }}>
+            <button
+              className={`wishlist-btn ${inWishlist ? 'active' : ''}`}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isAuthenticated) {
+                  toast.error('Please login to add items to wishlist');
+                  return;
+                }
+                toggleWishlist(product.id);
+              }}
+              title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+              style={{
+                position: 'absolute',
+                top: '15px',
+                right: '15px',
+                width: '44px',
+                height: '44px',
+                border: '2px solid #ffc0cb',
+                borderRadius: '50%',
+                background: '#28a745',
+                color: 'white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 10,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.3s ease',
+                outline: 'none'
+              }}
+            >
+              <FaHeart style={{ 
+                fontSize: '20px', 
+                color: '#ffffff', 
+                fill: '#ffffff',
+                stroke: '#ffffff',
+                display: 'block',
+                opacity: 1,
+                visibility: 'visible'
+              }} />
+            </button>
             <img 
               src={(product.images || product.productImages)?.[selectedImageIndex]?.image_url || product.primary_image || '/placeholder-product.jpg'} 
               alt={product.name}
@@ -236,7 +286,8 @@ const ProductDetail = () => {
               display: 'flex', 
               gap: '15px', 
               flexWrap: 'wrap',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              alignItems: 'center'
             }}>
               <button 
                 onClick={handleAddToCart}
@@ -293,6 +344,56 @@ const ProductDetail = () => {
                 }}
               >
                 Buy Now
+              </button>
+              
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!isAuthenticated) {
+                    toast.error('Please login to add items to wishlist');
+                    return;
+                  }
+                  toggleWishlist(product.id);
+                }}
+                title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                className={`wishlist-btn ${inWishlist ? 'active' : ''}`}
+                style={{
+                  width: '50px',
+                  height: '50px',
+                  border: '2px solid #ffc0cb',
+                  borderRadius: '50%',
+                  background: '#28a745',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                  transition: 'all 0.3s ease',
+                  outline: 'none'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = '#218838';
+                  e.target.style.borderColor = '#ff69b4';
+                  e.target.style.transform = 'scale(1.1)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = '#28a745';
+                  e.target.style.borderColor = '#ffc0cb';
+                  e.target.style.transform = 'scale(1)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+                }}
+              >
+                <FaHeart style={{ 
+                  fontSize: '22px', 
+                  color: '#ffffff', 
+                  fill: '#ffffff',
+                  stroke: '#ffffff',
+                  display: 'block',
+                  opacity: 1,
+                  visibility: 'visible'
+                }} />
               </button>
             </div>
           </div>

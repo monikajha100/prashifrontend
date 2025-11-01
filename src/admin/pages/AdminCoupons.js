@@ -2,123 +2,164 @@ import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import QRCode from 'qrcode';
+import { couponsAPI } from '../../services/api';
 import './AdminCoupons.css';
 
 const AdminCoupons = () => {
   const [activeTab, setActiveTab] = useState('coupons');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [editingCoupon, setEditingCoupon] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const queryClient = useQueryClient();
-  const qrCanvasRef = useRef(null);
-
-  // Mock data for demonstration - replace with actual API calls
-  const mockCoupons = [
-    {
-      id: 1,
-      code: 'WELCOME20',
-      name: 'Welcome Discount',
-      type: 'percentage',
-      value: 20,
-      minOrderAmount: 500,
-      maxDiscount: 1000,
-      usageLimit: 100,
-      usedCount: 45,
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
-      status: 'active',
-      targetAudience: 'new_customers',
-      description: '20% off for new customers',
-      qrCode: 'https://praashibysupal.com/coupon/WELCOME20',
-      createdAt: '2024-01-01',
-      isExpiring: false
-    },
-    {
-      id: 2,
-      code: 'FLASH50',
-      name: 'Flash Sale',
-      type: 'fixed',
-      value: 50,
-      minOrderAmount: 200,
-      maxDiscount: 50,
-      usageLimit: 50,
-      usedCount: 32,
-      startDate: '2024-10-01',
-      endDate: '2024-10-31',
-      status: 'active',
-      targetAudience: 'all',
-      description: '₹50 off on orders above ₹200',
-      qrCode: 'https://praashibysupal.com/coupon/FLASH50',
-      createdAt: '2024-10-01',
-      isExpiring: true
-    },
-    {
-      id: 3,
-      code: 'VIP15',
-      name: 'VIP Customer Discount',
-      type: 'percentage',
-      value: 15,
-      minOrderAmount: 1000,
-      maxDiscount: 500,
-      usageLimit: 10,
-      usedCount: 10,
-      startDate: '2024-09-01',
-      endDate: '2024-09-30',
-      status: 'expired',
-      targetAudience: 'vip_customers',
-      description: '15% off for VIP customers',
-      qrCode: 'https://praashibysupal.com/coupon/VIP15',
-      createdAt: '2024-09-01',
-      isExpiring: false
-    }
-  ];
-
-  const mockCampaigns = [
-    {
-      id: 1,
-      name: 'Holiday Season Sale',
-      description: 'Special discounts for holiday season',
-      startDate: '2024-12-01',
-      endDate: '2024-12-31',
-      status: 'active',
-      couponCount: 5,
-      totalUsage: 150,
-      targetAudience: 'all'
-    },
-    {
-      id: 2,
-      name: 'New Customer Acquisition',
-      description: 'Welcome offers for new customers',
-      startDate: '2024-01-01',
-      endDate: '2024-12-31',
-      status: 'active',
-      couponCount: 3,
-      totalUsage: 89,
-      targetAudience: 'new_customers'
-    }
-  ];
-
-  // Filter coupons based on search and filters
-  const filteredCoupons = mockCoupons.filter(coupon => {
-    const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         coupon.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || coupon.status === statusFilter;
-    const matchesType = typeFilter === 'all' || coupon.type === typeFilter;
-    return matchesSearch && matchesStatus && matchesType;
+  const [formData, setFormData] = useState({
+    code: '',
+    name: '',
+    type: 'percentage',
+    value: '',
+    min_order_amount: '',
+    max_discount: '',
+    usage_limit: '',
+    start_date: '',
+    end_date: '',
+    target_audience: 'all',
+    description: ''
   });
+  const queryClient = useQueryClient();
+
+  // Fetch coupons from API
+  const { data: couponsData, isLoading, error } = useQuery(
+    ['coupons', statusFilter, typeFilter, searchTerm],
+    () => couponsAPI.getAllCoupons({
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      type: typeFilter !== 'all' ? typeFilter : undefined,
+      search: searchTerm || undefined
+    }),
+    {
+      select: (response) => response.data,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  // Delete coupon mutation
+  const deleteCouponMutation = useMutation(
+    (couponId) => {
+      console.log('Calling deleteCoupon API with ID:', couponId);
+      return couponsAPI.deleteCoupon(couponId);
+    },
+    {
+      onSuccess: (response) => {
+        console.log('Delete success:', response);
+        console.log('Response data:', response.data);
+        toast.success(response.data?.message || 'Coupon deleted successfully');
+        queryClient.invalidateQueries(['coupons']);
+      },
+      onError: (error) => {
+        console.error('Delete error:', error);
+        console.error('Error response:', error.response);
+        console.error('Error response data:', error.response?.data);
+        const errorMsg = error.response?.data?.message || 
+                        error.response?.data?.error ||
+                        error.message || 
+                        'Error deleting coupon';
+        toast.error(errorMsg);
+      }
+    }
+  );
+
+  // Create/Update coupon mutation
+  const saveCouponMutation = useMutation(
+    (couponData) => {
+      if (editingCoupon) {
+        return couponsAPI.updateCoupon(editingCoupon.id, couponData);
+      }
+      return couponsAPI.createCoupon(couponData);
+    },
+    {
+      onSuccess: (response) => {
+        toast.success(response.data.message || `Coupon ${editingCoupon ? 'updated' : 'created'} successfully`);
+        queryClient.invalidateQueries(['coupons']);
+        setShowCreateModal(false);
+        setShowEditModal(false);
+        setEditingCoupon(null);
+        resetForm();
+      },
+      onError: (error) => {
+        console.error('Error saving coupon:', error);
+        console.error('Error response:', error.response?.data);
+        const errorMsg = error.response?.data?.message || 
+                        error.response?.data?.errors?.[0]?.msg ||
+                        error.response?.data?.errors?.[0]?.message ||
+                        error.message ||
+                        `Error ${editingCoupon ? 'updating' : 'creating'} coupon`;
+        toast.error(errorMsg);
+      }
+    }
+  );
+
+  const resetForm = () => {
+    setFormData({
+      code: '',
+      name: '',
+      type: 'percentage',
+      value: '',
+      min_order_amount: '',
+      max_discount: '',
+      usage_limit: '',
+      start_date: '',
+      end_date: '',
+      target_audience: 'all',
+      description: ''
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleCreateCoupon = () => {
+    setEditingCoupon(null);
+    resetForm();
     setShowCreateModal(true);
+  };
+
+  const handleEdit = (coupon) => {
+    setEditingCoupon(coupon);
+    setFormData({
+      code: coupon.code || '',
+      name: coupon.name || '',
+      type: coupon.type || 'percentage',
+      value: coupon.value || '',
+      min_order_amount: coupon.min_order_amount || '',
+      max_discount: coupon.max_discount || '',
+      usage_limit: coupon.usage_limit || '',
+      start_date: coupon.start_date ? coupon.start_date.split('T')[0] : '',
+      end_date: coupon.end_date ? coupon.end_date.split('T')[0] : '',
+      target_audience: coupon.target_audience || 'all',
+      description: coupon.description || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleCopyCode = (code) => {
+    navigator.clipboard.writeText(code);
+    toast.success(`Coupon code "${code}" copied to clipboard!`);
   };
 
   const handleGenerateQR = async (coupon) => {
     setSelectedCoupon(coupon);
     try {
-      const qrUrl = await QRCode.toDataURL(coupon.qrCode);
+      const siteUrl = window.location.origin;
+      const qrUrlString = `${siteUrl}/checkout?coupon=${coupon.code}`;
+      const qrUrl = await QRCode.toDataURL(qrUrlString);
       setQrCodeUrl(qrUrl);
       setShowQRModal(true);
     } catch (error) {
@@ -126,9 +167,46 @@ const AdminCoupons = () => {
     }
   };
 
-  const handleToggleStatus = (coupon) => {
-    const newStatus = coupon.status === 'active' ? 'inactive' : 'active';
-    toast.success(`Coupon ${coupon.code} ${newStatus === 'active' ? 'activated' : 'deactivated'}`);
+  const handleDelete = async (coupon) => {
+    const usedCount = parseInt(coupon.used_count || coupon.usedCount || 0);
+    const action = usedCount > 0 ? 'deactivate' : 'delete';
+    
+    if (window.confirm(`Are you sure you want to ${action} the coupon "${coupon.code}"?`)) {
+      try {
+        console.log('Deleting coupon:', coupon.id, coupon.code);
+        await deleteCouponMutation.mutateAsync(coupon.id);
+      } catch (error) {
+        console.error('Failed to delete coupon:', error);
+        // Error is already handled in mutation onError
+      }
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.code || !formData.name || !formData.value || !formData.start_date || !formData.end_date) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Prepare data
+    const couponData = {
+      code: formData.code.trim().toUpperCase(),
+      name: formData.name.trim(),
+      type: formData.type,
+      value: parseFloat(formData.value),
+      min_order_amount: parseFloat(formData.min_order_amount || 0),
+      max_discount: formData.max_discount ? parseFloat(formData.max_discount) : null,
+      usage_limit: parseInt(formData.usage_limit),
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      target_audience: formData.target_audience,
+      description: formData.description || ''
+    };
+
+    saveCouponMutation.mutate(couponData);
   };
 
   const getStatusColor = (status) => {
@@ -148,7 +226,9 @@ const AdminCoupons = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -156,14 +236,26 @@ const AdminCoupons = () => {
   };
 
   const isExpiringSoon = (date) => {
+    if (!date) return false;
     const expiryDate = new Date(date);
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     return expiryDate <= sevenDaysFromNow && expiryDate > new Date();
   };
 
   const getUsagePercentage = (used, limit) => {
-    return Math.round((used / limit) * 100);
+    if (!limit || limit === 0) return 0;
+    return Math.min(100, Math.round((used / limit) * 100));
   };
+
+  const coupons = couponsData?.coupons || [];
+  const filteredCoupons = coupons.filter(coupon => {
+    const matchesSearch = !searchTerm || 
+      coupon.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      coupon.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesSearch;
+  });
+
+  const mockCampaigns = [];
 
   return (
     <div className="admin-coupons">
@@ -202,6 +294,12 @@ const AdminCoupons = () => {
           onClick={() => setActiveTab('analytics')}
         >
           📊 Analytics
+        </button>
+        <button 
+          className={activeTab === 'usage' ? 'tab-active' : 'tab'}
+          onClick={() => setActiveTab('usage')}
+        >
+          📋 Usage History
         </button>
       </div>
 
@@ -242,281 +340,493 @@ const AdminCoupons = () => {
             </div>
           </div>
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="loading">Loading coupons...</div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="error">Error loading coupons: {error.message}</div>
+          )}
+
           {/* Coupons Table */}
-          <div className="coupons-table-container">
-            <table className="coupons-table">
-              <thead>
-                <tr>
-                  <th>Coupon Code</th>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Value</th>
-                  <th>Usage</th>
-                  <th>Expiry</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCoupons.map((coupon) => (
-                  <tr key={coupon.id} className={isExpiringSoon(coupon.endDate) ? 'expiring-row' : ''}>
-                    <td>
-                      <div className="coupon-code">
-                        <strong>{coupon.code}</strong>
-                        {isExpiringSoon(coupon.endDate) && (
-                          <span className="expiry-warning">⚠️ Expires Soon</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="coupon-info">
-                        <strong>{coupon.name}</strong>
-                        <div className="coupon-description">{coupon.description}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`coupon-type ${coupon.type}`}>
-                        {coupon.type === 'percentage' ? '%' : '₹'}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="coupon-value">
-                        {coupon.type === 'percentage' ? `${coupon.value}%` : formatCurrency(coupon.value)}
-                        {coupon.maxDiscount && (
-                          <div className="max-discount">Max: {formatCurrency(coupon.maxDiscount)}</div>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="usage-info">
-                        <div className="usage-bar">
-                          <div 
-                            className="usage-fill"
-                            style={{ width: `${getUsagePercentage(coupon.usedCount, coupon.usageLimit)}%` }}
-                          ></div>
-                        </div>
-                        <div className="usage-text">
-                          {coupon.usedCount}/{coupon.usageLimit} uses
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="expiry-info">
-                        {formatDate(coupon.endDate)}
-                      </div>
-                    </td>
-                    <td>
-                      <span 
-                        className="status-badge"
-                        style={{ backgroundColor: getStatusColor(coupon.status) }}
-                      >
-                        {coupon.status}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="btn-qr" 
-                          onClick={() => handleGenerateQR(coupon)}
-                          title="Generate QR Code"
-                        >
-                          📱
-                        </button>
-                        <button 
-                          className="btn-toggle" 
-                          onClick={() => handleToggleStatus(coupon)}
-                          title={coupon.status === 'active' ? 'Deactivate' : 'Activate'}
-                        >
-                          {coupon.status === 'active' ? '⏸️' : '▶️'}
-                        </button>
-                        <button className="btn-edit" title="Edit Coupon">✏️</button>
-                        <button className="btn-copy" title="Copy Code">📋</button>
-                      </div>
-                    </td>
+          {!isLoading && !error && (
+            <div className="coupons-table-container">
+              <table className="coupons-table">
+                <thead>
+                  <tr>
+                    <th>Coupon Code</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Usage</th>
+                    <th>Expiry</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredCoupons.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" style={{ textAlign: 'center', padding: '40px' }}>
+                        No coupons found
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCoupons.map((coupon) => {
+                      const usedCount = parseInt(coupon.used_count || coupon.usedCount || 0);
+                      const usageLimit = parseInt(coupon.usage_limit || 0);
+                      // Ensure status is properly set - check both status and is_active
+                      const couponStatus = coupon.status || (coupon.is_active === 1 || coupon.is_active === true ? 'active' : 'inactive');
+                      const isActive = couponStatus === 'active';
+                      
+                      return (
+                        <tr key={coupon.id} className={isExpiringSoon(coupon.end_date) ? 'expiring-row' : ''}>
+                          <td>
+                            <div className="coupon-code">
+                              <strong>{coupon.code}</strong>
+                              {isExpiringSoon(coupon.end_date) && (
+                                <span className="expiry-warning">⚠️ Expires Soon</span>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="coupon-info">
+                              <strong>{coupon.name}</strong>
+                              <div className="coupon-description">{coupon.description || ''}</div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`coupon-type ${coupon.type}`}>
+                              {coupon.type === 'percentage' ? '%' : '₹'}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="coupon-value">
+                              {coupon.type === 'percentage' ? `${coupon.value}%` : formatCurrency(coupon.value)}
+                              {coupon.max_discount && (
+                                <div className="max-discount">Max: {formatCurrency(coupon.max_discount)}</div>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="usage-info">
+                              <div className="usage-bar">
+                                <div 
+                                  className="usage-fill"
+                                  style={{ width: `${getUsagePercentage(usedCount, usageLimit)}%` }}
+                                ></div>
+                              </div>
+                              <div className="usage-text">
+                                {usedCount}/{usageLimit} uses
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="expiry-info">
+                              {formatDate(coupon.end_date)}
+                            </div>
+                          </td>
+                          <td>
+                            <span 
+                              className="status-badge"
+                              style={{ backgroundColor: getStatusColor(couponStatus) }}
+                            >
+                              {couponStatus}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="action-buttons">
+                              <button 
+                                className="btn-qr" 
+                                onClick={() => handleGenerateQR(coupon)}
+                                title="Generate QR Code"
+                                type="button"
+                              >
+                                📱
+                              </button>
+                              <button 
+                                className="btn-edit" 
+                                onClick={() => handleEdit(coupon)}
+                                title="Edit Coupon"
+                                type="button"
+                              >
+                                ✏️
+                              </button>
+                              <button 
+                                className="btn-copy" 
+                                onClick={() => handleCopyCode(coupon.code)}
+                                title="Copy Code"
+                              >
+                                📋
+                              </button>
+                              <button 
+                                className="btn-delete" 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleDelete(coupon);
+                                }}
+                                title="Delete Coupon"
+                                type="button"
+                                disabled={deleteCouponMutation.isLoading}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
       {/* Campaigns Tab */}
       {activeTab === 'campaigns' && (
         <div className="campaigns-content">
-          <div className="campaigns-grid">
-            {mockCampaigns.map((campaign) => (
-              <div key={campaign.id} className="campaign-card">
-                <div className="campaign-header">
-                  <h3>{campaign.name}</h3>
-                  <span className={`campaign-status ${campaign.status}`}>
-                    {campaign.status}
-                  </span>
-                </div>
-                <div className="campaign-description">
-                  {campaign.description}
-                </div>
-                <div className="campaign-stats">
-                  <div className="stat">
-                    <span className="stat-number">{campaign.couponCount}</span>
-                    <span className="stat-label">Coupons</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-number">{campaign.totalUsage}</span>
-                    <span className="stat-label">Total Uses</span>
-                  </div>
-                </div>
-                <div className="campaign-dates">
-                  <div>Start: {formatDate(campaign.startDate)}</div>
-                  <div>End: {formatDate(campaign.endDate)}</div>
-                </div>
-                <div className="campaign-actions">
-                  <button className="btn-primary">View Coupons</button>
-                  <button className="btn-secondary">Edit Campaign</button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className="no-data">Campaigns feature coming soon...</div>
         </div>
       )}
 
       {/* Analytics Tab */}
       {activeTab === 'analytics' && (
         <div className="analytics-content">
-          <div className="analytics-grid">
-            <div className="analytics-card">
-              <h3>📊 Coupon Overview</h3>
-              <div className="metric">
-                <span className="metric-value">{mockCoupons.length}</span>
-                <span className="metric-label">Total Coupons</span>
-              </div>
-              <div className="metric">
-                <span className="metric-value">{mockCoupons.filter(c => c.status === 'active').length}</span>
-                <span className="metric-label">Active</span>
-              </div>
-              <div className="metric">
-                <span className="metric-value">{mockCoupons.filter(c => isExpiringSoon(c.endDate)).length}</span>
-                <span className="metric-label">Expiring Soon</span>
-              </div>
-            </div>
-            
-            <div className="analytics-card">
-              <h3>💰 Usage Statistics</h3>
-              <div className="metric">
-                <span className="metric-value">
-                  {mockCoupons.reduce((sum, c) => sum + c.usedCount, 0)}
-                </span>
-                <span className="metric-label">Total Uses</span>
-              </div>
-              <div className="metric">
-                <span className="metric-value">
-                  {Math.round(mockCoupons.reduce((sum, c) => sum + c.usedCount, 0) / mockCoupons.length)}
-                </span>
-                <span className="metric-label">Avg Uses per Coupon</span>
-              </div>
-            </div>
+          <div className="no-data">Analytics feature coming soon...</div>
+        </div>
+      )}
 
-            <div className="analytics-card">
-              <h3>🎯 Campaign Performance</h3>
-              <div className="metric">
-                <span className="metric-value">{mockCampaigns.length}</span>
-                <span className="metric-label">Active Campaigns</span>
-              </div>
-              <div className="metric">
-                <span className="metric-value">
-                  {mockCampaigns.reduce((sum, c) => sum + c.totalUsage, 0)}
-                </span>
-                <span className="metric-label">Total Campaign Uses</span>
-              </div>
-            </div>
-          </div>
+      {/* Usage History Tab */}
+      {activeTab === 'usage' && (
+        <div className="usage-content">
+          <CouponUsageHistory />
         </div>
       )}
 
       {/* Create Coupon Modal */}
       {showCreateModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>🎫 Create New Coupon</h3>
               <button onClick={() => setShowCreateModal(false)}>×</button>
             </div>
             <div className="modal-body">
-              <form className="coupon-form">
+              <form className="coupon-form" onSubmit={handleSubmit}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Coupon Code</label>
-                    <input type="text" placeholder="e.g., WELCOME20" />
+                    <label>Coupon Code *</label>
+                    <input 
+                      type="text" 
+                      name="code"
+                      value={formData.code}
+                      onChange={handleInputChange}
+                      placeholder="e.g., WELCOME20" 
+                      required
+                    />
                   </div>
                   <div className="form-group">
-                    <label>Coupon Name</label>
-                    <input type="text" placeholder="e.g., Welcome Discount" />
+                    <label>Coupon Name *</label>
+                    <input 
+                      type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Welcome Discount" 
+                      required
+                    />
                   </div>
                 </div>
                 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Discount Type</label>
-                    <select>
+                    <label>Discount Type *</label>
+                    <select name="type" value={formData.type} onChange={handleInputChange} required>
                       <option value="percentage">Percentage</option>
                       <option value="fixed">Fixed Amount</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Discount Value</label>
-                    <input type="number" placeholder="20" />
+                    <label>Discount Value *</label>
+                    <input 
+                      type="number" 
+                      name="value"
+                      value={formData.value}
+                      onChange={handleInputChange}
+                      placeholder={formData.type === 'percentage' ? "20" : "100"} 
+                      min="0"
+                      step={formData.type === 'percentage' ? "1" : "0.01"}
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Minimum Order Amount</label>
-                    <input type="number" placeholder="500" />
+                    <label>Minimum Order Amount *</label>
+                    <input 
+                      type="number" 
+                      name="min_order_amount"
+                      value={formData.min_order_amount}
+                      onChange={handleInputChange}
+                      placeholder="500" 
+                      min="0"
+                      step="0.01"
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label>Maximum Discount</label>
-                    <input type="number" placeholder="1000" />
+                    <input 
+                      type="number" 
+                      name="max_discount"
+                      value={formData.max_discount}
+                      onChange={handleInputChange}
+                      placeholder="1000 (for percentage only)" 
+                      min="0"
+                      step="0.01"
+                    />
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Usage Limit</label>
-                    <input type="number" placeholder="100" />
+                    <label>Usage Limit *</label>
+                    <input 
+                      type="number" 
+                      name="usage_limit"
+                      value={formData.usage_limit}
+                      onChange={handleInputChange}
+                      placeholder="100" 
+                      min="1"
+                      required
+                    />
                   </div>
                   <div className="form-group">
                     <label>Target Audience</label>
-                    <select>
+                    <select name="target_audience" value={formData.target_audience} onChange={handleInputChange}>
                       <option value="all">All Customers</option>
                       <option value="new_customers">New Customers</option>
                       <option value="vip_customers">VIP Customers</option>
-                      <option value="returning_customers">Returning Customers</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Start Date</label>
-                    <input type="date" />
+                    <label>Start Date *</label>
+                    <input 
+                      type="date" 
+                      name="start_date"
+                      value={formData.start_date}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
                   <div className="form-group">
-                    <label>End Date</label>
-                    <input type="date" />
-        </div>
-      </div>
+                    <label>End Date *</label>
+                    <input 
+                      type="date" 
+                      name="end_date"
+                      value={formData.end_date}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
 
                 <div className="form-group">
                   <label>Description</label>
-                  <textarea rows="3" placeholder="Describe the coupon offer..."></textarea>
+                  <textarea 
+                    rows="3" 
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe the coupon offer..."
+                  ></textarea>
                 </div>
 
                 <div className="form-actions">
-                  <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    onClick={() => setShowCreateModal(false)}
+                    disabled={saveCouponMutation.isLoading}
+                  >
                     Cancel
                   </button>
-                  <button type="submit" className="btn-primary">
-                    Create Coupon
+                  <button 
+                    type="submit" 
+                    className="btn-primary"
+                    disabled={saveCouponMutation.isLoading}
+                  >
+                    {saveCouponMutation.isLoading ? 'Creating...' : 'Create Coupon'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Coupon Modal */}
+      {showEditModal && editingCoupon && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>✏️ Edit Coupon</h3>
+              <button onClick={() => setShowEditModal(false)}>×</button>
+            </div>
+            <div className="modal-body">
+              <form className="coupon-form" onSubmit={handleSubmit}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Coupon Code *</label>
+                    <input 
+                      type="text" 
+                      name="code"
+                      value={formData.code}
+                      onChange={handleInputChange}
+                      required
+                      disabled
+                    />
+                    <small style={{ color: '#6b7280' }}>Code cannot be changed</small>
+                  </div>
+                  <div className="form-group">
+                    <label>Coupon Name *</label>
+                    <input 
+                      type="text" 
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Discount Type *</label>
+                    <select name="type" value={formData.type} onChange={handleInputChange} required>
+                      <option value="percentage">Percentage</option>
+                      <option value="fixed">Fixed Amount</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Discount Value *</label>
+                    <input 
+                      type="number" 
+                      name="value"
+                      value={formData.value}
+                      onChange={handleInputChange}
+                      min="0"
+                      step={formData.type === 'percentage' ? "1" : "0.01"}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Minimum Order Amount *</label>
+                    <input 
+                      type="number" 
+                      name="min_order_amount"
+                      value={formData.min_order_amount}
+                      onChange={handleInputChange}
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Maximum Discount</label>
+                    <input 
+                      type="number" 
+                      name="max_discount"
+                      value={formData.max_discount}
+                      onChange={handleInputChange}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Usage Limit *</label>
+                    <input 
+                      type="number" 
+                      name="usage_limit"
+                      value={formData.usage_limit}
+                      onChange={handleInputChange}
+                      min="1"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Target Audience</label>
+                    <select name="target_audience" value={formData.target_audience} onChange={handleInputChange}>
+                      <option value="all">All Customers</option>
+                      <option value="new_customers">New Customers</option>
+                      <option value="vip_customers">VIP Customers</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Start Date *</label>
+                    <input 
+                      type="date" 
+                      name="start_date"
+                      value={formData.start_date}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>End Date *</label>
+                    <input 
+                      type="date" 
+                      name="end_date"
+                      value={formData.end_date}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea 
+                    rows="3" 
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                  ></textarea>
+                </div>
+
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    onClick={() => setShowEditModal(false)}
+                    disabled={saveCouponMutation.isLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="btn-primary"
+                    disabled={saveCouponMutation.isLoading}
+                  >
+                    {saveCouponMutation.isLoading ? 'Updating...' : 'Update Coupon'}
                   </button>
                 </div>
               </form>
@@ -527,8 +837,8 @@ const AdminCoupons = () => {
 
       {/* QR Code Modal */}
       {showQRModal && selectedCoupon && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal-overlay" onClick={() => setShowQRModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>📱 QR Code - {selectedCoupon.code}</h3>
               <button onClick={() => setShowQRModal(false)}>×</button>
@@ -539,7 +849,6 @@ const AdminCoupons = () => {
                 <div className="qr-code-info">
                   <p><strong>Coupon:</strong> {selectedCoupon.name}</p>
                   <p><strong>Code:</strong> {selectedCoupon.code}</p>
-                  <p><strong>URL:</strong> {selectedCoupon.qrCode}</p>
                 </div>
               </div>
               <div className="qr-actions">
@@ -552,15 +861,131 @@ const AdminCoupons = () => {
                   Download QR Code
                 </button>
                 <button className="btn-primary" onClick={() => {
-                  navigator.clipboard.writeText(selectedCoupon.qrCode);
-                  toast.success('URL copied to clipboard!');
+                  const siteUrl = window.location.origin;
+                  navigator.clipboard.writeText(`${siteUrl}/checkout?coupon=${selectedCoupon.code}`);
+                  toast.success('Coupon URL copied to clipboard!');
                 }}>
                   Copy URL
                 </button>
               </div>
+            </div>
+          </div>
         </div>
-      </div>
-        </div>
+      )}
+    </div>
+  );
+};
+
+// Coupon Usage History Component
+const CouponUsageHistory = () => {
+  const [page, setPage] = useState(1);
+  const limit = 20;
+
+  const { data, isLoading, error } = useQuery(
+    ['couponUsage', page],
+    () => couponsAPI.getUsageHistory({ page, limit }),
+    {
+      select: (response) => response.data
+    }
+  );
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return `₹${parseFloat(amount || 0).toFixed(2)}`;
+  };
+
+  if (isLoading) {
+    return <div className="loading">Loading usage history...</div>;
+  }
+
+  if (error) {
+    return <div className="error">Error loading usage history: {error.message}</div>;
+  }
+
+  const { usageHistory = [], pagination } = data || {};
+
+  return (
+    <div className="usage-history">
+      <h2>Coupon Usage History</h2>
+      
+      {usageHistory.length === 0 ? (
+        <div className="no-data">No coupon usage found.</div>
+      ) : (
+        <>
+          <div className="usage-table-container">
+            <table className="usage-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Coupon Code</th>
+                  <th>Order Number</th>
+                  <th>Customer</th>
+                  <th>Order Total</th>
+                  <th>Discount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usageHistory.map((usage) => (
+                  <tr key={usage.id}>
+                    <td>{formatDate(usage.used_at)}</td>
+                    <td>
+                      <strong>{usage.coupon_code || 'N/A'}</strong>
+                      {usage.coupon_name && (
+                        <div className="coupon-name-text">{usage.coupon_name}</div>
+                      )}
+                    </td>
+                    <td>{usage.order_number || 'N/A'}</td>
+                    <td>
+                      {usage.user_name || usage.user_email || 'Guest'}
+                      {usage.user_email && (
+                        <div className="user-email-text">{usage.user_email}</div>
+                      )}
+                    </td>
+                    <td>{formatCurrency(usage.order_total)}</td>
+                    <td className="discount-amount">{formatCurrency(usage.discount_amount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {pagination && pagination.totalPages > 1 && (
+            <div className="pagination">
+              <button 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={!pagination.hasPrev}
+                className="pagination-btn"
+              >
+                Previous
+              </button>
+              <span className="pagination-info">
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+              <button 
+                onClick={() => setPage(p => p + 1)}
+                disabled={!pagination.hasNext}
+                className="pagination-btn"
+              >
+                Next
+              </button>
+            </div>
+          )}
+
+          <div className="usage-summary">
+            <p>Total Usage Records: {pagination?.totalUsage || 0}</p>
+          </div>
+        </>
       )}
     </div>
   );

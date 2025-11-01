@@ -10,9 +10,12 @@ import {
   FaBuilding,
   FaStore,
   FaHandshake,
+  FaPlus,
 } from "react-icons/fa";
+import { partnersAPI } from "../../services/api";
+import PartnerForm from "../../admin/components/PartnerForm";
+import toast from "react-hot-toast";
 import "./AdminPartners.css";
-import api from "../../services/api";
 
 const AdminPartners = () => {
   const [applications, setApplications] = useState([]);
@@ -21,7 +24,14 @@ const AdminPartners = () => {
   const [showModal, setShowModal] = useState(false);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0
+  });
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingPartner, setEditingPartner] = useState(null);
 
   useEffect(() => {
     fetchApplications();
@@ -30,11 +40,18 @@ const AdminPartners = () => {
 
   const fetchApplications = async () => {
     try {
-      const response = await api.get("/admin/partners/applications");
-      const data = response.data;
-      setApplications(data.applications);
+      const response = await partnersAPI.getAllApplications();
+      if (response.data.success) {
+        // Ensure applications is always an array
+        setApplications(Array.isArray(response.data.applications) ? response.data.applications : []);
+      } else {
+        setApplications([]);
+      }
     } catch (error) {
       console.error("Error fetching applications:", error);
+      toast.error("Failed to fetch partner applications");
+      // Set to empty array on error to prevent filter errors
+      setApplications([]);
     } finally {
       setLoading(false);
     }
@@ -42,46 +59,130 @@ const AdminPartners = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await api.get("/admin/partners/stats");
-      const data = response.data;
-      setStats(data.stats);
+      const response = await partnersAPI.getStats();
+      if (response.data.success && response.data.stats) {
+        setStats(response.data.stats);
+      } else {
+        // Set default stats if API fails or returns no stats
+        setStats({
+          total: 0,
+          pending: 0,
+          approved: 0,
+          rejected: 0
+        });
+      }
     } catch (error) {
       console.error("Error fetching stats:", error);
+      // Set default stats on error
+      setStats({
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0
+      });
+    }
+  };
+
+  const createPartner = async (partnerData) => {
+    try {
+      const response = await partnersAPI.createPartner(partnerData);
+      
+      if (response.data.success) {
+        toast.success("Partner created successfully!");
+        fetchApplications();
+        fetchStats();
+        setShowCreateForm(false);
+        setEditingPartner(null);
+      } else {
+        toast.error(response.data.message || "Error creating partner");
+      }
+    } catch (error) {
+      console.error("Error creating partner:", error);
+      toast.error(error.response?.data?.message || "Error creating partner");
+    }
+  };
+
+  const updatePartner = async (id, partnerData) => {
+    try {
+      const response = await partnersAPI.updatePartner(id, partnerData);
+
+      if (response.data.success) {
+        toast.success("Partner updated successfully!");
+        fetchApplications();
+        fetchStats();
+        setShowCreateForm(false);
+        setEditingPartner(null);
+      } else {
+        toast.error(response.data.message || "Error updating partner");
+      }
+    } catch (error) {
+      console.error("Error updating partner:", error);
+      toast.error(error.response?.data?.message || "Error updating partner");
     }
   };
 
   const updateApplicationStatus = async (id, status) => {
     try {
-      await api.put(`/admin/partners/applications/${id}/status`, { status });
+      const response = await partnersAPI.updateApplicationStatus(id, status);
 
-      fetchApplications();
-      fetchStats();
-      setShowModal(false);
+      if (response.data.success) {
+        toast.success(`Application ${status} successfully!`);
+        fetchApplications();
+        fetchStats();
+        setShowModal(false);
+      } else {
+        toast.error(response.data.message || "Error updating status");
+      }
     } catch (error) {
       console.error("Error updating status:", error);
+      toast.error(error.response?.data?.message || "Error updating status");
     }
   };
 
   const deleteApplication = async (id) => {
     if (window.confirm("Are you sure you want to delete this application?")) {
       try {
-        await api.delete(`/admin/partners/applications/${id}`);
-        fetchApplications();
-        fetchStats();
+        const response = await partnersAPI.deleteApplication(id);
+
+        if (response.data.success) {
+          toast.success("Application deleted successfully!");
+          fetchApplications();
+          fetchStats();
+        } else {
+          toast.error(response.data.message || "Error deleting application");
+        }
       } catch (error) {
         console.error("Error deleting application:", error);
+        toast.error(error.response?.data?.message || "Error deleting application");
       }
     }
   };
 
   const viewApplication = async (id) => {
     try {
-      const response = await api.get(`/admin/partners/applications/${id}`);
-      const data = response.data;
-      setSelectedApplication(data.application);
-      setShowModal(true);
+      const response = await partnersAPI.getApplicationById(id);
+      if (response.data.success) {
+        setSelectedApplication(response.data.application);
+        setShowModal(true);
+      } else {
+        toast.error(response.data.message || "Error fetching application details");
+      }
     } catch (error) {
       console.error("Error fetching application:", error);
+      toast.error("Error fetching application details");
+    }
+  };
+
+  const handleEditPartner = (partner) => {
+    setEditingPartner(partner);
+    setShowCreateForm(true);
+  };
+
+  const handleSavePartner = (partnerData) => {
+    if (editingPartner) {
+      updatePartner(editingPartner.id, partnerData);
+    } else {
+      createPartner(partnerData);
     }
   };
 
@@ -107,12 +208,12 @@ const AdminPartners = () => {
     return <span className={statusClasses[status]}>{status}</span>;
   };
 
-  const filteredApplications = applications.filter((app) => {
+  const filteredApplications = (Array.isArray(applications) ? applications : []).filter((app) => {
     const matchesFilter = filter === "all" || app.status === filter;
     const matchesSearch =
-      app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.business.toLowerCase().includes(searchTerm.toLowerCase());
+      app.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.business?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -131,6 +232,15 @@ const AdminPartners = () => {
           <h1>🤝 Partner Applications</h1>
           <p>Manage partnership applications and approvals</p>
         </div>
+        <button 
+          className="btn-primary create-btn"
+          onClick={() => {
+            setEditingPartner(null);
+            setShowCreateForm(true);
+          }}
+        >
+          <FaPlus /> Create Partner
+        </button>
       </div>
 
       {/* Statistics Cards */}
@@ -138,28 +248,28 @@ const AdminPartners = () => {
         <div className="stat-card">
           <div className="stat-icon total">📊</div>
           <div className="stat-content">
-            <h3>{stats.total || 0}</h3>
+            <h3>{stats?.total || 0}</h3>
             <p>Total Applications</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon pending">⏳</div>
           <div className="stat-content">
-            <h3>{stats.pending || 0}</h3>
+            <h3>{stats?.pending || 0}</h3>
             <p>Pending Review</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon approved">✅</div>
           <div className="stat-content">
-            <h3>{stats.approved || 0}</h3>
+            <h3>{stats?.approved || 0}</h3>
             <p>Approved</p>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon rejected">❌</div>
           <div className="stat-content">
-            <h3>{stats.rejected || 0}</h3>
+            <h3>{stats?.rejected || 0}</h3>
             <p>Rejected</p>
           </div>
         </div>
@@ -252,6 +362,13 @@ const AdminPartners = () => {
                     title="View Details"
                   >
                     <FaEye />
+                  </button>
+                  <button
+                    className="action-btn edit"
+                    onClick={() => handleEditPartner(app)}
+                    title="Edit Partner"
+                  >
+                    <FaUser />
                   </button>
                   {app.status === "pending" && (
                     <>
@@ -402,6 +519,18 @@ const AdminPartners = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create/Edit Partner Form Modal */}
+      {showCreateForm && (
+        <PartnerForm
+          partner={editingPartner}
+          onSave={handleSavePartner}
+          onCancel={() => {
+            setShowCreateForm(false);
+            setEditingPartner(null);
+          }}
+        />
       )}
     </div>
   );

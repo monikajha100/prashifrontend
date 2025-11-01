@@ -19,17 +19,61 @@ export const CartProvider = ({ children }) => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       try {
-        setCartItems(JSON.parse(savedCart));
+        const parsedCart = JSON.parse(savedCart);
+        // Validate and filter out invalid items
+        if (Array.isArray(parsedCart)) {
+          const validCart = parsedCart.filter(item => 
+            item && 
+            item.id && 
+            item.quantity && 
+            typeof item.quantity === 'number' && 
+            item.quantity > 0 &&
+            item.price !== undefined
+          );
+          setCartItems(validCart);
+          // Update localStorage with cleaned data if items were removed
+          if (validCart.length !== parsedCart.length) {
+            localStorage.setItem('cart', JSON.stringify(validCart));
+          }
+        } else {
+          // Invalid format, clear it
+          setCartItems([]);
+          localStorage.removeItem('cart');
+        }
       } catch (error) {
         console.error('Error loading cart from localStorage:', error);
         localStorage.removeItem('cart');
+        setCartItems([]);
       }
+    } else {
+      setCartItems([]);
     }
   }, []);
 
-  // Save cart to localStorage whenever cartItems change
+  // Save cart to localStorage whenever cartItems change and cleanup invalid items
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cartItems));
+    // Only save valid cart items
+    if (Array.isArray(cartItems)) {
+      const validCart = cartItems.filter(item => 
+        item && 
+        item.id && 
+        item.quantity && 
+        typeof item.quantity === 'number' && 
+        item.quantity > 0 &&
+        item.price !== undefined
+      );
+      
+      // If invalid items were filtered out, update state to match
+      if (validCart.length !== cartItems.length) {
+        setCartItems(validCart);
+        return; // Don't save yet, let the next effect cycle handle it
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(validCart));
+    } else {
+      setCartItems([]);
+      localStorage.setItem('cart', JSON.stringify([]));
+    }
   }, [cartItems]);
 
   const addToCart = (product, quantity = 1) => {
@@ -98,7 +142,16 @@ export const CartProvider = ({ children }) => {
   };
 
   const getCartItemsCount = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      return 0;
+    }
+    return cartItems.reduce((total, item) => {
+      const quantity = item?.quantity;
+      if (typeof quantity === 'number' && quantity > 0) {
+        return total + quantity;
+      }
+      return total;
+    }, 0);
   };
 
   const getCartItem = (productId) => {

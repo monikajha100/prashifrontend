@@ -1,6 +1,5 @@
 .invoice-template {
   width: 210mm;
-  min-height: 297mm;
   margin: 0 auto;
   padding: 20mm;
   background: white;
@@ -69,7 +68,7 @@
 /* Invoice Details Grid */
 .invoice-details-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 15px;
   margin-bottom: 20px;
   background: #f8f9fa;
@@ -78,22 +77,42 @@
 }
 
 .bill-to h3,
-.transportation-details h3,
 .invoice-info h3 {
   font-size: 12px;
   font-weight: bold;
   margin: 0 0 8px 0;
-  color: #333;
+  color: #000;
   background: #e9ecef;
   padding: 5px;
   border: 1px solid #ccc;
 }
 
+.customer-details {
+  color: #000;
+  background: #fff;
+}
+
 .customer-details p,
-.transport-info p,
 .invoice-meta p {
   margin: 3px 0;
   font-size: 10px;
+  color: #000;
+  line-height: 1.4;
+}
+
+.customer-details p strong {
+  color: #000;
+  font-weight: bold;
+}
+
+.shipping-address-section {
+  margin-top: 10px;
+  color: #000;
+}
+
+.shipping-address-text {
+  white-space: pre-line;
+  color: #000 !important;
 }
 
 /* Items Table */
@@ -114,6 +133,11 @@
   font-weight: bold;
   border: 1px solid #333;
   font-size: 9px;
+  color: #000;
+}
+
+.items-table th:nth-child(7) {
+  min-width: 100px;
 }
 
 .items-table td {
@@ -121,9 +145,28 @@
   text-align: center;
   border: 1px solid #333;
   font-size: 9px;
+  color: #000;
+  background: #fff;
+}
+
+.items-table td:nth-child(7) {
+  font-weight: 500;
+  min-width: 100px;
 }
 
 .items-table td:nth-child(2) {
+  text-align: center;
+  padding: 4px;
+}
+
+.items-table td:nth-child(2) img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.items-table td:nth-child(3) {
   text-align: left;
   padding-left: 8px;
 }
@@ -135,7 +178,7 @@
 
 .totals-row {
   display: grid;
-  grid-template-columns: 1fr 0.5fr 0.8fr 0.8fr 0.8fr 0.8fr 1fr;
+  grid-template-columns: 1fr 0.5fr 0.8fr 1fr;
   gap: 0;
   background: #f8f9fa;
   border: 1px solid #333;
@@ -158,22 +201,17 @@
   padding-left: 8px;
 }
 
-/* Tax and Amounts Section */
-.tax-amounts-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+/* Amounts Summary Section */
+.amounts-summary-section {
   margin-bottom: 20px;
 }
 
-.tax-details,
 .amounts-summary {
   background: #f8f9fa;
   padding: 15px;
   border: 1px solid #ddd;
 }
 
-.tax-details h4,
 .amounts-summary h4 {
   font-size: 12px;
   font-weight: bold;
@@ -184,7 +222,6 @@
   border: 1px solid #ccc;
 }
 
-.tax-breakdown p,
 .amount-breakdown p {
   margin: 5px 0;
   font-size: 10px;
@@ -282,6 +319,32 @@
     page-break-inside: avoid;
   }
   
+  .invoice-details-grid {
+    page-break-inside: avoid;
+  }
+  
+  .bill-to,
+  .customer-details {
+    color: #000 !important;
+    background: #fff !important;
+  }
+  
+  .customer-details p {
+    color: #000 !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+  
+  .shipping-address-section {
+    color: #000 !important;
+    margin-top: 10px !important;
+  }
+  
+  .shipping-address-text {
+    color: #000 !important;
+    white-space: pre-line !important;
+  }
+  
   .items-table {
     page-break-inside: avoid;
   }
@@ -304,10 +367,6 @@
     gap: 10px;
   }
   
-  .tax-amounts-section {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
   
   .invoice-footer {
     grid-template-columns: 1fr;

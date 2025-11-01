@@ -50,10 +50,17 @@ const CustomerInvoices = () => {
     if (!invoiceRef.current || !invoiceDetails) return;
 
     try {
+      // Wait a bit more for all content to render, especially images and text
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       const canvas = await html2canvas(invoiceRef.current, {
         scale: 2,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: invoiceRef.current.scrollWidth,
+        windowHeight: invoiceRef.current.scrollHeight
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -69,7 +76,8 @@ const CustomerInvoices = () => {
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
 
-      while (heightLeft >= 0) {
+      // Only add new page if there's significant content left (> 10mm)
+      while (heightLeft > 10) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);

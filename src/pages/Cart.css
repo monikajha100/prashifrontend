@@ -132,7 +132,7 @@
 }
 
 .quantity-btn {
-  background: none;
+  background: #1A362B;
   border: none;
   width: 32px;
   height: 32px;
@@ -141,13 +141,68 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #6b7280;
+  color: #ffffff;
+  font-size: 16px;
   transition: all 0.2s;
+  font-weight: 700;
+  line-height: 1;
+  position: relative;
+  flex-shrink: 0;
 }
 
 .quantity-btn:hover {
-  background: #e5e7eb;
-  color: #374151;
+  background: #0f2419;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+.quantity-btn:active {
+  transform: scale(0.95);
+}
+
+/* Hide SVG icons - use text fallback instead */
+.quantity-btn svg {
+  display: none !important;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Text fallback icons - always visible */
+.quantity-btn .icon-fallback-minus,
+.quantity-btn .icon-fallback-plus {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffffff !important;
+  display: block !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  pointer-events: none;
+  user-select: none;
+  font-family: Arial, sans-serif;
+}
+
+/* Ensure icons are always visible and properly styled */
+.quantity-btn svg,
+.quantity-btn .icon-fallback-minus,
+.quantity-btn .icon-fallback-plus {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Force icon visibility */
+.quantity-btn {
+  color: #ffffff !important;
+}
+
+.quantity-btn svg path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 .quantity {
@@ -461,6 +516,15 @@
     font-size: 12px;
   }
   
+  .quantity-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .quantity-btn .icon-fallback {
+    font-size: 16px;
+  }
+  
   .quantity-input {
     width: 45px;
     height: 28px;
@@ -540,6 +604,15 @@
     width: 26px;
     height: 26px;
     font-size: 11px;
+  }
+  
+  .quantity-btn svg {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .quantity-btn .icon-fallback {
+    font-size: 14px;
   }
   
   .quantity-input {

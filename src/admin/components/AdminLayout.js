@@ -31,6 +31,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/special-offers', label: 'Special Offers', icon: FaGift },
     { path: '/admin/orders', label: 'Orders', icon: FaShoppingCart },
     { path: '/admin/invoices', label: 'Invoices', icon: FaFileInvoice },
+    { path: '/admin/customers', label: 'Customers', icon: FaUsers },
     { path: '/admin/contacts', label: 'Contacts', icon: FaEnvelope },
     { path: '/admin/payment-settings', label: 'Payment Settings', icon: FaCreditCard },
     { path: '/admin/users', label: 'Users', icon: FaUsers },

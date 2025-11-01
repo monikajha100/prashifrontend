@@ -311,18 +311,29 @@
 
 /* Action Buttons */
 .action-buttons {
-  display: flex;
+  display: flex !important;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  width: auto;
+  min-width: fit-content;
 }
 
 .action-buttons button {
-  padding: 8px;
+  padding: 8px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 16px;
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .btn-qr {
@@ -363,6 +374,39 @@
 .btn-copy:hover {
   background: #4b5563;
   transform: scale(1.1);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+}
+
+.action-buttons button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.action-buttons .btn-toggle {
+  background: #10b981 !important;
+  color: white !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.action-buttons .btn-toggle:hover:not(:disabled) {
+  background: #059669 !important;
+  transform: scale(1.1);
+}
+
+.action-buttons .btn-toggle:disabled {
+  opacity: 0.6 !important;
 }
 
 /* Campaigns Grid */
@@ -728,5 +772,6 @@
     padding: 16px;
   }
 }
+
 
 

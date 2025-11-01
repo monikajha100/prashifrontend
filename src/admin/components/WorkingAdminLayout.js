@@ -14,6 +14,7 @@ const WorkingAdminLayout = ({ children }) => {
     { path: '/admin/inventory', icon: '🏪', label: 'Inventory' },
     { path: '/admin/orders', icon: '🛒', label: 'Orders' },
     { path: '/admin/invoices', icon: '📄', label: 'Invoices' },
+    { path: '/admin/customers', icon: '👤', label: 'Customers' },
     { path: '/admin/payment-settings', icon: '💳', label: 'Payment Settings' },
     { path: '/admin/users', icon: '👥', label: 'Users' },
     { path: '/admin/partners', icon: '🤝', label: 'Partners' },

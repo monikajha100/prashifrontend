@@ -161,6 +161,48 @@ const AdminSettings = () => {
           </div>
 
           <div className="settings-section">
+            <h2>Tax Settings</h2>
+            
+            <div className="form-group">
+              <label className="form-label">
+                <input
+                  type="checkbox"
+                  name="tax_enabled"
+                  checked={formData.tax_enabled === 'true' || formData.tax_enabled === true}
+                  onChange={(e) => handleChange({
+                    target: {
+                      name: 'tax_enabled',
+                      value: e.target.checked ? 'true' : 'false'
+                    }
+                  })}
+                  className="form-checkbox"
+                />
+                <span style={{ marginLeft: '8px' }}>Enable Tax</span>
+              </label>
+              <p className="form-help-text">Enable or disable tax calculation on orders</p>
+            </div>
+
+            {formData.tax_enabled === 'true' || formData.tax_enabled === true ? (
+              <div className="form-group">
+                <label htmlFor="tax_rate" className="form-label">Tax Rate (%)</label>
+                <input
+                  type="number"
+                  id="tax_rate"
+                  name="tax_rate"
+                  value={formData.tax_rate || ''}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="18"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                />
+                <p className="form-help-text">Enter the tax percentage rate (e.g., 18 for 18% GST)</p>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="settings-section">
             <h2>Currency Settings</h2>
             
             <div className="form-row">

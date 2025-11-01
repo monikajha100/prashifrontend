@@ -130,11 +130,17 @@ const AdminInvoices = () => {
               if (ref) {
                 setTimeout(async () => {
                   try {
+                    // Wait a bit more for all content to render, especially images and text
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
                     const canvas = await html2canvas(ref, {
                       scale: 2,
                       useCORS: true,
                       allowTaint: true,
-                      backgroundColor: '#ffffff'
+                      backgroundColor: '#ffffff',
+                      logging: false,
+                      windowWidth: ref.scrollWidth,
+                      windowHeight: ref.scrollHeight
                     });
 
                     const imgData = canvas.toDataURL('image/png');
@@ -149,7 +155,8 @@ const AdminInvoices = () => {
                     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                     heightLeft -= pageHeight;
 
-                    while (heightLeft >= 0) {
+                    // Only add new page if there's significant content left (> 10mm)
+                    while (heightLeft > 10) {
                       position = heightLeft - imgHeight;
                       pdf.addPage();
                       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);

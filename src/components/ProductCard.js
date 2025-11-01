@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import { motion } from 'framer-motion';
+import { FaHeart } from 'react-icons/fa';
 import { toAbsoluteImageUrl } from '../services/api';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
   const { addToCart, isInCart, getCartQuantity } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   const cartQuantity = getCartQuantity(product.id);
   const inCart = isInCart(product.id);
+  const inWishlist = isInWishlist(product.id);
   const [selectedColorImage, setSelectedColorImage] = useState(null);
 
   const handleAddToCart = (e) => {
@@ -30,6 +34,27 @@ const ProductCard = ({ product }) => {
           {product.discount_percentage > 0 && (
             <div className="sale-badge">Sale</div>
           )}
+          <button
+            className={`wishlist-btn ${inWishlist ? 'active' : ''}`}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleWishlist(product.id);
+            }}
+            title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <FaHeart style={{ 
+              display: 'block', 
+              fontSize: '18px', 
+              color: '#ffffff', 
+              fill: '#ffffff',
+              stroke: '#ffffff',
+              strokeWidth: '1px',
+              opacity: 1,
+              visibility: 'visible'
+            }} />
+          </button>
           <img 
             src={toAbsoluteImageUrl(selectedColorImage || product.primary_image) || '/placeholder-product.jpg'} 
             alt={product.name}

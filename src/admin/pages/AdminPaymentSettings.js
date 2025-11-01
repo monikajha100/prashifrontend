@@ -138,11 +138,27 @@ const AdminPaymentSettings = () => {
               <small>Your Razorpay Key Secret (keep this secure)</small>
             </div>
 
-            <div className="info-box">
-              <h4>Test Credentials (for testing)</h4>
-              <p><strong>Key ID:</strong> rzp_test_1DP5mmOlF5G5ag</p>
-              <p><strong>Key Secret:</strong> thisisasecret</p>
-              <p><em>Use these credentials for testing. Replace with your live credentials for production.</em></p>
+            <div className="info-box warning">
+              <h4>⚠️ Important: Get Your Own Test Keys</h4>
+              <p><strong>The credentials shown below are PLACEHOLDERS only - they will NOT work!</strong></p>
+              <p>You need to get your <strong>own test keys</strong> from your Razorpay account:</p>
+              <ol style={{ marginLeft: '20px', marginTop: '10px' }}>
+                <li>Go to <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer">Razorpay Dashboard</a></li>
+                <li>Settings → API Keys → Test Keys</li>
+                <li>Copy your <strong>Key ID</strong> (starts with <code>rzp_test_</code>)</li>
+                <li>Click <strong>"Reveal"</strong> to see and copy your <strong>Key Secret</strong></li>
+                <li>Paste them in the fields above</li>
+              </ol>
+              <p style={{ marginTop: '10px', color: '#e74c3c', fontWeight: 'bold' }}>
+                ❌ Do NOT use placeholder values - they will cause authentication errors!
+              </p>
+              <details style={{ marginTop: '15px' }}>
+                <summary style={{ cursor: 'pointer', color: '#666' }}>Example format (NOT real keys)</summary>
+                <p style={{ marginTop: '10px', fontFamily: 'monospace', fontSize: '12px' }}>
+                  Key ID: rzp_test_xxxxxxxxxxxxx<br/>
+                  Key Secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (30+ characters, no spaces)
+                </p>
+              </details>
             </div>
           </div>
         )}
@@ -178,7 +194,14 @@ const AdminPaymentSettings = () => {
           
           <div className="help-step">
             <h4>4. Test Integration</h4>
-            <p>Use the test credentials provided above to test the payment flow before going live.</p>
+            <p>Use your actual test keys from Razorpay dashboard (not placeholders) to test the payment flow before going live.</p>
+            <p><strong>⚠️ Recommended: Use UPI for Testing</strong></p>
+            <p>In Razorpay checkout, select "UPI" and use: <code>test@razorpay</code></p>
+            <p><strong>If testing with cards:</strong></p>
+            <ul style={{ marginLeft: '20px', marginTop: '10px' }}>
+              <li>Mastercard: <code>5267 3181 8797 5449</code> (CVV: 123, Expiry: 12/25)</li>
+              <li>If you see "International cards not supported" error, use UPI instead!</li>
+            </ul>
           </div>
         </div>
       </div>

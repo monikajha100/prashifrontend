@@ -16,10 +16,13 @@ import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Addresses from './pages/Addresses';
 import CustomerOrders from './pages/CustomerOrders';
 import CustomerInvoices from './pages/CustomerInvoices';
 import Contact from './pages/Contact';
 import About from './pages/About';
+import Wishlist from './pages/Wishlist';
+import Offers from './pages/Offers';
 import Partner from './pages/Partner';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -38,6 +41,7 @@ import AdminBanners from './admin/pages/AdminBanners';
 import AdminPromotionalBanners from './admin/pages/AdminPromotionalBanners';
 import AdminOrders from './admin/pages/AdminOrders';
 import AdminInvoices from './admin/pages/AdminInvoices';
+import AdminCustomers from './admin/pages/AdminCustomers';
 import AdminPaymentSettings from './admin/pages/AdminPaymentSettings';
 import AdminUsers from './admin/pages/FullAdminUsers';
 import AdminPartners from './admin/pages/AdminPartners';
@@ -55,11 +59,13 @@ import AdminLayout from './admin/components/WorkingAdminLayout';
 // Context
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <WishlistProvider>
         <div className="App">
           <Helmet>
             <title>Praashibysupal - Luxury Jewelry Store</title>
@@ -130,6 +136,30 @@ function App() {
               <>
                 <Header />
                 <Profile />
+                <Footer />
+              </>
+            } />
+            
+            <Route path="/wishlist" element={
+              <>
+                <Header />
+                <Wishlist />
+                <Footer />
+              </>
+            } />
+            
+            <Route path="/offers" element={
+              <>
+                <Header />
+                <Offers />
+                <Footer />
+              </>
+            } />
+            
+            <Route path="/addresses" element={
+              <>
+                <Header />
+                <Addresses />
                 <Footer />
               </>
             } />
@@ -277,6 +307,11 @@ function App() {
             <AdminInvoices />
           </AdminLayout>
         } />
+        <Route path="/admin/customers" element={
+          <AdminLayout>
+            <AdminCustomers />
+          </AdminLayout>
+        } />
         <Route path="/admin/payment-settings" element={
           <AdminLayout>
             <AdminPaymentSettings />
@@ -343,6 +378,7 @@ function App() {
             } />
           </Routes>
         </div>
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   );

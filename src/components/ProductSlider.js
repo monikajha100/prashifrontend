@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { toAbsoluteImageUrl } from '../services/api';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import { FaHeart } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 const ProductSlider = ({ products, title = "Related Products" }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4); // Number of items to show at once
+  const { isAuthenticated } = useAuth();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   // Responsive items per view
   useEffect(() => {
@@ -169,54 +176,105 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
             transition: 'transform 0.3s ease',
             gap: window.innerWidth < 768 ? '15px' : '20px'
           }}>
-            {products.map((product, index) => (
-              <div
-                key={product.id}
-                style={{
-                  minWidth: `calc(${100 / itemsPerView}% - ${(window.innerWidth < 768 ? 15 : 20) * (itemsPerView - 1) / itemsPerView}px)`,
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '10px',
-                  padding: window.innerWidth < 768 ? '12px' : '15px',
-                  textAlign: 'center',
-                  backgroundColor: 'white',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
-                onMouseOver={(e) => e.target.style.transform = 'translateY(-5px)'}
-                onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-                onClick={() => window.location.href = `/product/${product.slug || product.id}`}
-              >
-                <img
-                  src={toAbsoluteImageUrl(product.primary_image) || '/placeholder-product.jpg'}
-                  alt={product.name}
+            {products.map((product, index) => {
+              const inWishlist = isInWishlist(product.id);
+              
+              const handleWishlistClick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isAuthenticated) {
+                  toast.error('Please login to add items to wishlist');
+                  return;
+                }
+                toggleWishlist(product.id);
+              };
+
+              return (
+                <div
+                  key={product.id}
                   style={{
-                    width: '100%',
-                    height: window.innerWidth < 768 ? '150px' : '200px',
-                    objectFit: 'cover',
-                    borderRadius: '8px',
-                    marginBottom: '10px'
+                    position: 'relative',
+                    minWidth: `calc(${100 / itemsPerView}% - ${(window.innerWidth < 768 ? 15 : 20) * (itemsPerView - 1) / itemsPerView}px)`,
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '10px',
+                    padding: window.innerWidth < 768 ? '12px' : '15px',
+                    textAlign: 'center',
+                    backgroundColor: 'white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer'
                   }}
-                />
-                <h4 style={{
-                  fontSize: window.innerWidth < 768 ? '14px' : '16px',
-                  fontWeight: '600',
-                  marginBottom: '8px',
-                  color: '#333',
-                  lineHeight: '1.4'
-                }}>
-                  {product.name}
-                </h4>
-                <p style={{
-                  fontSize: window.innerWidth < 768 ? '16px' : '18px',
-                  fontWeight: '600',
-                  color: '#D4AF37',
-                  margin: '0'
-                }}>
-                  ₹ {product.price}
-                </p>
-              </div>
-            ))}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  onClick={() => window.location.href = `/product/${product.slug || product.id}`}
+                >
+                  <div style={{ position: 'relative' }}>
+                    <button
+                      className={`wishlist-btn ${inWishlist ? 'active' : ''}`}
+                      onClick={handleWishlistClick}
+                      title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        width: '36px',
+                        height: '36px',
+                        border: '2px solid #ffc0cb',
+                        borderRadius: '50%',
+                        background: inWishlist ? '#28a745' : '#28a745',
+                        color: 'white',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10,
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        transition: 'all 0.3s ease',
+                        outline: 'none'
+                      }}
+                    >
+                      <FaHeart style={{ 
+                        fontSize: '16px', 
+                        color: '#ffffff', 
+                        fill: '#ffffff',
+                        stroke: '#ffffff',
+                        display: 'block',
+                        opacity: 1,
+                        visibility: 'visible'
+                      }} />
+                    </button>
+                    <img
+                      src={toAbsoluteImageUrl(product.primary_image) || '/placeholder-product.jpg'}
+                      alt={product.name}
+                      style={{
+                        width: '100%',
+                        height: window.innerWidth < 768 ? '150px' : '200px',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                        marginBottom: '10px'
+                      }}
+                    />
+                  </div>
+                  <h4 style={{
+                    fontSize: window.innerWidth < 768 ? '14px' : '16px',
+                    fontWeight: '600',
+                    marginBottom: '8px',
+                    color: '#333',
+                    lineHeight: '1.4'
+                  }}>
+                    {product.name}
+                  </h4>
+                  <p style={{
+                    fontSize: window.innerWidth < 768 ? '16px' : '18px',
+                    fontWeight: '600',
+                    color: '#D4AF37',
+                    margin: '0'
+                  }}>
+                    ₹ {product.price}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

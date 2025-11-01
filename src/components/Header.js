@@ -8,6 +8,9 @@ import {
   FaShoppingBag,
   FaBars,
   FaTimes,
+  FaUserCircle,
+  FaClipboardList,
+  FaLock,
 } from "react-icons/fa";
 import "../live-styles.css";
 import api from "../services/api";
@@ -230,23 +233,37 @@ const Header = () => {
               <div className="user-actions d-mobile-none">
                 {isAuthenticated ? (
                   <div className="user-dropdown">
-                    <button className="icon-button" aria-label="User account">
+                    <button className="icon-button user-button" aria-label="User account" title={user?.name || user?.email}>
                       <FaUser />
+                      {user?.name && <span className="user-name-tooltip">{user.name}</span>}
                     </button>
                     <div className="dropdown-menu">
-                      <Link to="/profile" className="dropdown-item">
-                        Profile
+                      <div className="dropdown-header">
+                        <div className="user-badge">
+                          <FaUser className="user-badge-icon" />
+                          <span className="user-badge-name">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+                        </div>
+                        <div className="user-info">
+                          <div className="user-name">{user?.name || 'User'}</div>
+                          <div className="user-email">{user?.email}</div>
+                        </div>
+                      </div>
+                      <Link to="/profile" className="dropdown-item" onClick={(e) => e.stopPropagation()}>
+                        <FaUserCircle className="dropdown-icon" />
+                        <span>Profile</span>
                       </Link>
-                      <Link to="/orders" className="dropdown-item">
-                        My Orders
+                      <Link to="/orders" className="dropdown-item" onClick={(e) => e.stopPropagation()}>
+                        <FaClipboardList className="dropdown-icon" />
+                        <span>My Orders</span>
                       </Link>
                       {user?.role === "admin" && (
-                        <Link to="/admin" className="dropdown-item">
-                          Admin Panel
+                        <Link to="/admin" className="dropdown-item" onClick={(e) => e.stopPropagation()}>
+                          <FaLock className="dropdown-icon" />
+                          <span>Admin Panel</span>
                         </Link>
                       )}
-                      <button onClick={handleLogout} className="dropdown-item">
-                        Logout
+                      <button onClick={(e) => { e.stopPropagation(); handleLogout(); }} className="dropdown-item logout-button">
+                        <span>Logout</span>
                       </button>
                     </div>
                   </div>
@@ -385,16 +402,28 @@ const Header = () => {
 
           {isAuthenticated ? (
             <div className="mobile-user-section">
+              <div className="mobile-user-info">
+                <div className="mobile-user-badge">
+                  <FaUser className="mobile-user-badge-icon" />
+                  <span className="mobile-user-badge-name">{user?.name?.charAt(0)?.toUpperCase() || 'U'}</span>
+                </div>
+                <div>
+                  <div className="mobile-user-name">{user?.name || 'User'}</div>
+                  <div className="mobile-user-email">{user?.email}</div>
+                </div>
+              </div>
               <div
                 className="mobile-nav-link"
                 onClick={() => handleMobileMenuItemClick('/profile')}
               >
+                <FaUserCircle style={{ marginRight: '10px', color: '#ff69b4', display: 'inline-block' }} />
                 Profile
               </div>
               <div
                 className="mobile-nav-link"
                 onClick={() => handleMobileMenuItemClick('/orders')}
               >
+                <FaClipboardList style={{ marginRight: '10px', color: '#ff69b4', display: 'inline-block' }} />
                 My Orders
               </div>
               {user?.role === "admin" && (
@@ -402,6 +431,7 @@ const Header = () => {
                   className="mobile-nav-link"
                   onClick={() => handleMobileMenuItemClick('/admin')}
                 >
+                  <FaLock style={{ marginRight: '10px', color: '#ff69b4', display: 'inline-block' }} />
                   Admin Panel
                 </div>
               )}
@@ -410,7 +440,7 @@ const Header = () => {
                   handleLogout();
                   setIsMenuOpen(false);
                 }}
-                className="mobile-nav-link"
+                className="mobile-nav-link logout-mobile"
               >
                 Logout
               </button>

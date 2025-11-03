@@ -378,6 +378,111 @@
   background: #c82333;
 }
 
+.btn-customers {
+  background: #6f42c1;
+  color: white;
+}
+
+.btn-customers:hover {
+  background: #5a32a3;
+}
+
+/* Offer Customers Section */
+.offer-customers-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e1e1;
+}
+
+.offer-customers-section h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.no-customers {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.customers-table thead {
+  background: #D4AF37;
+  color: white;
+}
+
+.customers-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.customers-table tbody tr {
+  border-bottom: 1px solid #e1e1e1;
+  transition: background 0.2s;
+}
+
+.customers-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.customers-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.customers-table td {
+  padding: 12px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.customers-table .status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.customers-table .status-badge.pending {
+  background: #ffc107;
+  color: #333;
+}
+
+.customers-table .status-badge.confirmed,
+.customers-table .status-badge.processing {
+  background: #007bff;
+  color: white;
+}
+
+.customers-table .status-badge.shipped {
+  background: #17a2b8;
+  color: white;
+}
+
+.customers-table .status-badge.delivered {
+  background: #28a745;
+  color: white;
+}
+
+.customers-table .status-badge.cancelled {
+  background: #dc3545;
+  color: white;
+}
+
 /* Empty State */
 .empty-state {
   grid-column: 1 / -1;

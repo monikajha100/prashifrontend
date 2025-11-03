@@ -772,7 +772,7 @@ const Profile = () => {
             <FaUser className="title-icon" />
             My Profile
           </h1>
-
+          
           {/* Tabs */}
           <div className="profile-tabs">
             <button
@@ -815,10 +815,10 @@ const Profile = () => {
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <div className="profile-content">
+          <div className="profile-content">
               <div className="profile-section">
                 <div className="section-header">
-                  <h2>Personal Information</h2>
+              <h2>Personal Information</h2>
                   {!isEditing && (
                     <button 
                       className="btn btn-primary btn-icon"
@@ -828,101 +828,101 @@ const Profile = () => {
                     </button>
                   )}
                 </div>
-
-                {isEditing ? (
+              
+              {isEditing ? (
                   <form onSubmit={handleProfileSubmit} className="profile-form">
-                    <div className="form-group">
+                  <div className="form-group">
                       <label htmlFor="name" className="form-label">Full Name *</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="form-input"
+                      required
+                        placeholder="Enter your full name"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="phone" className="form-label">Phone Number</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="form-input"
+                        placeholder="Enter your phone number"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="address" className="form-label">Address</label>
+                    <textarea
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="form-textarea"
+                      rows="3"
+                        placeholder="Enter your address"
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label htmlFor="city" className="form-label">City</label>
                       <input
                         type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
+                        id="city"
+                        name="city"
+                        value={formData.city}
                         onChange={handleChange}
                         className="form-input"
-                        required
-                        placeholder="Enter your full name"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="phone" className="form-label">Phone Number</label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="form-input"
-                        placeholder="Enter your phone number"
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="address" className="form-label">Address</label>
-                      <textarea
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        className="form-textarea"
-                        rows="3"
-                        placeholder="Enter your address"
-                      />
-                    </div>
-
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor="city" className="form-label">City</label>
-                        <input
-                          type="text"
-                          id="city"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          className="form-input"
                           placeholder="City"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="state" className="form-label">State</label>
-                        <input
-                          type="text"
-                          id="state"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleChange}
-                          className="form-input"
-                          placeholder="State"
-                        />
-                      </div>
-
-                      <div className="form-group">
-                        <label htmlFor="pincode" className="form-label">Pincode</label>
-                        <input
-                          type="text"
-                          id="pincode"
-                          name="pincode"
-                          value={formData.pincode}
-                          onChange={handleChange}
-                          className="form-input"
-                          placeholder="Pincode"
-                        />
-                      </div>
+                      />
                     </div>
 
-                    <div className="form-actions">
-                      <button 
-                        type="submit" 
-                        className="btn btn-primary"
-                        disabled={isUpdatingProfile}
-                      >
-                        {isUpdatingProfile ? 'Saving...' : 'Save Changes'}
-                      </button>
-                      <button 
-                        type="button" 
-                        className="btn btn-secondary"
+                    <div className="form-group">
+                      <label htmlFor="state" className="form-label">State</label>
+                      <input
+                        type="text"
+                        id="state"
+                        name="state"
+                        value={formData.state}
+                        onChange={handleChange}
+                        className="form-input"
+                          placeholder="State"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="pincode" className="form-label">Pincode</label>
+                      <input
+                        type="text"
+                        id="pincode"
+                        name="pincode"
+                        value={formData.pincode}
+                        onChange={handleChange}
+                        className="form-input"
+                          placeholder="Pincode"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-actions">
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary"
+                      disabled={isUpdatingProfile}
+                    >
+                      {isUpdatingProfile ? 'Saving...' : 'Save Changes'}
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary"
                         onClick={() => {
                           setIsEditing(false);
                           // Reset form data
@@ -937,14 +937,14 @@ const Profile = () => {
                             });
                           }
                         }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="profile-details">
-                    <div className="detail-item">
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="profile-details">
+                  <div className="detail-item">
                       <strong>Name:</strong>
                       <span>{user.name || 'Not provided'}</span>
                     </div>
@@ -963,16 +963,16 @@ const Profile = () => {
                     <div className="detail-item">
                       <strong>City:</strong>
                       <span>{user.city ? user.city : 'Not provided'}</span>
-                    </div>
-                    <div className="detail-item">
+                  </div>
+                  <div className="detail-item">
                       <strong>State:</strong>
                       <span>{user.state ? user.state : 'Not provided'}</span>
-                    </div>
-                    <div className="detail-item">
+                  </div>
+                  <div className="detail-item">
                       <strong>Pincode:</strong>
                       <span>{user.pincode ? user.pincode : 'Not provided'}</span>
-                    </div>
-                    <div className="detail-item">
+                  </div>
+                  <div className="detail-item">
                       <strong>Member Since:</strong>
                       <span>{new Date(user.created_at).toLocaleDateString()}</span>
                     </div>
@@ -1320,12 +1320,12 @@ const Profile = () => {
                         minLength="6"
                         placeholder="Confirm new password"
                       />
-                    </div>
+                  </div>
 
                     <div className="form-actions">
-                      <button 
+                  <button 
                         type="submit" 
-                        className="btn btn-primary"
+                    className="btn btn-primary"
                         disabled={isChangingPassword}
                       >
                         {isChangingPassword ? 'Changing...' : 'Change Password'}
@@ -1341,14 +1341,14 @@ const Profile = () => {
                             confirm_password: ''
                           });
                         }}
-                      >
+                  >
                         Cancel
-                      </button>
-                    </div>
+                  </button>
+                </div>
                   </form>
-                )}
-              </div>
+              )}
             </div>
+          </div>
           )}
         </motion.div>
       </div>

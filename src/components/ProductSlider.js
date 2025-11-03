@@ -215,32 +215,40 @@ const ProductSlider = ({ products, title = "Related Products" }) => {
                       title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                       style={{
                         position: 'absolute',
-                        top: '8px',
-                        right: '8px',
-                        width: '36px',
-                        height: '36px',
-                        border: '2px solid #ffc0cb',
+                        top: '12px',
+                        right: '12px',
+                        width: '44px',
+                        height: '44px',
+                        border: 'none',
                         borderRadius: '50%',
-                        background: inWishlist ? '#28a745' : '#28a745',
+                        background: '#28a745',
                         color: 'white',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         zIndex: 10,
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
                         transition: 'all 0.3s ease',
-                        outline: 'none'
+                        outline: 'none',
+                        padding: 0,
+                        minWidth: '44px',
+                        minHeight: '44px'
                       }}
                     >
                       <FaHeart style={{ 
-                        fontSize: '16px', 
+                        fontSize: '20px',
+                        width: '20px',
+                        height: '20px',
+                        minWidth: '20px',
+                        minHeight: '20px',
                         color: '#ffffff', 
                         fill: '#ffffff',
-                        stroke: '#ffffff',
+                        stroke: 'none',
                         display: 'block',
                         opacity: 1,
-                        visibility: 'visible'
+                        visibility: 'visible',
+                        pointerEvents: 'none'
                       }} />
                     </button>
                     <img

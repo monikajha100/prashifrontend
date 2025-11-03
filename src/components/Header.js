@@ -13,6 +13,7 @@ import {
   FaLock,
 } from "react-icons/fa";
 import "../live-styles.css";
+import "./Header.css";
 import api from "../services/api";
 
 const Header = () => {
@@ -68,9 +69,15 @@ const Header = () => {
   };
 
   const toggleMenu = (e) => {
-    e.stopPropagation();
-    console.log("Toggling menu. Current state:", isMenuOpen);
-    setIsMenuOpen(!isMenuOpen);
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setIsMenuOpen(prev => !prev);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
   };
 
   const toggleSearch = () => {
@@ -79,19 +86,26 @@ const Header = () => {
 
   // Close mobile menu when clicking outside
   useEffect(() => {
+    if (!isMenuOpen) return;
+    
     const handleClickOutside = (event) => {
-      // Check if click is outside mobile menu and not on the toggle button
-      if (isMenuOpen && 
-          !event.target.closest(".mobile-menu") && 
-          !event.target.closest(".mobile-menu-toggle")) {
-        console.log("Click outside detected, closing menu");
-        setIsMenuOpen(false);
+      const target = event.target;
+      const menu = document.querySelector('.mobile-menu');
+      const toggle = document.querySelector('.mobile-menu-toggle');
+      
+      if (menu && toggle && 
+          !menu.contains(target) && 
+          !toggle.contains(target)) {
+        closeMenu();
       }
     };
 
+    // Use both touch and mouse events for better mobile support
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [isMenuOpen]);
 
@@ -141,15 +155,39 @@ const Header = () => {
                   index === currentBannerIndex ? "active" : ""
                 }`}
                 style={{
-                  backgroundColor: banner.background_color,
-                  color: banner.text_color,
+                  backgroundColor: banner.background_color || '#D4AF37',
+                  color: banner.text_color || '#ffffff',
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  outline: 'none',
                 }}
               >
                 <div className="container">
                   <div className="banner-content">
-                    <div className="banner-text-container">
-                      <span className="banner-text">{banner.text}</span>
-                    </div>
+                    {banner.link_url ? (
+                      <Link to={banner.link_url} className="banner-link">
+                        <div className="banner-text-container">
+                          <span className="banner-text">{banner.text}</span>
+                          {banner.subtitle && (
+                            <span className="banner-subtitle">{banner.subtitle}</span>
+                          )}
+                          {banner.button_text && (
+                            <span className="banner-button">{banner.button_text}</span>
+                          )}
+                        </div>
+                      </Link>
+                    ) : (
+                      <div className="banner-text-container">
+                        <span className="banner-text">{banner.text}</span>
+                        {banner.subtitle && (
+                          <span className="banner-subtitle">{banner.subtitle}</span>
+                        )}
+                        {banner.button_text && (
+                          <span className="banner-button">{banner.button_text}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -290,8 +328,14 @@ const Header = () => {
               <button
                 className="mobile-menu-toggle d-mobile-block"
                 onClick={toggleMenu}
-                aria-label="Toggle mobile menu"
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  toggleMenu(e);
+                }}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isMenuOpen}
+                type="button"
+                data-menu-toggle="true"
               >
                 {isMenuOpen ? <FaTimes /> : <FaBars />}
               </button>
@@ -305,24 +349,42 @@ const Header = () => {
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="mobile-menu-overlay active" onClick={toggleMenu} aria-hidden="true"></div>
+        <div 
+          className="mobile-menu-overlay active" 
+          onClick={closeMenu} 
+          onTouchStart={closeMenu}
+          aria-hidden="true"
+        ></div>
       )}
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="mobile-menu active" role="dialog" aria-label="Mobile navigation menu">
-          <div className="mobile-menu-header">
-            <Link to="/" className="logo-container" onClick={(e) => {e.preventDefault(); handleMobileMenuItemClick('/');}}>
-              <img
-                src="/logo.png"
-                alt="Praashi by Supal"
-                className="logo-image"
-              />
-            </Link>
-            <button className="icon-button" onClick={toggleMenu} aria-label="Close menu">
-              <FaTimes />
-            </button>
-          </div>
+      <div 
+        className={`mobile-menu ${isMenuOpen ? 'active' : ''}`} 
+        role="dialog" 
+        aria-label="Mobile navigation menu"
+        aria-hidden={!isMenuOpen}
+        style={{
+          display: 'flex'
+        }}
+      >
+        <div className="mobile-menu-header">
+          <Link to="/" className="logo-container" onClick={(e) => {e.preventDefault(); handleMobileMenuItemClick('/');}}>
+            <img
+              src="/logo.png"
+              alt="Praashi by Supal"
+              className="logo-image"
+            />
+          </Link>
+          <button 
+            className="icon-button mobile-menu-close" 
+            onClick={closeMenu} 
+            onTouchStart={closeMenu}
+            aria-label="Close menu"
+            type="button"
+          >
+            <FaTimes />
+          </button>
+        </div>
 
           {/* Mobile Search */}
           <div className="mobile-search">
@@ -462,7 +524,6 @@ const Header = () => {
             </div>
           )}
         </div>
-      )}
     </header>
   );
 };

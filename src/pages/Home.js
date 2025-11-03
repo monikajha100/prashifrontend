@@ -498,7 +498,7 @@ const Home = () => {
                   )}
 
                   <Link
-                    to={offer.link_url || "/products"}
+                    to={`/checkout?offer=${offer.id}`}
                     className="offer-btn"
                     onClick={() => {
                       // Track click

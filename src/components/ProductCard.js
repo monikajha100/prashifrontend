@@ -46,13 +46,17 @@ const ProductCard = ({ product }) => {
           >
             <FaHeart style={{ 
               display: 'block', 
-              fontSize: '18px', 
+              fontSize: '20px',
+              width: '20px',
+              height: '20px',
+              minWidth: '20px',
+              minHeight: '20px',
               color: '#ffffff', 
               fill: '#ffffff',
-              stroke: '#ffffff',
-              strokeWidth: '1px',
+              stroke: 'none',
               opacity: 1,
-              visibility: 'visible'
+              visibility: 'visible',
+              pointerEvents: 'none'
             }} />
           </button>
           <img 

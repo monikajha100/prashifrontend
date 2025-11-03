@@ -394,6 +394,11 @@
     display: block !important;
   }
   
+  .d-mobile-block.mobile-menu-toggle,
+  .mobile-menu-toggle.d-mobile-block {
+    display: flex !important;
+  }
+  
   .d-mobile-flex {
     display: flex !important;
   }

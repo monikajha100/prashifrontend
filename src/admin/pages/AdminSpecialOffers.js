@@ -10,6 +10,9 @@ const AdminSpecialOffers = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingOffer, setEditingOffer] = useState(null);
   const [formData, setFormData] = useState(getEmptyFormData());
+  const [selectedOfferId, setSelectedOfferId] = useState(null);
+  const [offerCustomers, setOfferCustomers] = useState([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
 
   function getEmptyFormData() {
     return {
@@ -47,7 +50,29 @@ const AdminSpecialOffers = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setOffers(response.data);
+      const offersData = response.data;
+      
+      // Fetch customer counts for each offer
+      const offersWithCounts = await Promise.all(
+        offersData.map(async (offer) => {
+          try {
+            const customersResponse = await axios.get(
+              `${API_BASE_URL}/special-offers/admin/${offer.id}/customers`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
+            );
+            return {
+              ...offer,
+              customerCount: customersResponse.data.customers?.length || 0
+            };
+          } catch (error) {
+            return { ...offer, customerCount: 0 };
+          }
+        })
+      );
+      
+      setOffers(offersWithCounts);
     } catch (error) {
       console.error("Error fetching offers:", error);
       toast.error("Failed to load offers");
@@ -151,6 +176,35 @@ const AdminSpecialOffers = () => {
     } catch (error) {
       console.error("Error toggling offer:", error);
       toast.error("Failed to update status");
+    }
+  };
+
+  const fetchOfferCustomers = async (offerId) => {
+    if (selectedOfferId === offerId) {
+      // If already showing, hide it
+      setSelectedOfferId(null);
+      setOfferCustomers([]);
+      return;
+    }
+
+    setLoadingCustomers(true);
+    setSelectedOfferId(offerId);
+    try {
+      const token =
+        localStorage.getItem("token") || localStorage.getItem("adminToken");
+      const response = await axios.get(
+        `${API_BASE_URL}/special-offers/admin/${offerId}/customers`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setOfferCustomers(response.data.customers || []);
+    } catch (error) {
+      console.error("Error fetching offer customers:", error);
+      toast.error("Failed to load customers");
+      setOfferCustomers([]);
+    } finally {
+      setLoadingCustomers(false);
     }
   };
 
@@ -535,12 +589,64 @@ const AdminSpecialOffers = () => {
                   {offer.is_active ? "⏸️ Deactivate" : "▶️ Activate"}
                 </button>
                 <button
+                  className="btn-customers"
+                  onClick={() => fetchOfferCustomers(offer.id)}
+                  title="View customers who availed this offer"
+                >
+                  👥 Customers ({loadingCustomers && selectedOfferId === offer.id ? '...' : offer.customerCount || 0})
+                </button>
+                <button
                   className="btn-delete"
                   onClick={() => handleDelete(offer.id)}
                 >
                   🗑️ Delete
                 </button>
               </div>
+
+              {/* Show customers who availed this offer */}
+              {selectedOfferId === offer.id && (
+                <div className="offer-customers-section">
+                  <h4>Customers who availed this offer:</h4>
+                  {loadingCustomers ? (
+                    <div className="loading">Loading customers...</div>
+                  ) : offerCustomers.length === 0 ? (
+                    <p className="no-customers">No customers have availed this offer yet.</p>
+                  ) : (
+                    <div className="customers-list">
+                      <table className="customers-table">
+                        <thead>
+                          <tr>
+                            <th>Order #</th>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {offerCustomers.map((customer) => (
+                            <tr key={customer.orderId}>
+                              <td>{customer.orderNumber}</td>
+                              <td>{customer.customerName}</td>
+                              <td>{customer.customerEmail}</td>
+                              <td>{customer.customerPhone}</td>
+                              <td>₹{customer.totalAmount.toFixed(2)}</td>
+                              <td>
+                                <span className={`status-badge ${customer.orderStatus}`}>
+                                  {customer.orderStatus}
+                                </span>
+                              </td>
+                              <td>{new Date(customer.orderDate).toLocaleDateString()}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}

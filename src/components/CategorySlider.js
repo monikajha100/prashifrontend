@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { categoriesAPI, toAbsoluteImageUrl } from '../services/api';
 import './CategorySlider.css';
 
@@ -100,7 +101,13 @@ const CategorySlider = () => {
             disabled={!canGoPrev}
             aria-label="Previous collections"
           >
-            ‹
+            <FaChevronLeft style={{ 
+              display: 'block',
+              width: '20px',
+              height: '20px',
+              color: 'white',
+              fill: 'white'
+            }} />
           </button>
           
           <div className="category-slider">
@@ -164,7 +171,13 @@ const CategorySlider = () => {
             disabled={!canGoNext}
             aria-label="Next collections"
           >
-            ›
+            <FaChevronRight style={{ 
+              display: 'block',
+              width: '20px',
+              height: '20px',
+              color: 'white',
+              fill: 'white'
+            }} />
           </button>
         </div>
         

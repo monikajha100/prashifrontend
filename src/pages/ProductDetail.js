@@ -104,7 +104,7 @@ const ProductDetail = () => {
                 right: '15px',
                 width: '44px',
                 height: '44px',
-                border: '2px solid #ffc0cb',
+                border: 'none',
                 borderRadius: '50%',
                 background: '#28a745',
                 color: 'white',
@@ -113,19 +113,27 @@ const ProductDetail = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 zIndex: 10,
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
                 transition: 'all 0.3s ease',
-                outline: 'none'
+                outline: 'none',
+                padding: 0,
+                minWidth: '44px',
+                minHeight: '44px'
               }}
             >
               <FaHeart style={{ 
-                fontSize: '20px', 
+                fontSize: '20px',
+                width: '20px',
+                height: '20px',
+                minWidth: '20px',
+                minHeight: '20px',
                 color: '#ffffff', 
                 fill: '#ffffff',
-                stroke: '#ffffff',
+                stroke: 'none',
                 display: 'block',
                 opacity: 1,
-                visibility: 'visible'
+                visibility: 'visible',
+                pointerEvents: 'none'
               }} />
             </button>
             <img 
@@ -358,9 +366,9 @@ const ProductDetail = () => {
                 title={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 className={`wishlist-btn ${inWishlist ? 'active' : ''}`}
                 style={{
-                  width: '50px',
-                  height: '50px',
-                  border: '2px solid #ffc0cb',
+                  width: '44px',
+                  height: '44px',
+                  border: 'none',
                   borderRadius: '50%',
                   background: '#28a745',
                   color: 'white',
@@ -368,32 +376,38 @@ const ProductDetail = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
                   transition: 'all 0.3s ease',
-                  outline: 'none'
+                  outline: 'none',
+                  padding: 0,
+                  minWidth: '44px',
+                  minHeight: '44px'
                 }}
                 onMouseOver={(e) => {
                   e.target.style.background = '#218838';
-                  e.target.style.borderColor = '#ff69b4';
                   e.target.style.transform = 'scale(1.1)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
                 }}
                 onMouseOut={(e) => {
                   e.target.style.background = '#28a745';
-                  e.target.style.borderColor = '#ffc0cb';
                   e.target.style.transform = 'scale(1)';
-                  e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.15)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.25)';
                 }}
               >
-                <FaHeart style={{ 
-                  fontSize: '22px', 
-                  color: '#ffffff', 
-                  fill: '#ffffff',
-                  stroke: '#ffffff',
-                  display: 'block',
-                  opacity: 1,
-                  visibility: 'visible'
-                }} />
+              <FaHeart style={{ 
+                fontSize: '20px',
+                width: '20px',
+                height: '20px',
+                minWidth: '20px',
+                minHeight: '20px',
+                color: '#ffffff', 
+                fill: '#ffffff',
+                stroke: 'none',
+                display: 'block',
+                opacity: 1,
+                visibility: 'visible',
+                pointerEvents: 'none'
+              }} />
               </button>
             </div>
           </div>
@@ -407,7 +421,7 @@ const ProductDetail = () => {
           marginTop: '30px'
         }}>
           <div style={{ display: 'flex', gap: 10, borderBottom: '1px solid #e0e0e0', marginBottom: 20, flexWrap: 'wrap' }}>
-            {['description','specifications','reviews','shipping'].map(tab => (
+            {['description','specifications','reviews'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -440,8 +454,7 @@ const ProductDetail = () => {
               >
                 {tab === 'description' ? 'Description' : 
                  tab === 'specifications' ? 'Specifications' : 
-                 tab === 'reviews' ? 'Reviews' : 
-                 'Shipping & Returns'}
+                 'Reviews'}
               </button>
             ))}
           </div>
@@ -505,43 +518,23 @@ const ProductDetail = () => {
             </div>
           )}
 
-          {activeTab === 'shipping' && (
-            <div>
-              <h3>Shipping & Returns</h3>
-              <ul style={{ color: '#666', lineHeight: 1.8 }}>
-                <li>Free shipping on all orders</li>
-                <li>Standard delivery 3-5 business days</li>
-                <li>Easy returns within 30 days</li>
-              </ul>
-            </div>
-          )}
         </div>
 
         {/* Related Products Slider */}
-        <div style={{
-          marginTop: '60px',
-          padding: '20px',
-          border: '2px solid #e0e0e0',
-          borderRadius: '8px',
-          backgroundColor: '#f8f9fa'
-        }}>
-          <h3 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' }}>
-            Related Products
-          </h3>
-          <div style={{ textAlign: 'center', marginBottom: '20px', color: '#666' }}>
-            Debug: {product.relatedProducts?.length || 0} related products found
-          </div>
-          {product.relatedProducts && product.relatedProducts.length > 0 ? (
+        {product.relatedProducts && product.relatedProducts.length > 0 && (
+          <div style={{
+            marginTop: '60px',
+            padding: '20px',
+            border: '2px solid #e0e0e0',
+            borderRadius: '8px',
+            backgroundColor: '#f8f9fa'
+          }}>
             <ProductSlider 
               products={product.relatedProducts} 
               title="Related Products" 
             />
-          ) : (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-              No related products available
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

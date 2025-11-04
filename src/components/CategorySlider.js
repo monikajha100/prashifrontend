@@ -82,8 +82,25 @@ const CategorySlider = () => {
     );
   }
 
+  // Reset index if categories change
+  useEffect(() => {
+    if (categories && categories.length > 0 && currentIndex >= categories.length) {
+      setCurrentIndex(0);
+    }
+  }, [categories, currentIndex]);
+
   if (!categories || categories.length === 0) {
-    return null;
+    // Don't return null, show a message instead
+    return (
+      <section className="trending-section">
+        <div className="container">
+          <h2 className="section-title">Top Trending Collections</h2>
+          <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+            <p>Collections coming soon...</p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   const visibleCategories = categories.slice(currentIndex, currentIndex + itemsPerView);

@@ -117,6 +117,8 @@
   width: 100%;
   min-width: 0;
   position: relative;
+  display: block;
+  visibility: visible;
 }
 
 .slider-track {
@@ -125,6 +127,8 @@
   gap: 0;
   width: 100%;
   min-width: 0;
+  visibility: visible;
+  opacity: 1;
 }
 
 .collection-card-wrapper {
@@ -132,6 +136,9 @@
   box-sizing: border-box;
   flex-shrink: 0;
   min-width: 0;
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 .collection-card {
@@ -145,12 +152,16 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border: 2px solid transparent;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  visibility: visible;
+  opacity: 1;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .collection-card::before {
@@ -337,10 +348,21 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
+    display: block;
+    visibility: visible;
+  }
+  
+  .slider-track {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .collection-card-wrapper {
     padding: 0 8px;
+    display: block;
+    visibility: visible;
+    opacity: 1;
   }
   
   .slider-btn.prev-btn {
@@ -429,10 +451,21 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
+    display: block;
+    visibility: visible;
+  }
+  
+  .slider-track {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .collection-card-wrapper {
     padding: 0 5px;
+    display: block;
+    visibility: visible;
+    opacity: 1;
   }
   
   .collection-card {

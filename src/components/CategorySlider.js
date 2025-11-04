@@ -24,17 +24,21 @@ const CategorySlider = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 480) {
+      const width = window.innerWidth;
+      if (width < 480) {
         setItemsPerView(1); // Show 1 item on very small screens
-      } else if (window.innerWidth < 768) {
-        setItemsPerView(2); // Show 2 items on mobile
-      } else if (window.innerWidth < 1024) {
-        setItemsPerView(3); // Show 3 items on tablets
+      } else if (width < 768) {
+        setItemsPerView(1); // Show 1 item on mobile for better visibility
+      } else if (width < 1024) {
+        setItemsPerView(2); // Show 2 items on tablets
       } else {
         setItemsPerView(4); // Show 4 items on desktop
       }
+      // Reset index when view changes
+      setCurrentIndex(0);
     };
 
+    // Set initial value immediately
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -136,9 +140,18 @@ const CategorySlider = () => {
               }}
             >
               {categories.map((category) => {
-                console.log('Category:', category.name, 'Image:', category.image, 'Absolute URL:', category.image ? toAbsoluteImageUrl(category.image) : 'No image');
                 return (
-                <div key={category.id} className="collection-card-wrapper" style={{ flex: `0 0 ${100 / itemsPerView}%` }}>
+                <div 
+                  key={category.id} 
+                  className="collection-card-wrapper" 
+                  style={{ 
+                    flex: `0 0 ${100 / itemsPerView}%`,
+                    minWidth: `${100 / itemsPerView}%`,
+                    maxWidth: `${100 / itemsPerView}%`,
+                    display: 'block',
+                    visibility: 'visible'
+                  }}
+                >
                   <Link 
                     to={`/products?category=${category.slug}`}
                     className="collection-card"
@@ -150,14 +163,12 @@ const CategorySlider = () => {
                           alt={category.name}
                           className="category-image"
                           onError={(e) => {
-                            console.error('Image failed to load:', category.image, '->', toAbsoluteImageUrl(category.image));
                             e.target.style.display = 'none';
                             if (e.target.nextElementSibling) {
                               e.target.nextElementSibling.style.display = 'inline';
                             }
                           }}
                           onLoad={(e) => {
-                            // Ensure image is visible when loaded
                             e.target.style.display = 'block';
                           }}
                         />

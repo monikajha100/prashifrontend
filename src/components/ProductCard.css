@@ -373,6 +373,29 @@
     padding: 10px 16px;
     font-size: 13px;
   }
+  
+  /* Ensure wishlist button is visible on mobile */
+  .wishlist-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 10 !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+  
+  .wishlist-btn svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -390,6 +413,29 @@
   
   .current-price {
     font-size: 15px;
+  }
+  
+  /* Ensure wishlist button is visible on small mobile */
+  .wishlist-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 10 !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+  
+  .wishlist-btn svg {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 

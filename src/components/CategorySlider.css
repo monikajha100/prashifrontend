@@ -2,6 +2,15 @@
 .trending-section {
   padding: 80px 0;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.trending-section .container {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0 20px;
 }
 
 .section-title {
@@ -31,6 +40,8 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  overflow: hidden;
+  width: 100%;
 }
 
 .slider-btn {
@@ -103,17 +114,24 @@
   flex: 1;
   overflow: hidden;
   border-radius: 20px;
+  width: 100%;
+  min-width: 0;
+  position: relative;
 }
 
 .slider-track {
   display: flex;
   transition: transform 0.5s ease;
   gap: 0;
+  width: 100%;
+  min-width: 0;
 }
 
 .collection-card-wrapper {
   padding: 0 10px;
   box-sizing: border-box;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .collection-card {
@@ -220,31 +238,7 @@
   color: #555;
 }
 
-.slider-dots {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 30px;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: none;
-  background: #ddd;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.dot.active {
-  background: #D4AF37;
-  transform: scale(1.2);
-}
-
-.dot:hover {
-  background: #B8941F;
-}
+/* Slider dots removed */
 
 /* Loading States */
 .loading-slider {
@@ -298,13 +292,21 @@
     padding: 60px 0;
   }
   
+  .trending-section .container {
+    padding: 0 16px;
+  }
+  
   .section-title {
     font-size: 2rem;
     margin-bottom: 40px;
   }
   
   .category-slider-container {
-    gap: 15px;
+    gap: 12px;
+    width: 100%;
+    overflow: hidden;
+    padding: 0 8px;
+    box-sizing: border-box;
   }
   
   .slider-btn {
@@ -313,28 +315,45 @@
     font-size: 20px;
     min-width: 40px;
     min-height: 40px;
-    /* Ensure slider buttons are visible on mobile */
     position: relative;
     z-index: 10;
+    flex-shrink: 0;
   }
 
   .slider-btn svg {
-    width: 16px !important;
-    height: 16px !important;
+    width: 18px !important;
+    height: 18px !important;
     display: block !important;
     visibility: visible !important;
+    opacity: 1 !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .category-slider {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .collection-card-wrapper {
+    padding: 0 8px;
   }
   
   .slider-btn.prev-btn {
-    margin-left: 5px;
+    margin-left: 0;
   }
   
   .slider-btn.next-btn {
-    margin-right: 5px;
+    margin-right: 0;
   }
   
   .collection-card {
     padding: 30px 20px;
+    min-height: 220px;
   }
   
   .collection-icon {
@@ -365,13 +384,21 @@
     padding: 40px 0;
   }
   
+  .trending-section .container {
+    padding: 0 12px;
+  }
+  
   .section-title {
     font-size: 1.8rem;
     margin-bottom: 30px;
   }
   
   .category-slider-container {
-    gap: 10px;
+    gap: 8px;
+    width: 100%;
+    overflow: hidden;
+    padding: 0 5px;
+    box-sizing: border-box;
   }
   
   .slider-btn {
@@ -380,17 +407,37 @@
     font-size: 18px;
     min-width: 35px;
     min-height: 35px;
+    flex-shrink: 0;
+    z-index: 10;
+    position: relative;
   }
 
   .slider-btn svg {
-    width: 14px !important;
-    height: 14px !important;
+    width: 16px !important;
+    height: 16px !important;
     display: block !important;
     visibility: visible !important;
+    opacity: 1 !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .category-slider {
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  
+  .collection-card-wrapper {
+    padding: 0 5px;
   }
   
   .collection-card {
     padding: 25px 15px;
+    min-height: 200px;
   }
   
   .collection-icon {
@@ -415,29 +462,42 @@
     font-size: 0.85rem;
   }
   
-  /* Ensure slider buttons are visible on mobile */
-  .slider-btn {
-    position: relative;
-    z-index: 10;
-  }
-  
   .slider-btn.prev-btn {
-    margin-left: 5px;
+    margin-left: 0;
   }
   
   .slider-btn.next-btn {
-    margin-right: 5px;
+    margin-right: 0;
   }
 }
 
 /* Small Mobile Devices */
 @media (max-width: 360px) {
+  .category-slider-container {
+    gap: 6px;
+    padding: 0 3px;
+  }
+  
   .slider-btn {
     width: 30px;
     height: 30px;
     font-size: 16px;
     min-width: 30px;
     min-height: 30px;
+  }
+  
+  .slider-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  .collection-card-wrapper {
+    padding: 0 3px;
+  }
+  
+  .collection-card {
+    padding: 20px 12px;
+    min-height: 180px;
   }
   
   .collection-icon {
@@ -460,5 +520,51 @@
   
   .collection-subtitle {
     font-size: 0.8rem;
+  }
+}
+
+/* iPhone SE and similar devices */
+@media (max-width: 375px) {
+  .trending-section {
+    padding: 30px 0;
+  }
+  
+  .trending-section .container {
+    padding: 0 10px;
+  }
+  
+  .section-title {
+    font-size: 1.6rem;
+    margin-bottom: 25px;
+  }
+  
+  .category-slider-container {
+    gap: 6px;
+    padding: 0 4px;
+  }
+  
+  .slider-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+  
+  .slider-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  .collection-card {
+    padding: 22px 14px;
+    min-height: 190px;
+  }
+  
+  .collection-name {
+    font-size: 1.15rem;
+  }
+  
+  .collection-subtitle {
+    font-size: 0.82rem;
   }
 }

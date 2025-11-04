@@ -125,13 +125,6 @@ const CategorySlider = () => {
                   <Link 
                     to={`/products?category=${category.slug}`}
                     className="collection-card"
-                    onClick={(e) => {
-                      // Ensure proper navigation on mobile
-                      if (window.innerWidth <= 768) {
-                        e.preventDefault();
-                        window.location.href = `/products?category=${category.slug}`;
-                      }
-                    }}
                   >
                     <div className="collection-icon">
                       {category.image ? (
@@ -180,19 +173,6 @@ const CategorySlider = () => {
             }} />
           </button>
         </div>
-        
-        {categories.length > itemsPerView && (
-          <div className="slider-dots">
-            {Array.from({ length: Math.ceil(categories.length / itemsPerView) }).map((_, index) => (
-              <button
-                key={index}
-                className={`dot ${Math.floor(currentIndex / itemsPerView) === index ? 'active' : ''}`}
-                onClick={() => setCurrentIndex(index * itemsPerView)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </section>
   );

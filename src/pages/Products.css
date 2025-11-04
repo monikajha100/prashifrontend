@@ -595,6 +595,20 @@
     flex-direction: column;
     gap: 15px;
   }
+  
+  /* Ensure pagination buttons are touch-friendly on mobile */
+  .pagination-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 20px;
+    touch-action: manipulation;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .pagination-btn:disabled {
+    pointer-events: none;
+  }
 }
 
 /* Small Mobile Devices */
@@ -653,6 +667,20 @@
   
   .price-input {
     min-height: 44px;
+  }
+  
+  /* Ensure pagination buttons are touch-friendly on tablets */
+  .pagination-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 20px;
+    touch-action: manipulation;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+  
+  .pagination-btn:disabled {
+    pointer-events: none;
   }
 }
 

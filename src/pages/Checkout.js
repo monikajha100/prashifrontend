@@ -27,6 +27,7 @@ const Checkout = () => {
   const [couponError, setCouponError] = useState('');
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [offerDiscount, setOfferDiscount] = useState(0);
+  const [discountedItems, setDiscountedItems] = useState([]); // Store item-level discount info
   const [availableOffers, setAvailableOffers] = useState([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
 
@@ -145,8 +146,8 @@ const Checkout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offerId]);
 
-  // Apply an offer
-  const applyOffer = (offer) => {
+  // Apply an offer - automatically removes previous offer
+  const applyOffer = async (offer) => {
     console.log('applyOffer called with:', offer);
     
     if (!offer) {
@@ -154,16 +155,13 @@ const Checkout = () => {
       return;
     }
     
-    // Check if offer has discount_percentage
-    if (!offer.discount_percentage || offer.discount_percentage <= 0) {
-      console.error('Offer missing discount_percentage:', offer);
-      alert('This offer does not have a valid discount percentage. Please select another offer.');
-      return;
+    // Remove previous offer if any (only one offer at a time)
+    if (selectedOffer) {
+      console.log('Removing previous offer:', selectedOffer.title);
+      removeOffer();
     }
     
-    console.log('Applying offer:', offer.title, 'Discount:', offer.discount_percentage + '%');
-    
-    // Calculate discount using current cart items from state
+    // Get cart items
     const itemsToUse = cartItems.length > 0 ? cartItems : (() => {
       const savedCartItems = localStorage.getItem('cartItems');
       return savedCartItems ? JSON.parse(savedCartItems) : [];
@@ -175,72 +173,96 @@ const Checkout = () => {
       return;
     }
     
-    // Calculate base subtotal
-    const baseSubtotal = itemsToUse.reduce((sum, item) => {
-      const price = parseFloat(item.price || 0);
-      const quantity = parseInt(item.quantity || 1);
-      return sum + (price * quantity);
-    }, 0);
-    
-    if (baseSubtotal <= 0) {
-      console.error('Invalid subtotal:', baseSubtotal);
-      return;
+    try {
+      // Call backend to calculate discount (handles all offer types)
+      const response = await api.post('/special-offers/calculate', {
+        offer_id: offer.id,
+        cart_items: itemsToUse.map(item => ({
+          id: item.id || item.product_id,
+          product_id: item.product_id || item.id,
+          category_id: item.category_id || item.categoryId,
+          price: parseFloat(item.price || 0),
+          quantity: parseInt(item.quantity || 1)
+        }))
+      });
+      
+      if (!response.data.success) {
+        alert(response.data.message || 'This offer cannot be applied to your cart.');
+        return;
+      }
+      
+      const discount = parseFloat(response.data.discount || 0);
+      const message = response.data.message || 'Offer applied';
+      const discountedItemsData = response.data.discounted_items || [];
+      
+      console.log('Offer calculated:', offer.title, 'Discount:', discount, message);
+      console.log('Discounted items:', discountedItemsData);
+      
+      // Calculate base subtotal
+      const baseSubtotal = itemsToUse.reduce((sum, item) => {
+        const price = parseFloat(item.price || 0);
+        const quantity = parseInt(item.quantity || 1);
+        return sum + (price * quantity);
+      }, 0);
+      
+      // Update state
+      setSelectedOffer(offer);
+      setOfferDiscount(discount);
+      setDiscountedItems(discountedItemsData); // Store item-level discount info
+      setCouponData(null); // Remove coupon if offer is applied
+      setCouponCode('');
+      setCouponError('');
+      
+      // Get tax settings
+      const taxEnabled = taxSettings?.tax_enabled || false;
+      const taxRate = taxSettings?.tax_rate || 18;
+      
+      // Calculate base totals
+      const baseTotals = calculateCartTotals(itemsToUse, taxEnabled, taxRate);
+      
+      // Apply discount
+      const finalSubtotal = Math.max(0, baseSubtotal - discount);
+      let finalTaxAmount = 0;
+      
+      // Recalculate tax on discounted amount if tax is enabled
+      if (taxEnabled) {
+        finalTaxAmount = finalSubtotal * (taxRate / 100);
+      }
+      
+      const finalTotalAmount = finalSubtotal + baseTotals.shippingAmount + finalTaxAmount;
+      
+      // Update cart totals
+      const updatedTotals = {
+        ...baseTotals,
+        subtotal: finalSubtotal,
+        taxAmount: finalTaxAmount,
+        totalAmount: finalTotalAmount,
+        discountAmount: discount,
+        originalSubtotal: baseSubtotal
+      };
+      
+      console.log('Updated totals with offer:', updatedTotals);
+      
+      setCartTotals(updatedTotals);
+      
+      // Update localStorage
+      localStorage.setItem('cartTotals', JSON.stringify(updatedTotals));
+      
+      // Show success feedback
+      console.log('Offer applied successfully!', message);
+      
+    } catch (error) {
+      console.error('Error calculating offer:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to apply offer';
+      alert(errorMessage);
     }
-    
-    // Calculate discount
-    const discount = (baseSubtotal * offer.discount_percentage) / 100;
-    console.log('Calculated discount:', discount, 'from subtotal:', baseSubtotal);
-    
-    // Update state first
-    setSelectedOffer(offer);
-    setOfferDiscount(discount);
-    setCouponData(null); // Remove coupon if offer is applied
-    setCouponCode('');
-    setCouponError('');
-    
-    // Get tax settings (use current taxSettings or defaults)
-    const taxEnabled = taxSettings?.tax_enabled || false;
-    const taxRate = taxSettings?.tax_rate || 18;
-    
-    // Calculate base totals
-    const baseTotals = calculateCartTotals(itemsToUse, taxEnabled, taxRate);
-    
-    // Apply discount
-    const finalSubtotal = Math.max(0, baseSubtotal - discount);
-    let finalTaxAmount = 0;
-    
-    // Recalculate tax on discounted amount if tax is enabled
-    if (taxEnabled) {
-      finalTaxAmount = finalSubtotal * (taxRate / 100);
-    }
-    
-    const finalTotalAmount = finalSubtotal + baseTotals.shippingAmount + finalTaxAmount;
-    
-    // Update cart totals
-    const updatedTotals = {
-      ...baseTotals,
-      subtotal: finalSubtotal,
-      taxAmount: finalTaxAmount,
-      totalAmount: finalTotalAmount,
-      discountAmount: discount,
-      originalSubtotal: baseSubtotal
-    };
-    
-    console.log('Updated totals with offer:', updatedTotals);
-    
-    setCartTotals(updatedTotals);
-    
-    // Update localStorage
-    localStorage.setItem('cartTotals', JSON.stringify(updatedTotals));
-    
-    // Show success feedback
-    console.log('Offer applied successfully!');
   };
 
   // Remove offer
   const removeOffer = () => {
     setSelectedOffer(null);
     setOfferDiscount(0);
+    setDiscountedItems([]); // Clear discounted items
     
     // Recalculate totals without offer
     const itemsToUse = cartItems.length > 0 ? cartItems : (() => {
@@ -765,14 +787,50 @@ const Checkout = () => {
         finalTotalAmount = finalSubtotal + totals.shippingAmount + finalTaxAmount;
       }
 
-      const orderData = {
-        items: cartItems.map(item => ({
+      // Map cart items with item-level discounts if available
+      const orderItems = cartItems.map(item => {
+        const itemId = item.id || item.product_id;
+        const discountedItem = discountedItems.find(di => 
+          (di.id === itemId || di.product_id === itemId)
+        );
+        
+        const basePrice = parseFloat(item.price || 0);
+        const quantity = parseInt(item.quantity || 1);
+        
+        // If this item has a discount, apply it
+        if (discountedItem && discountedItem.quantity > 0) {
+          // Calculate how many units get discounted
+          const discountedQty = Math.min(discountedItem.quantity, quantity);
+          const fullPriceQty = quantity - discountedQty;
+          const discountPerUnit = discountedItem.discount / discountedItem.quantity;
+          
+          const discountedPrice = basePrice - discountPerUnit;
+          const totalPrice = (basePrice * fullPriceQty) + (discountedPrice * discountedQty);
+          
+          return {
+            productId: item.id,
+            productName: item.name,
+            productPrice: basePrice,
+            quantity: quantity,
+            totalPrice: totalPrice,
+            discountedQuantity: discountedQty,
+            discountPerUnit: discountPerUnit,
+            discountPercentage: discountedItem.discountPercentage || 0
+          };
+        }
+        
+        // No discount for this item
+        return {
           productId: item.id,
           productName: item.name,
-          productPrice: parseFloat(item.price || 0),
-          quantity: item.quantity || 1,
-          totalPrice: parseFloat(item.price || 0) * (item.quantity || 1)
-        })),
+          productPrice: basePrice,
+          quantity: quantity,
+          totalPrice: basePrice * quantity
+        };
+      });
+      
+      const orderData = {
+        items: orderItems,
         customerName: formData.customerName,
         customerEmail: formData.customerEmail,
         customerPhone: formData.customerPhone,
@@ -965,7 +1023,15 @@ const Checkout = () => {
                       <span className="offer-icon">{selectedOffer.icon || '🎁'}</span>
                       <div className="offer-info">
                         <span className="offer-title">{selectedOffer.title}</span>
-                        <span className="discount-amount">-₹{offerDiscount.toFixed(2)} ({selectedOffer.discount_percentage}% OFF)</span>
+                        <span className="discount-amount">-₹{offerDiscount.toFixed(2)} {
+                          selectedOffer.discount_percentage 
+                            ? `(${selectedOffer.discount_percentage}% OFF)`
+                            : selectedOffer.offer_type === 'buy_x_get_y'
+                            ? `(Buy ${selectedOffer.buy_quantity} Get ${selectedOffer.get_quantity} Free)`
+                            : selectedOffer.offer_type === 'fixed_amount'
+                            ? `(₹${selectedOffer.discount_amount} OFF)`
+                            : '(Discount Applied)'
+                        }</span>
                       </div>
                     </div>
                     <button 
@@ -991,55 +1057,49 @@ const Checkout = () => {
                       
                       const totalCartItems = itemsToUse.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0);
                       
-                      // Extract discount percentage from description if not set
-                      let discountPercent = offer.discount_percentage;
-                      if (!discountPercent && offer.description) {
-                        // Try multiple patterns to find percentage
-                        const percentMatch = offer.description.match(/(\d+)%\s*OFF/i) || 
-                                          offer.description.match(/(\d+)%\s*off/i) ||
-                                          offer.description.match(/Get\s*(\d+)%/i) ||
-                                          offer.description.match(/(\d+)%\s*on/i) ||
-                                          offer.description.match(/(\d+)%\s*discount/i) ||
-                                          offer.description.match(/(\d+)%\s*OFF/i);
-                        if (percentMatch) {
-                          discountPercent = parseInt(percentMatch[1]);
-                          console.log(`Extracted discount ${discountPercent}% from description for offer: ${offer.title}`);
-                        }
-                      }
+                      // Check if offer has any discount mechanism
+                      const hasPercentage = offer.discount_percentage && offer.discount_percentage > 0;
+                      const hasFixedAmount = offer.discount_amount && parseFloat(offer.discount_amount) > 0;
+                      const hasBOGO = offer.offer_type === 'buy_x_get_y' && offer.buy_quantity && offer.get_quantity;
+                      const hasMinimumPurchase = offer.minimum_purchase_amount && parseFloat(offer.minimum_purchase_amount) > 0;
                       
-                      // Check conditions from description
+                      // Calculate cart subtotal for minimum purchase check
+                      const cartSubtotal = itemsToUse.reduce((sum, item) => {
+                        return sum + (parseFloat(item.price || 0) * (parseInt(item.quantity) || 1));
+                      }, 0);
+                      
+                      // Check conditions
                       let meetsCondition = true;
                       let conditionText = '';
                       
-                      if (offer.description) {
-                        // Check for "Buy any 3 items" or similar patterns
-                        const buyXMatch = offer.description.match(/[Bb]uy\s+(?:any\s+)?(\d+)\s+item/i);
-                        if (buyXMatch) {
-                          const requiredItems = parseInt(buyXMatch[1]);
-                          meetsCondition = totalCartItems >= requiredItems;
-                          conditionText = meetsCondition 
-                            ? `✓ ${totalCartItems} items in cart (Requires ${requiredItems})`
-                            : `✗ Need ${requiredItems} items (You have ${totalCartItems})`;
-                        }
-                        
-                        // Check for minimum amount
-                        const amountMatch = offer.description.match(/(?:above|over|minimum)\s*[Rr]s?\.?\s*(\d+)/i) ||
-                                          offer.description.match(/(?:above|over|minimum)\s*₹\s*(\d+)/i);
-                        if (amountMatch) {
-                          const minAmount = parseFloat(amountMatch[1]);
-                          const cartSubtotal = itemsToUse.reduce((sum, item) => {
-                            return sum + (parseFloat(item.price || 0) * (parseInt(item.quantity) || 1));
-                          }, 0);
-                          meetsCondition = meetsCondition && cartSubtotal >= minAmount;
-                          if (!meetsCondition && conditionText) {
-                            conditionText += ` & Min ₹${minAmount}`;
-                          } else if (!meetsCondition) {
-                            conditionText = `✗ Minimum order ₹${minAmount} required`;
-                          }
+                      // Check minimum purchase amount
+                      if (hasMinimumPurchase) {
+                        const minAmount = parseFloat(offer.minimum_purchase_amount);
+                        meetsCondition = cartSubtotal >= minAmount;
+                        conditionText = meetsCondition 
+                          ? `✓ Order value ₹${cartSubtotal.toFixed(2)} (Min ₹${minAmount})`
+                          : `✗ Minimum order ₹${minAmount} required (You have ₹${cartSubtotal.toFixed(2)})`;
+                      }
+                      
+                      // Check BOGO conditions
+                      if (hasBOGO) {
+                        const totalQty = totalCartItems;
+                        const requiredQty = parseInt(offer.buy_quantity) + parseInt(offer.get_quantity);
+                        meetsCondition = meetsCondition && totalQty >= requiredQty;
+                        if (!meetsCondition && !conditionText) {
+                          conditionText = `✗ Buy ${offer.buy_quantity} Get ${offer.get_quantity} Free - Need ${requiredQty} items (You have ${totalQty})`;
+                        } else if (!meetsCondition) {
+                          conditionText += ` | Need ${requiredQty} items for BOGO (You have ${totalQty})`;
                         }
                       }
                       
-                      const hasDiscount = discountPercent && discountPercent > 0;
+                      // Check product/category restrictions
+                      if (offer.product_ids || offer.category_ids) {
+                        // This will be checked by backend, just show info
+                        conditionText += conditionText ? ' | Product/Category specific' : 'Product/Category specific offer';
+                      }
+                      
+                      const hasDiscount = hasPercentage || hasFixedAmount || hasBOGO;
                       const canApply = hasDiscount && meetsCondition;
                       
                       return (
@@ -1052,9 +1112,12 @@ const Checkout = () => {
                               {offer.discount_text && (
                                 <div className="offer-item-discount-text">{offer.discount_text}</div>
                               )}
-                              {discountPercent && (
+                              {(hasPercentage || hasFixedAmount || hasBOGO) && (
                                 <div className="offer-item-discount">
-                                  {discountPercent}% OFF
+                                  {hasPercentage && `${offer.discount_percentage}% OFF`}
+                                  {hasFixedAmount && !hasPercentage && `₹${offer.discount_amount} OFF`}
+                                  {hasBOGO && !hasPercentage && !hasFixedAmount && `Buy ${offer.buy_quantity} Get ${offer.get_quantity} Free`}
+                                  {offer.offer_type === 'referral' && offer.referral_code && `Referral: ${offer.referral_code}`}
                                 </div>
                               )}
                               {conditionText && (
@@ -1075,8 +1138,8 @@ const Checkout = () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 console.log('Apply button clicked for offer:', offer);
-                                // Apply discount percentage from parsed value
-                                applyOffer({ ...offer, discount_percentage: discountPercent });
+                                // Apply offer (handles all types)
+                                applyOffer(offer);
                               }}
                             >
                               Apply

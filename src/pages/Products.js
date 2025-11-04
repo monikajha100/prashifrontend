@@ -21,6 +21,14 @@ const Products = () => {
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
 
+  // Debug: Log search parameters
+  useEffect(() => {
+    if (search) {
+      console.log('Search parameter from URL:', search);
+      console.log('All search params:', { category, subcategory, search, page, minPrice, maxPrice });
+    }
+  }, [search, category, subcategory, page, minPrice, maxPrice]);
+
   // Fetch products
   const { data: productsData, isLoading, error } = useQuery(
     ['products', { category, subcategory, search, page, minPrice, maxPrice, featured }],
@@ -76,7 +84,10 @@ const Products = () => {
     } else {
       newParams.delete(key);
     }
-    newParams.delete('page'); // Reset to first page when filtering
+    // Only reset to first page when filtering (not when changing page)
+    if (key !== 'page') {
+      newParams.delete('page');
+    }
     setSearchParams(newParams);
   };
 

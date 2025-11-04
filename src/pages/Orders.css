@@ -249,11 +249,23 @@
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 .summary-label {
   color: #666;
   font-weight: 500;
+  flex: 1 1 0%;
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  padding-right: 8px;
+  line-height: 1.4;
 }
 
 .summary-value {
@@ -262,6 +274,12 @@
   gap: 4px;
   color: #2C2C2C;
   font-weight: 600;
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+  overflow: visible;
+  min-width: fit-content;
+  margin-left: auto;
 }
 
 .rupee-icon {
@@ -540,10 +558,29 @@
 
   .order-summary {
     padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
   }
 
   .summary-row {
     font-size: 13px;
+    gap: 10px;
+    padding: 8px 0;
+    width: 100%;
+    overflow: visible;
+    flex-wrap: nowrap;
+  }
+  
+  .summary-label {
+    font-size: 13px;
+    min-width: 90px;
+    padding-right: 8px;
+  }
+  
+  .summary-value {
+    font-size: 13px;
+    min-width: fit-content;
   }
 
   .total-row .summary-label {

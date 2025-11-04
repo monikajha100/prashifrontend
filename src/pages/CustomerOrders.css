@@ -431,6 +431,11 @@
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid #e2e8f0;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 .summary-row:last-child {
@@ -440,10 +445,23 @@
 
 .summary-row span:first-child {
   color: #4a5568;
+  flex: 1 1 0%;
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  padding-right: 8px;
+  line-height: 1.4;
 }
 
 .summary-row span:last-child {
   color: #2d3748;
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+  overflow: visible;
+  min-width: fit-content;
+  margin-left: auto;
 }
 
 .total-row {
@@ -502,6 +520,26 @@
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+  }
+  
+  .summary-row {
+    gap: 10px;
+    padding: 8px 0;
+    width: 100%;
+    overflow: visible;
+    flex-wrap: nowrap;
+  }
+  
+  .summary-row span:first-child {
+    min-width: 90px;
+    padding-right: 8px;
+  }
+  
+  .summary-row span:last-child {
+    min-width: fit-content;
   }
 
   .order-actions {

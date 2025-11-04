@@ -356,13 +356,17 @@
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    height: auto;
+    min-height: 220px;
   }
   
   .collection-card-wrapper {
     padding: 0 8px;
-    display: block;
-    visibility: visible;
-    opacity: 1;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: 100%;
+    align-items: stretch;
   }
   
   .slider-btn.prev-btn {
@@ -376,6 +380,11 @@
   .collection-card {
     padding: 30px 20px;
     min-height: 220px;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .collection-icon {
@@ -459,18 +468,27 @@
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    height: auto;
+    min-height: 200px;
   }
   
   .collection-card-wrapper {
     padding: 0 5px;
-    display: block;
-    visibility: visible;
-    opacity: 1;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    height: 100%;
+    align-items: stretch;
   }
   
   .collection-card {
     padding: 25px 15px;
     min-height: 200px;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100%;
+    box-sizing: border-box;
   }
   
   .collection-icon {

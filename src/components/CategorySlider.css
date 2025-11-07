@@ -386,15 +386,15 @@
     opacity: 1 !important;
     position: relative !important;
     height: auto !important;
-    min-height: 220px !important;
+    min-height: 280px !important;
   }
   
   .slider-track {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    min-height: 220px !important;
+    height: 100% !important;
+    min-height: 280px !important;
     align-items: stretch !important;
     flex-wrap: nowrap !important;
     position: relative !important;
@@ -406,8 +406,8 @@
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    min-height: 220px !important;
+    height: 100% !important;
+    min-height: 280px !important;
     align-items: stretch !important;
     flex: 0 0 100% !important;
     width: 100% !important;
@@ -425,6 +425,9 @@
     max-width: 100% !important;
     box-sizing: border-box !important;
     height: 100% !important;
+    min-height: 280px !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
   }
   
   .slider-btn.prev-btn {

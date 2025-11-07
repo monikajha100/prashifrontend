@@ -5,9 +5,19 @@ import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { categoriesAPI, toAbsoluteImageUrl } from '../services/api';
 import './CategorySlider.css';
 
+const fallbackCategories = [
+  { id: 'fallback-1', name: 'Rings', slug: 'rings', description: 'Designer rings for every occasion' },
+  { id: 'fallback-2', name: 'Necklaces', slug: 'necklaces', description: 'Statement necklaces that shine' },
+  { id: 'fallback-3', name: 'Earrings', slug: 'earrings', description: 'Elegant earrings collection' },
+  { id: 'fallback-4', name: 'Bracelets', slug: 'bracelets', description: 'Graceful bracelets and bangles' },
+  { id: 'fallback-5', name: 'Sets', slug: 'sets', description: 'Curated jewellery sets' },
+  { id: 'fallback-6', name: 'Accessories', slug: 'accessories', description: 'Complete your look with accessories' }
+];
+
 const CategorySlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
+  const [isMobile, setIsMobile] = useState(false);
 
   const { data: categories, isLoading, error } = useQuery(
     'categories',
@@ -39,6 +49,9 @@ const CategorySlider = () => {
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
+      const mobile = width < 768;
+      setIsMobile(mobile);
+      
       let newItemsPerView = 3;
       if (width < 480) {
         newItemsPerView = 1; // Show 1 item on very small screens
@@ -70,6 +83,17 @@ const CategorySlider = () => {
     }
   }, [categories, currentIndex]);
 
+  // Debug: Log current state
+  useEffect(() => {
+    console.log('CategorySlider State:', {
+      categories: categories?.length || 0,
+      isLoading,
+      error: error?.message,
+      itemsPerView,
+      currentIndex,
+      isMobile
+    });
+  }, [categories, isLoading, error, itemsPerView, currentIndex, isMobile]);
 
   const nextSlide = () => {
     if (categories && currentIndex < categories.length - itemsPerView) {
@@ -83,60 +107,25 @@ const CategorySlider = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <section className="trending-section">
-        <div className="container">
-          <h2 className="section-title">Top Trending Collections</h2>
-          <div className="loading-slider">
-            <div className="loading-card"></div>
-            <div className="loading-card"></div>
-            <div className="loading-card"></div>
-            <div className="loading-card"></div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    console.error('Categories API error:', error);
-    return (
-      <section className="trending-section">
-        <div className="container">
-          <h2 className="section-title">Top Trending Collections</h2>
-          <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
-            <p>Unable to load categories. Please try again later.</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (!categories || categories.length === 0) {
-    // Show empty state but keep the section visible
-    return (
-      <section className="trending-section">
-        <div className="container">
-          <h2 className="section-title">Top Trending Collections</h2>
-          <div className="category-slider-container" style={{justifyContent: 'center'}}>
-            <div style={{textAlign: 'center', padding: '40px', color: '#666', width: '100%'}}>
-              <p>Collections coming soon...</p>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const visibleCategories = categories.slice(currentIndex, currentIndex + itemsPerView);
-  const canGoNext = currentIndex < categories.length - itemsPerView;
+  const displayCategories = categories && categories.length > 0 ? categories : fallbackCategories;
+  const usingFallback = !categories || categories.length === 0;
+  const canGoNext = currentIndex < displayCategories.length - itemsPerView;
   const canGoPrev = currentIndex > 0;
 
   return (
     <section className="trending-section">
       <div className="container">
         <h2 className="section-title">Top Trending Collections</h2>
+        {isLoading ? (
+          <div className="category-slider-container" style={{justifyContent: 'center'}}>
+            <div className="loading-slider">
+              <div className="loading-card"></div>
+              <div className="loading-card"></div>
+              <div className="loading-card"></div>
+              <div className="loading-card"></div>
+            </div>
+          </div>
+        ) : displayCategories.length > 0 ? (
         <div className="category-slider-container">
           <button 
             className={`slider-btn prev-btn ${!canGoPrev ? 'disabled' : ''}`}
@@ -166,19 +155,19 @@ const CategorySlider = () => {
               className="slider-track"
               style={{
                 transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                width: `${categories.length * (100 / itemsPerView)}%`,
-                display: 'flex !important',
-                visibility: 'visible !important',
-                opacity: '1 !important',
+                width: `${(displayCategories.length / itemsPerView) * 100}%`,
+                display: 'flex',
+                visibility: 'visible',
+                opacity: 1,
                 transition: 'transform 0.5s ease',
-                flexWrap: 'nowrap !important',
+                flexWrap: 'nowrap',
                 height: 'auto',
-                position: 'relative'
+                position: 'relative',
+                alignItems: 'stretch'
               }}
             >
-              {categories.map((category, idx) => {
+              {displayCategories.map((category, idx) => {
                 const cardWidthPercent = 100 / itemsPerView;
-                console.log(`Rendering category ${idx}:`, category.name, 'Width:', cardWidthPercent + '%');
                 return (
                 <div 
                   key={category.id} 
@@ -189,10 +178,11 @@ const CategorySlider = () => {
                     maxWidth: `${cardWidthPercent}%`,
                     width: `${cardWidthPercent}%`,
                     boxSizing: 'border-box',
-                    display: 'flex !important',
-                    visibility: 'visible !important',
-                    opacity: '1 !important',
-                    position: 'relative'
+                    display: 'flex',
+                    visibility: 'visible',
+                    opacity: 1,
+                    position: 'relative',
+                    padding: isMobile ? '0 8px' : '0 10px'
                   }}
                 >
                   <Link 
@@ -244,6 +234,21 @@ const CategorySlider = () => {
             }} />
           </button>
         </div>
+        ) : (
+          <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+            <p>No categories available right now. Please check back soon.</p>
+          </div>
+        )}
+        {error && (
+          <div style={{textAlign: 'center', marginTop: '20px', color: '#aa0000', fontSize: '0.9rem'}}>
+            <p>Unable to load live categories. Showing curated list instead.</p>
+          </div>
+        )}
+        {usingFallback && !isLoading && !error && (
+          <div style={{textAlign: 'center', marginTop: '20px', color: '#666', fontSize: '0.9rem'}}>
+            <p>Showing our curated categories while the live catalogue loads.</p>
+          </div>
+        )}
       </div>
     </section>
   );

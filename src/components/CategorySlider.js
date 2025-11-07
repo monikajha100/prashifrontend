@@ -7,7 +7,7 @@ import './CategorySlider.css';
 
 const CategorySlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsPerView, setItemsPerView] = useState(4);
+  const [itemsPerView, setItemsPerView] = useState(3);
 
   const { data: categories, isLoading, error } = useQuery(
     'categories',
@@ -17,7 +17,6 @@ const CategorySlider = () => {
         // The API returns categories directly as an array
         const categoriesList = Array.isArray(response) ? response : (response.data || []);
         const filtered = categoriesList?.filter(cat => cat.is_active) || [];
-        console.log('Categories loaded:', filtered.length, filtered);
         return filtered;
       },
       retry: 2,
@@ -29,7 +28,7 @@ const CategorySlider = () => {
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      let newItemsPerView = 4;
+      let newItemsPerView = 3;
       if (width < 480) {
         newItemsPerView = 1; // Show 1 item on very small screens
       } else if (width < 768) {
@@ -37,7 +36,7 @@ const CategorySlider = () => {
       } else if (width < 1024) {
         newItemsPerView = 2; // Show 2 items on tablets
       } else {
-        newItemsPerView = 4; // Show 4 items on desktop
+        newItemsPerView = 3; // Show 3 items on desktop
       }
       
       if (newItemsPerView !== itemsPerView) {
@@ -60,12 +59,6 @@ const CategorySlider = () => {
     }
   }, [categories, currentIndex]);
 
-  // Debug: Log categories on mobile
-  useEffect(() => {
-    if (window.innerWidth <= 768) {
-      console.log('Mobile view - Categories:', categories?.length, 'Items per view:', itemsPerView, 'Current index:', currentIndex);
-    }
-  }, [categories, itemsPerView, currentIndex]);
 
   const nextSlide = () => {
     if (categories && currentIndex < categories.length - itemsPerView) {
@@ -215,7 +208,7 @@ const CategorySlider = () => {
                     </p>
                   </Link>
                 </div>
-                );
+              );
               })}
             </div>
           </div>

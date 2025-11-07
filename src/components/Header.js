@@ -23,10 +23,14 @@ const Header = () => {
   const [banners, setBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const { user, isAuthenticated, logout } = useAuth();
-  const { getCartItemsCount } = useCart();
+  const { getCartItemsCount, cartItems } = useCart();
   const navigate = useNavigate();
 
-  const cartItemsCount = getCartItemsCount();
+  // Recalculate cart count whenever cartItems change
+  // Using useMemo to ensure proper reactivity when cartItems array changes
+  const cartItemsCount = React.useMemo(() => {
+    return getCartItemsCount();
+  }, [cartItems]);
 
   // Fetch promotional banners
   useEffect(() => {
@@ -319,9 +323,9 @@ const Header = () => {
                 aria-label="Shopping cart"
               >
                 <FaShoppingBag />
-                {cartItemsCount > 0 && (
+                {cartItemsCount > 0 ? (
                   <span className="cart-badge">{cartItemsCount}</span>
-                )}
+                ) : null}
               </Link>
 
               {/* Mobile Menu Toggle */}

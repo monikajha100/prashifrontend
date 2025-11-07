@@ -28,11 +28,18 @@ export const CartProvider = ({ children }) => {
             item.quantity && 
             typeof item.quantity === 'number' && 
             item.quantity > 0 &&
-            item.price !== undefined
+            item.price !== undefined &&
+            !isNaN(parseFloat(item.price))
           );
-          setCartItems(validCart);
-          // Update localStorage with cleaned data if items were removed
-          if (validCart.length !== parsedCart.length) {
+          
+          // Always update localStorage with cleaned data
+          if (validCart.length === 0) {
+            // If no valid items, clear localStorage
+            localStorage.removeItem('cart');
+            setCartItems([]);
+          } else {
+            setCartItems(validCart);
+            // Update localStorage with cleaned data
             localStorage.setItem('cart', JSON.stringify(validCart));
           }
         } else {
@@ -47,6 +54,8 @@ export const CartProvider = ({ children }) => {
       }
     } else {
       setCartItems([]);
+      // Ensure localStorage is cleared (don't store empty array)
+      localStorage.removeItem('cart');
     }
   }, []);
 
@@ -60,7 +69,8 @@ export const CartProvider = ({ children }) => {
         item.quantity && 
         typeof item.quantity === 'number' && 
         item.quantity > 0 &&
-        item.price !== undefined
+        item.price !== undefined &&
+        !isNaN(parseFloat(item.price))
       );
       
       // If invalid items were filtered out, update state to match
@@ -69,10 +79,15 @@ export const CartProvider = ({ children }) => {
         return; // Don't save yet, let the next effect cycle handle it
       }
       
-      localStorage.setItem('cart', JSON.stringify(validCart));
+      // If cart is empty, remove from localStorage instead of storing empty array
+      if (validCart.length === 0) {
+        localStorage.removeItem('cart');
+      } else {
+        localStorage.setItem('cart', JSON.stringify(validCart));
+      }
     } else {
       setCartItems([]);
-      localStorage.setItem('cart', JSON.stringify([]));
+      localStorage.removeItem('cart');
     }
   }, [cartItems]);
 

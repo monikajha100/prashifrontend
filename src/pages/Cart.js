@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
 import { storefrontAPI } from '../services/api';
+import { useCart } from '../context/CartContext';
 import './Cart.css';
 
 const Cart = () => {
   const navigate = useNavigate();
-  
-  // Load cart items from localStorage or start empty
-  const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+  const { 
+    cartItems, 
+    updateQuantity: updateCartQuantity, 
+    removeFromCart,
+    getCartItemsCount 
+  } = useCart();
 
   // Get tax settings
   const { data: taxSettings } = useQuery(
@@ -26,41 +27,26 @@ const Cart = () => {
     }
   );
 
-  // Sync cart state when component mounts
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        const parsedCart = JSON.parse(savedCart);
-        setCartItems(parsedCart);
-      } catch (error) {
-        console.error('Error parsing cart from localStorage:', error);
-        setCartItems([]);
-      }
-    }
-  }, []);
-
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeItem(id);
-      return;
-    }
-    
-    const updatedItems = cartItems.map(item =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
+    updateCartQuantity(id, newQuantity);
   };
 
   const removeItem = (id) => {
-    const updatedItems = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedItems);
-    localStorage.setItem('cart', JSON.stringify(updatedItems));
+    removeFromCart(id);
   };
 
+  const cartCount = getCartItemsCount();
+  const validCartItems = Array.isArray(cartItems) ? cartItems.filter(item => 
+    item && 
+    item.id && 
+    item.quantity && 
+    typeof item.quantity === 'number' && 
+    item.quantity > 0 &&
+    item.price !== undefined
+  ) : [];
+
   const calculateTotals = () => {
-    const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
+    const subtotal = validCartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
     const shippingAmount = 0; // Free shipping for all orders
     const taxEnabled = taxSettings?.tax_enabled || false;
     const taxRate = taxSettings?.tax_rate || 18;
@@ -74,17 +60,18 @@ const Cart = () => {
 
   const handleCheckout = () => {
     // Store cart data in localStorage for checkout page
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    localStorage.setItem('cartItems', JSON.stringify(validCartItems));
     localStorage.setItem('cartTotals', JSON.stringify({ subtotal, shippingAmount, taxAmount, totalAmount }));
     navigate('/checkout');
   };
 
-  if (cartItems.length === 0) {
+  if (validCartItems.length === 0 || cartCount === 0) {
     return (
       <div className="cart-page">
         <div className="container">
           <div className="cart-header">
             <h1>Shopping Cart</h1>
+            <p>0 items in your cart</p>
           </div>
           
           <div className="empty-cart">
@@ -105,13 +92,13 @@ const Cart = () => {
       <div className="container">
         <div className="cart-header">
           <h1>Shopping Cart</h1>
-          <p>{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
+          <p>{cartCount} item{cartCount !== 1 ? 's' : ''} in your cart</p>
         </div>
 
         <div className="cart-content">
           <div className="cart-items-section">
             <div className="cart-items">
-              {cartItems.map(item => (
+              {validCartItems.map(item => (
                 <div key={item.id} className="cart-item">
                   <div className="item-image">
                     <img src={item.image} alt={item.name} />

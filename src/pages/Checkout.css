@@ -41,9 +41,24 @@
   overflow-x: hidden;
 }
 
-@media (max-width: 1024px) {
+/* Tablet Styles */
+@media (max-width: 1024px) and (min-width: 769px) {
   .checkout-content {
     grid-template-columns: 1fr 380px;
+    gap: 30px;
+  }
+  
+  .checkout-form {
+    padding: 24px;
+  }
+  
+  .order-summary {
+    padding: 24px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
   }
 }
 

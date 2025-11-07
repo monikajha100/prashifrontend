@@ -186,6 +186,24 @@
   font-size: 16px;
 }
 
+/* Tablet Responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .addresses-container {
+    max-width: 95%;
+    padding: 0 20px;
+  }
+  
+  .addresses-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .address-card {
+    padding: 25px;
+  }
+}
+
+/* Mobile Responsive */
 @media (max-width: 768px) {
   .addresses-header {
     flex-direction: column;

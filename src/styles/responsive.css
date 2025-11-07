@@ -1,0 +1,205 @@
+/* Global Responsive Utilities */
+/* This file provides common responsive patterns used across all pages */
+
+/* Container Responsive */
+.responsive-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Grid Responsive Patterns */
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.responsive-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Typography Responsive */
+.responsive-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.responsive-subtitle {
+  font-size: 1.2rem;
+}
+
+.responsive-text {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Button Responsive */
+.responsive-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  min-height: 44px; /* Touch-friendly */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Card Responsive */
+.responsive-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tablet Styles (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .responsive-container {
+    padding: 0 16px;
+  }
+
+  .responsive-grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .responsive-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .responsive-title {
+    font-size: 2.2rem;
+  }
+
+  .responsive-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .responsive-card {
+    padding: 20px;
+  }
+}
+
+/* Mobile Styles (up to 768px) */
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 0 16px;
+  }
+
+  .responsive-grid-4,
+  .responsive-grid-3,
+  .responsive-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .responsive-title {
+    font-size: 2rem;
+  }
+
+  .responsive-subtitle {
+    font-size: 1rem;
+  }
+
+  .responsive-text {
+    font-size: 0.95rem;
+  }
+
+  .responsive-btn {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .responsive-card {
+    padding: 16px;
+  }
+
+  /* Ensure all interactive elements are touch-friendly */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Small Mobile Styles (up to 480px) */
+@media (max-width: 480px) {
+  .responsive-container {
+    padding: 0 12px;
+  }
+
+  .responsive-title {
+    font-size: 1.75rem;
+  }
+
+  .responsive-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .responsive-text {
+    font-size: 0.9rem;
+  }
+
+  .responsive-btn {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+
+  .responsive-card {
+    padding: 12px;
+  }
+}
+
+/* Landscape Mobile Optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .responsive-container {
+    padding: 0 12px;
+  }
+
+  .responsive-title {
+    font-size: 1.8rem;
+  }
+}
+
+/* Large Screens (above 1440px) */
+@media (min-width: 1440px) {
+  .responsive-container {
+    max-width: 1400px;
+    padding: 0 40px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .responsive-btn,
+  .no-print {
+    display: none !important;
+  }
+}
+

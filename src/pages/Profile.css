@@ -440,7 +440,33 @@ select.form-input:focus {
   margin-right: auto;
 }
 
-/* Responsive Design */
+/* Tablet Responsive Design */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .profile-container {
+    max-width: 95%;
+    padding: 0 20px;
+  }
+  
+  .profile-section {
+    padding: 30px 25px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .profile-tabs {
+    gap: 8px;
+  }
+  
+  .tab-btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Mobile Responsive Design */
 @media (max-width: 768px) {
   .profile-page {
     padding: 20px 0;

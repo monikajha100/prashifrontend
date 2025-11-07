@@ -439,6 +439,35 @@
   color: #666;
 }
 
+/* Tablet Responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .orders-page {
+    padding: 30px 0 50px;
+  }
+  
+  .orders-container {
+    max-width: 95%;
+    padding: 0 20px;
+  }
+  
+  .order-card {
+    padding: 25px;
+  }
+  
+  .order-items {
+    gap: 15px;
+  }
+  
+  .order-item {
+    padding: 15px;
+  }
+  
+  .order-actions {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .orders-page {

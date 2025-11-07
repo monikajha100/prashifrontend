@@ -15,11 +15,21 @@ const AdminUsers = () => {
   const [selectedUserForOrders, setSelectedUserForOrders] = useState(null);
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading } = useQuery(
+  const { data: users, isLoading, error } = useQuery(
     'adminUsers',
-    () => usersAPI.getAllUsers(),
+    async () => {
+      try {
+        const response = await usersAPI.getAllUsers();
+        // Handle both direct array response and wrapped response
+        return Array.isArray(response) ? response : (response?.data || []);
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        throw err;
+      }
+    },
     {
-      select: (response) => response.data
+      retry: 1,
+      refetchOnWindowFocus: false
     }
   );
 
@@ -70,6 +80,31 @@ const AdminUsers = () => {
     return (
       <AdminLayout>
         <LoadingSpinner text="Loading users..." />
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="error-container" style={{ padding: '2rem', textAlign: 'center' }}>
+          <h2>⚠️ Error Loading Users</h2>
+          <p>Unable to fetch users. Please ensure:</p>
+          <ul style={{ textAlign: 'left', display: 'inline-block' }}>
+            <li>Backend server is running</li>
+            <li>Database is connected</li>
+            <li>You are logged in as admin</li>
+          </ul>
+          <p style={{ marginTop: '1rem', color: '#666' }}>
+            Error: {error.message || 'Unknown error'}
+          </p>
+          <button 
+            onClick={() => window.location.reload()} 
+            style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}
+          >
+            Retry
+          </button>
+        </div>
       </AdminLayout>
     );
   }

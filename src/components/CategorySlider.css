@@ -414,12 +414,17 @@
     max-width: 100% !important;
     min-width: 100% !important;
     box-sizing: border-box !important;
+    position: relative !important;
   }
   
   .collection-card {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    height: 100% !important;
   }
   
   .slider-btn.prev-btn {

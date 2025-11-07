@@ -14,14 +14,25 @@ const CategorySlider = () => {
     categoriesAPI.getAll,
     {
       select: (response) => {
-        // The API returns categories directly as an array
-        const categoriesList = Array.isArray(response) ? response : (response.data || []);
-        const filtered = categoriesList?.filter(cat => cat.is_active) || [];
-        return filtered;
+        try {
+          // The API returns categories directly as an array
+          const categoriesList = Array.isArray(response) ? response : (response?.data || []);
+          const filtered = categoriesList?.filter(cat => cat.is_active) || [];
+          console.log('Categories loaded:', filtered.length, filtered);
+          return filtered;
+        } catch (err) {
+          console.error('Error processing categories:', err);
+          return [];
+        }
       },
       retry: 2,
       staleTime: 5 * 60 * 1000, // Cache for 5 minutes
       cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
+      onError: (err) => {
+        console.error('Categories fetch error:', err);
+      },
+      refetchOnWindowFocus: false,
+      refetchOnMount: true
     }
   );
 
@@ -103,13 +114,15 @@ const CategorySlider = () => {
   }
 
   if (!categories || categories.length === 0) {
-    // Don't return null, show a message instead
+    // Show empty state but keep the section visible
     return (
       <section className="trending-section">
         <div className="container">
           <h2 className="section-title">Top Trending Collections</h2>
-          <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
-            <p>Collections coming soon...</p>
+          <div className="category-slider-container" style={{justifyContent: 'center'}}>
+            <div style={{textAlign: 'center', padding: '40px', color: '#666', width: '100%'}}>
+              <p>Collections coming soon...</p>
+            </div>
           </div>
         </div>
       </section>
@@ -154,16 +167,18 @@ const CategorySlider = () => {
               style={{
                 transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
                 width: `${categories.length * (100 / itemsPerView)}%`,
-                display: 'flex',
-                visibility: 'visible',
-                opacity: 1,
+                display: 'flex !important',
+                visibility: 'visible !important',
+                opacity: '1 !important',
                 transition: 'transform 0.5s ease',
-                flexWrap: 'nowrap',
-                height: 'auto'
+                flexWrap: 'nowrap !important',
+                height: 'auto',
+                position: 'relative'
               }}
             >
-              {categories.map((category) => {
+              {categories.map((category, idx) => {
                 const cardWidthPercent = 100 / itemsPerView;
+                console.log(`Rendering category ${idx}:`, category.name, 'Width:', cardWidthPercent + '%');
                 return (
                 <div 
                   key={category.id} 
@@ -174,9 +189,10 @@ const CategorySlider = () => {
                     maxWidth: `${cardWidthPercent}%`,
                     width: `${cardWidthPercent}%`,
                     boxSizing: 'border-box',
-                    display: 'flex',
-                    visibility: 'visible',
-                    opacity: 1
+                    display: 'flex !important',
+                    visibility: 'visible !important',
+                    opacity: '1 !important',
+                    position: 'relative'
                   }}
                 >
                   <Link 

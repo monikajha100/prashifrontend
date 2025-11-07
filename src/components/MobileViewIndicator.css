@@ -1,0 +1,74 @@
+/* Mobile View Indicator - Only visible in development */
+.mobile-view-indicator {
+  position: fixed;
+  top: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 10px 15px;
+  z-index: 99999;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  border-bottom-left-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  min-width: 200px;
+}
+
+.indicator-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.indicator-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.indicator-label {
+  color: #aaa;
+  font-weight: 500;
+}
+
+.indicator-value {
+  color: #4ade80;
+  font-weight: 700;
+  text-align: right;
+}
+
+.indicator-value.device-type {
+  color: #60a5fa;
+}
+
+.indicator-value.breakpoint {
+  color: #fbbf24;
+}
+
+/* Hide on very small screens to avoid clutter */
+@media (max-width: 320px) {
+  .mobile-view-indicator {
+    font-size: 10px;
+    padding: 8px 10px;
+    min-width: 150px;
+  }
+  
+  .indicator-item {
+    gap: 5px;
+  }
+}
+
+/* Position adjustment for mobile */
+@media (max-width: 768px) {
+  .mobile-view-indicator {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    border-radius: 8px 0 0 0;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+}
+

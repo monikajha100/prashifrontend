@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import './index.css';
 import './live-styles.css';
 import './responsive.css';
+import './mobile-tablet-enhancements.css';
 import App from './App';
 
 const queryClient = new QueryClient({

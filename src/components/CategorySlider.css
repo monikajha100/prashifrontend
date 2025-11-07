@@ -4,6 +4,10 @@
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   width: 100%;
   overflow-x: hidden;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
 }
 
 .trending-section .container {
@@ -37,11 +41,13 @@
 
 .category-slider-container {
   position: relative;
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 20px;
-  overflow: hidden;
-  width: 100%;
+  overflow: visible !important;
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .slider-btn {
@@ -122,13 +128,16 @@
 }
 
 .slider-track {
-  display: flex;
+  display: flex !important;
   transition: transform 0.5s ease;
   gap: 0;
-  width: 100%;
+  width: auto;
   min-width: 0;
-  visibility: visible;
-  opacity: 1;
+  visibility: visible !important;
+  opacity: 1 !important;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  height: auto;
 }
 
 .collection-card-wrapper {
@@ -136,31 +145,33 @@
   box-sizing: border-box;
   flex-shrink: 0;
   min-width: 0;
-  display: block;
+  display: flex;
   visibility: visible;
   opacity: 1;
+  align-items: stretch;
 }
 
 .collection-card {
-  background: white;
+  background: white !important;
   border-radius: 20px;
   padding: 40px 30px;
   text-align: center;
   text-decoration: none;
   color: inherit;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
   border: 2px solid transparent;
   position: relative;
   overflow: visible;
   height: 100%;
-  display: flex;
+  min-height: 220px;
+  display: flex !important;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  visibility: visible;
-  opacity: 1;
-  width: 100%;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
   box-sizing: border-box;
 }
 
@@ -300,24 +311,39 @@
 
 @media (max-width: 768px) {
   .trending-section {
-    padding: 60px 0;
+    padding: 60px 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .trending-section .container {
-    padding: 0 16px;
+    padding: 0 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .section-title {
-    font-size: 2rem;
-    margin-bottom: 40px;
+    font-size: 2rem !important;
+    margin-bottom: 40px !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .category-slider-container {
-    gap: 12px;
-    width: 100%;
-    overflow: hidden;
-    padding: 0 8px;
-    box-sizing: border-box;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative;
+    align-items: center;
   }
   
   .slider-btn {
@@ -344,29 +370,50 @@
   }
   
   .category-slider {
-    width: 100%;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    display: block;
-    visibility: visible;
+    width: 100% !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 220px !important;
   }
   
   .slider-track {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto;
-    min-height: 220px;
+    height: auto !important;
+    min-height: 220px !important;
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
+    position: relative !important;
+    will-change: transform;
   }
   
   .collection-card-wrapper {
-    padding: 0 8px;
+    padding: 0 8px !important;
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: 100%;
-    align-items: stretch;
+    height: auto !important;
+    min-height: 220px !important;
+    align-items: stretch !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .collection-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .slider-btn.prev-btn {
@@ -412,24 +459,39 @@
 
 @media (max-width: 480px) {
   .trending-section {
-    padding: 40px 0;
+    padding: 40px 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .trending-section .container {
-    padding: 0 12px;
+    padding: 0 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .section-title {
-    font-size: 1.8rem;
-    margin-bottom: 30px;
+    font-size: 1.8rem !important;
+    margin-bottom: 30px !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .category-slider-container {
-    gap: 8px;
-    width: 100%;
-    overflow: hidden;
-    padding: 0 5px;
-    box-sizing: border-box;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative;
+    align-items: center;
   }
   
   .slider-btn {
@@ -456,39 +518,55 @@
   }
   
   .category-slider {
-    width: 100%;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    display: block;
-    visibility: visible;
+    width: 100% !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 200px !important;
   }
   
   .slider-track {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto;
-    min-height: 200px;
+    height: auto !important;
+    min-height: 200px !important;
+    align-items: stretch !important;
+    flex-wrap: nowrap !important;
+    position: relative !important;
+    will-change: transform;
   }
   
   .collection-card-wrapper {
-    padding: 0 5px;
+    padding: 0 5px !important;
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: 100%;
-    align-items: stretch;
+    height: auto !important;
+    min-height: 200px !important;
+    align-items: stretch !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .collection-card {
-    padding: 25px 15px;
-    min-height: 200px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 25px 15px !important;
+    min-height: 200px !important;
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    width: 100%;
-    box-sizing: border-box;
   }
   
   .collection-icon {
@@ -543,12 +621,25 @@
   }
   
   .collection-card-wrapper {
-    padding: 0 3px;
+    padding: 0 3px !important;
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .collection-card {
-    padding: 20px 12px;
-    min-height: 180px;
+    padding: 20px 12px !important;
+    min-height: 180px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .collection-icon {
@@ -577,21 +668,76 @@
 /* iPhone SE and similar devices */
 @media (max-width: 375px) {
   .trending-section {
-    padding: 30px 0;
+    padding: 30px 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   .trending-section .container {
-    padding: 0 10px;
+    padding: 0 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .section-title {
-    font-size: 1.6rem;
-    margin-bottom: 25px;
+    font-size: 1.6rem !important;
+    margin-bottom: 25px !important;
+    display: block !important;
+    visibility: visible !important;
   }
   
   .category-slider-container {
-    gap: 6px;
-    padding: 0 4px;
+    gap: 6px !important;
+    padding: 0 !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center;
+  }
+  
+  .category-slider {
+    width: 100% !important;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 190px !important;
+  }
+  
+  .slider-track {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    flex-wrap: nowrap !important;
+    height: auto !important;
+    min-height: 190px !important;
+    align-items: stretch !important;
+  }
+  
+  .collection-card-wrapper {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 0 4px !important;
+  }
+  
+  .collection-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .slider-btn {
@@ -599,6 +745,7 @@
     height: 32px;
     min-width: 32px;
     min-height: 32px;
+    flex-shrink: 0;
   }
   
   .slider-btn svg {
@@ -609,6 +756,8 @@
   .collection-card {
     padding: 22px 14px;
     min-height: 190px;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .collection-name {

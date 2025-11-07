@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import MobileViewIndicator from './components/MobileViewIndicator';
 
 // Pages
 import Home from './pages/Home';
@@ -73,6 +74,7 @@ function App() {
           </Helmet>
           
           <ScrollToTop />
+          <MobileViewIndicator />
           
           <Routes>
             {/* Public Routes */}

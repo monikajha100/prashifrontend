@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
-import api, { categoriesAPI } from "../../services/api";
+import api, { categoriesAPI, toAbsoluteImageUrl } from "../../services/api";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "../components/AdminLayout";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -16,7 +16,20 @@ const AdminCategories = () => {
     "categories",
     categoriesAPI.getAll,
     {
-      select: (response) => response.data,
+      select: (response) => {
+        const data = response.data;
+        console.log('Categories data:', data);
+        if (data && Array.isArray(data)) {
+          data.forEach(cat => {
+            console.log(`Category ${cat.name}:`, { 
+              id: cat.id, 
+              image: cat.image,
+              hasImage: !!cat.image 
+            });
+          });
+        }
+        return data;
+      },
     }
   );
 
@@ -66,56 +79,75 @@ const AdminCategories = () => {
           </div>
 
           <div className="categories-grid">
-            {categories?.map((category) => (
-              <div key={category.id} className="category-card">
-                <div className="category-info">
-                  {category.image && (
-                    <div className="category-image">
-                      <img
-                        src={category.image}
-                        alt={category.name}
-                        style={{
-                          width: "60px",
-                          height: "60px",
-                          objectFit: "cover",
-                          borderRadius: "8px",
-                          marginBottom: "15px",
-                        }}
-                      />
+            {categories?.map((category) => {
+              const imageUrl = category.image ? toAbsoluteImageUrl(category.image) : null;
+              console.log(`Rendering category ${category.name}:`, { 
+                originalImage: category.image, 
+                absoluteUrl: imageUrl 
+              });
+              
+              return (
+                <div key={category.id} className="category-card">
+                  <div className="category-info">
+                    {imageUrl && (
+                      <div className="category-image">
+                        <img
+                          src={imageUrl}
+                          alt={category.name}
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                            borderRadius: "8px",
+                            marginBottom: "15px",
+                          }}
+                          onError={(e) => {
+                            console.error('Category image load error:', { 
+                              category: category.name,
+                              originalUrl: category.image,
+                              absoluteUrl: imageUrl 
+                            });
+                            e.target.style.display = 'none';
+                          }}
+                          onLoad={() => {
+                            console.log('Category image loaded successfully:', category.name);
+                          }}
+                        />
+                      </div>
+                    )}
+                    <h3>{category.name}</h3>
+                    <p className="category-slug">Slug: {category.slug}</p>
+                    <p className="category-description">{category.description}</p>
+                    <div className="category-meta">
+                      <span className="product-count">
+                        {category.product_count || 0} products
+                      </span>
+                      <span
+                        className={`status-badge ${
+                          category.is_active ? "active" : "inactive"
+                        }`}
+                      >
+                        {category.is_active ? "Active" : "Inactive"}
+                      </span>
                     </div>
-                  )}
-                  <h3>{category.name}</h3>
-                  <p className="category-slug">Slug: {category.slug}</p>
-                  <p className="category-description">{category.description}</p>
-                  <div className="category-meta">
-                    <span className="product-count">
-                      {category.product_count || 0} products
-                    </span>
-                    <span
-                      className={`status-badge ${
-                        category.is_active ? "active" : "inactive"
-                      }`}
+                  </div>
+                  <div className="category-actions">
+                    <button
+                      className="btn btn-sm btn-secondary"
+                      onClick={() => setEditingCategory(category)}
                     >
-                      {category.is_active ? "Active" : "Inactive"}
-                    </span>
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDelete(category.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-                <div className="category-actions">
-                  <button
-                    className="btn btn-sm btn-secondary"
-                    onClick={() => setEditingCategory(category)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(category.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {showAddForm && (
@@ -342,7 +374,9 @@ const CategoryForm = ({ category, onClose, onSuccess }) => {
             {imagePreview && (
               <div className="image-preview">
                 <img
-                  src={imagePreview}
+                  src={imagePreview.startsWith('data:') || imagePreview.startsWith('http') 
+                    ? imagePreview 
+                    : toAbsoluteImageUrl(imagePreview)}
                   alt="Preview"
                   style={{
                     width: "100px",
@@ -350,6 +384,10 @@ const CategoryForm = ({ category, onClose, onSuccess }) => {
                     objectFit: "cover",
                     borderRadius: "8px",
                     marginTop: "10px",
+                  }}
+                  onError={(e) => {
+                    console.error('Image preview error:', imagePreview);
+                    e.target.style.display = 'none';
                   }}
                 />
               </div>

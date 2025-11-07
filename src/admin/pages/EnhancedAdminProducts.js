@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import api, { adminAPI, API_BASE_URL } from '../../services/api';
+import api, { adminAPI, API_BASE_URL, toAbsoluteImageUrl } from '../../services/api';
 
 const EnhancedAdminProducts = () => {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -232,8 +232,11 @@ const ProductFormModal = ({ product, categories, subcategories, onClose, onSucce
     is_active: product?.is_active !== false
   });
 
-  const [images, setImages] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]);
+  const [images, setImages] = useState([]); // New files to upload
+  const [imagePreviews, setImagePreviews] = useState([]); // Previews for new files
+  const [existingImages, setExistingImages] = useState([]); // Existing images from database
+  const [deletedImageIds, setDeletedImageIds] = useState([]); // IDs of images to delete
+  const [loadingImages, setLoadingImages] = useState(false); // Loading state for images
   const [videos, setVideos] = useState([
     { url: '', type: 'youtube', title: '' }
   ]);
@@ -243,6 +246,79 @@ const ProductFormModal = ({ product, categories, subcategories, onClose, onSucce
   ]);
   const [colorImages, setColorImages] = useState([]);
   const [uploading, setUploading] = useState(false);
+
+  // Load existing product images when editing
+  React.useEffect(() => {
+    const loadProductImages = async () => {
+      if (product && product.id) {
+        setLoadingImages(true);
+        try {
+          console.log('=== Loading Product Images ===');
+          console.log('Product object:', product);
+          console.log('Product ID:', product.id);
+          
+          // Always fetch fresh data from API to ensure we have the latest images
+          console.log('Fetching images from API for product ID:', product.id);
+          const response = await adminAPI.getProduct(product.id);
+          console.log('Product API response:', response);
+          console.log('Response data:', response.data);
+          console.log('Response data.images:', response.data?.images);
+          console.log('Response data.images type:', typeof response.data?.images);
+          console.log('Response data.images is array?', Array.isArray(response.data?.images));
+          
+          // Handle different response structures
+          let imageArray = [];
+          if (response.data) {
+            if (Array.isArray(response.data.images)) {
+              imageArray = response.data.images;
+              console.log('Images found as array:', imageArray);
+            } else if (response.data.images && typeof response.data.images === 'object') {
+              // If images is an object, try to convert to array
+              imageArray = Object.values(response.data.images);
+              console.log('Images converted from object:', imageArray);
+            } else if (response.data.image_url) {
+              // Fallback: if there's a single image_url on the product
+              imageArray = [{ image_url: response.data.image_url, is_primary: true }];
+              console.log('Using single image_url:', imageArray);
+            }
+          }
+          
+          console.log('Final image array:', imageArray);
+          console.log('Image array length:', imageArray.length);
+          if (imageArray.length > 0) {
+            console.log('Image array details:', imageArray.map(img => ({ 
+              id: img.id, 
+              url: img.image_url || img.url || img.imageUrl,
+              is_primary: img.is_primary 
+            })));
+          }
+          
+          if (imageArray.length > 0) {
+            console.log('✅ Setting existing images:', imageArray);
+            setExistingImages(imageArray);
+          } else {
+            console.log('❌ No images found - imageArray is empty');
+            console.log('Full response.data for debugging:', JSON.stringify(response.data, null, 2));
+            setExistingImages([]);
+          }
+        } catch (error) {
+          console.error('❌ Error loading product images:', error);
+          console.error('Error details:', error.response?.data || error.message);
+          setExistingImages([]);
+        } finally {
+          setLoadingImages(false);
+        }
+      } else {
+        // Reset for new product
+        console.log('No product or product.id, resetting images');
+        setExistingImages([]);
+        setDeletedImageIds([]);
+        setImages([]);
+        setImagePreviews([]);
+      }
+    };
+    loadProductImages();
+  }, [product]);
 
   // Initialize colors when editing a product
   React.useEffect(() => {
@@ -320,6 +396,31 @@ const ProductFormModal = ({ product, categories, subcategories, onClose, onSucce
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = async (imageId, imageIndex) => {
+    if (window.confirm('Are you sure you want to delete this image?')) {
+      try {
+        await adminAPI.deleteProductImage(imageId);
+        // Remove from state
+        setExistingImages(prev => prev.filter((_, i) => i !== imageIndex));
+        toast.success('Image deleted successfully');
+        // Reload product images to ensure consistency
+        if (product && product.id) {
+          try {
+            const response = await adminAPI.getProduct(product.id);
+            if (response.data && response.data.images) {
+              setExistingImages(response.data.images || []);
+            }
+          } catch (error) {
+            console.error('Error reloading images:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting image:', error);
+        toast.error('Failed to delete image: ' + (error.response?.data?.message || error.message));
+      }
+    }
   };
 
   const handleVideoChange = (index, field, value) => {
@@ -719,60 +820,165 @@ const ProductFormModal = ({ product, categories, subcategories, onClose, onSucce
               style={{ marginBottom: '15px' }}
             />
 
-            {imagePreviews.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-                {imagePreviews.map((preview, index) => (
-                  <div key={index} style={{ position: 'relative' }}>
-                    <img 
-                      src={preview} 
-                      alt={`Preview ${index + 1}`}
-                      style={{
-                        width: '100%',
-                        height: '100px',
-                        objectFit: 'cover',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      style={{
-                        position: 'absolute',
-                        top: '5px',
-                        right: '5px',
-                        background: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '50%',
-                        width: '25px',
-                        height: '25px',
-                        cursor: 'pointer',
-                        fontSize: '0.8rem'
-                      }}
-                    >
-                      ✕
-                    </button>
-                    {index === 0 && (
-                      <div style={{
-                        position: 'absolute',
-                        bottom: '5px',
-                        left: '5px',
-                        background: '#D4AF37',
-                        color: 'white',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600'
-                      }}>
-                        Primary
+            {/* Existing Images */}
+            {product && (
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ marginBottom: '10px', fontSize: '0.95rem', color: '#666', fontWeight: '600' }}>
+                  Existing Images {existingImages.length > 0 && `(${existingImages.length})`}
+                </h4>
+                {loadingImages && (
+                  <p style={{ fontSize: '0.85rem', color: '#666', fontStyle: 'italic', marginBottom: '10px' }}>
+                    Loading images...
+                  </p>
+                )}
+                {!loadingImages && existingImages.length === 0 && (
+                  <p style={{ fontSize: '0.85rem', color: '#999', fontStyle: 'italic', marginBottom: '10px' }}>
+                    No images found for this product.
+                  </p>
+                )}
+                {existingImages.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
+                    {existingImages.map((image, index) => {
+                      const imageUrl = image.image_url || image.url || image.imageUrl || '';
+                      const absoluteUrl = toAbsoluteImageUrl(imageUrl);
+                      console.log(`Image ${index}:`, { image, imageUrl, absoluteUrl });
+                      return (
+                      <div key={image.id || `img-${index}`} style={{ position: 'relative' }}>
+                        <img 
+                          src={absoluteUrl || 'https://via.placeholder.com/120x120?text=No+Image'} 
+                          alt={`Product image ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '120px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            border: '2px solid #e1e1e1',
+                            display: 'block'
+                          }}
+                          onError={(e) => {
+                            console.error('Image load error:', absoluteUrl);
+                            e.target.src = 'https://via.placeholder.com/120x120?text=Image+Error';
+                          }}
+                          onLoad={() => {
+                            console.log('Image loaded successfully:', absoluteUrl);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingImage(image.id, index)}
+                          style={{
+                            position: 'absolute',
+                            top: '5px',
+                            right: '5px',
+                            background: '#dc3545',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '28px',
+                            height: '28px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                          }}
+                          title="Delete image"
+                        >
+                          ✕
+                        </button>
+                        {image.is_primary && (
+                          <div style={{
+                            position: 'absolute',
+                            bottom: '5px',
+                            left: '5px',
+                            background: '#D4AF37',
+                            color: 'white',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            fontWeight: '600'
+                          }}>
+                            Primary
+                          </div>
+                        )}
                       </div>
-                    )}
+                    );
+                    })}
                   </div>
-                ))}
+                )}
               </div>
             )}
+
+            {/* New Image Previews */}
+            {imagePreviews.length > 0 && (
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ marginBottom: '10px', fontSize: '0.95rem', color: '#666', fontWeight: '600' }}>
+                  New Images ({imagePreviews.length}) - Preview
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '10px' }}>
+                  {imagePreviews.map((preview, index) => (
+                    <div key={`preview-${index}`} style={{ position: 'relative' }}>
+                      <img 
+                        src={preview} 
+                        alt={`New preview ${index + 1}`}
+                        style={{
+                          width: '100%',
+                          height: '120px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '2px solid #28a745'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        style={{
+                          position: 'absolute',
+                          top: '5px',
+                          right: '5px',
+                          background: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '28px',
+                          height: '28px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 2px 5px rgba(0,0,0,0.2)'
+                        }}
+                        title="Remove preview"
+                      >
+                        ✕
+                      </button>
+                      {existingImages.length === 0 && index === 0 && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '5px',
+                          background: '#28a745',
+                          color: 'white',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.7rem',
+                          fontWeight: '600'
+                        }}>
+                          Will be Primary
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <p style={{ fontSize: '0.9rem', color: '#666', marginTop: '10px' }}>
-              First image will be set as primary. You can upload multiple images.
+              {existingImages.length === 0 && imagePreviews.length === 0 
+                ? 'First image will be set as primary. You can upload multiple images.'
+                : 'Upload additional images. The first image (existing or new) will be set as primary.'}
             </p>
           </div>
 

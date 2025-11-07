@@ -6,6 +6,7 @@ import { paymentsAPI, ordersAPI, storefrontAPI, couponsAPI } from '../services/a
 import api from '../services/api';
 import './Checkout.css';
 
+
 const Checkout = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

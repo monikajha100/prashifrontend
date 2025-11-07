@@ -17,32 +17,55 @@ const CategorySlider = () => {
         // The API returns categories directly as an array
         const categoriesList = Array.isArray(response) ? response : (response.data || []);
         const filtered = categoriesList?.filter(cat => cat.is_active) || [];
+        console.log('Categories loaded:', filtered.length, filtered);
         return filtered;
-      }
+      },
+      retry: 2,
+      staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+      cacheTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
     }
   );
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
+      let newItemsPerView = 4;
       if (width < 480) {
-        setItemsPerView(1); // Show 1 item on very small screens
+        newItemsPerView = 1; // Show 1 item on very small screens
       } else if (width < 768) {
-        setItemsPerView(1); // Show 1 item on mobile for better visibility
+        newItemsPerView = 1; // Show 1 item on mobile for better visibility
       } else if (width < 1024) {
-        setItemsPerView(2); // Show 2 items on tablets
+        newItemsPerView = 2; // Show 2 items on tablets
       } else {
-        setItemsPerView(4); // Show 4 items on desktop
+        newItemsPerView = 4; // Show 4 items on desktop
       }
-      // Reset index when view changes
-      setCurrentIndex(0);
+      
+      if (newItemsPerView !== itemsPerView) {
+        setItemsPerView(newItemsPerView);
+        // Reset index when view changes
+        setCurrentIndex(0);
+      }
     };
 
     // Set initial value immediately
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [itemsPerView]);
+
+  // Reset index if categories change
+  useEffect(() => {
+    if (categories && categories.length > 0 && currentIndex >= categories.length) {
+      setCurrentIndex(0);
+    }
+  }, [categories, currentIndex]);
+
+  // Debug: Log categories on mobile
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      console.log('Mobile view - Categories:', categories?.length, 'Items per view:', itemsPerView, 'Current index:', currentIndex);
+    }
+  }, [categories, itemsPerView, currentIndex]);
 
   const nextSlide = () => {
     if (categories && currentIndex < categories.length - itemsPerView) {
@@ -86,13 +109,6 @@ const CategorySlider = () => {
     );
   }
 
-  // Reset index if categories change
-  useEffect(() => {
-    if (categories && categories.length > 0 && currentIndex >= categories.length) {
-      setCurrentIndex(0);
-    }
-  }, [categories, currentIndex]);
-
   if (!categories || categories.length === 0) {
     // Don't return null, show a message instead
     return (
@@ -131,25 +147,43 @@ const CategorySlider = () => {
             }} />
           </button>
           
-          <div className="category-slider">
+          <div className="category-slider" style={{ 
+            width: '100%', 
+            maxWidth: '100%',
+            overflow: 'hidden', 
+            position: 'relative',
+            flex: '1 1 0%',
+            minWidth: 0,
+            height: 'auto'
+          }}>
             <div 
               className="slider-track"
               style={{
                 transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)`,
-                width: `${(categories.length / itemsPerView) * 100}%`
+                width: `${categories.length * (100 / itemsPerView)}%`,
+                display: 'flex',
+                visibility: 'visible',
+                opacity: 1,
+                transition: 'transform 0.5s ease',
+                flexWrap: 'nowrap',
+                height: 'auto'
               }}
             >
               {categories.map((category) => {
+                const cardWidthPercent = 100 / itemsPerView;
                 return (
                 <div 
                   key={category.id} 
                   className="collection-card-wrapper" 
                   style={{ 
-                    flex: `0 0 ${100 / itemsPerView}%`,
-                    minWidth: `${100 / itemsPerView}%`,
-                    maxWidth: `${100 / itemsPerView}%`,
-                    display: 'block',
-                    visibility: 'visible'
+                    flex: `0 0 ${cardWidthPercent}%`,
+                    minWidth: `${cardWidthPercent}%`,
+                    maxWidth: `${cardWidthPercent}%`,
+                    width: `${cardWidthPercent}%`,
+                    boxSizing: 'border-box',
+                    display: 'flex',
+                    visibility: 'visible',
+                    opacity: 1
                   }}
                 >
                   <Link 

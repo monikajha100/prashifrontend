@@ -6,12 +6,48 @@ import { categoriesAPI, toAbsoluteImageUrl } from '../services/api';
 import './CategorySlider.css';
 
 const fallbackCategories = [
-  { id: 'fallback-1', name: 'Rings', slug: 'rings', description: 'Designer rings for every occasion' },
-  { id: 'fallback-2', name: 'Necklaces', slug: 'necklaces', description: 'Statement necklaces that shine' },
-  { id: 'fallback-3', name: 'Earrings', slug: 'earrings', description: 'Elegant earrings collection' },
-  { id: 'fallback-4', name: 'Bracelets', slug: 'bracelets', description: 'Graceful bracelets and bangles' },
-  { id: 'fallback-5', name: 'Sets', slug: 'sets', description: 'Curated jewellery sets' },
-  { id: 'fallback-6', name: 'Accessories', slug: 'accessories', description: 'Complete your look with accessories' }
+  {
+    id: 'fallback-1',
+    name: 'Rings',
+    slug: 'rings',
+    description: 'Designer rings for every occasion',
+    image: '/placeholder-product.jpg'
+  },
+  {
+    id: 'fallback-2',
+    name: 'Necklaces',
+    slug: 'necklaces',
+    description: 'Statement necklaces that shine',
+    image: '/placeholder-product.jpg'
+  },
+  {
+    id: 'fallback-3',
+    name: 'Earrings',
+    slug: 'earrings',
+    description: 'Elegant earrings collection',
+    image: '/placeholder-product.jpg'
+  },
+  {
+    id: 'fallback-4',
+    name: 'Bracelets',
+    slug: 'bracelets',
+    description: 'Graceful bracelets and bangles',
+    image: '/placeholder-product.jpg'
+  },
+  {
+    id: 'fallback-5',
+    name: 'Sets',
+    slug: 'sets',
+    description: 'Curated jewellery sets',
+    image: '/placeholder-product.jpg'
+  },
+  {
+    id: 'fallback-6',
+    name: 'Accessories',
+    slug: 'accessories',
+    description: 'Complete your look with accessories',
+    image: '/placeholder-product.jpg'
+  }
 ];
 
 const CategorySlider = () => {
@@ -95,22 +131,22 @@ const CategorySlider = () => {
     });
   }, [categories, isLoading, error, itemsPerView, currentIndex, isMobile]);
 
-  const nextSlide = () => {
-    if (categories && currentIndex < categories.length - itemsPerView) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const prevSlide = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
   const displayCategories = categories && categories.length > 0 ? categories : fallbackCategories;
   const usingFallback = !categories || categories.length === 0;
   const canGoNext = currentIndex < displayCategories.length - itemsPerView;
   const canGoPrev = currentIndex > 0;
+
+  const nextSlide = () => {
+    if (canGoNext) {
+      setCurrentIndex((prev) => prev + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (canGoPrev) {
+      setCurrentIndex((prev) => Math.max(prev - 1, 0));
+    }
+  };
 
   return (
     <section className="trending-section">
@@ -124,6 +160,32 @@ const CategorySlider = () => {
               <div className="loading-card"></div>
               <div className="loading-card"></div>
             </div>
+          </div>
+        ) : isMobile ? (
+          <div className="mobile-horizontal-scroll">
+            {displayCategories.map((category) => (
+              <Link
+                key={category.id}
+                to={`/products?category=${category.slug}`}
+                className="mobile-scroll-card"
+              >
+                <div className="mobile-scroll-image-wrapper">
+                  {category.image ? (
+                    <img
+                      src={toAbsoluteImageUrl(category.image)}
+                      alt={category.name}
+                      className="mobile-scroll-image"
+                    />
+                  ) : (
+                    <span className="default-icon">💎</span>
+                  )}
+                </div>
+                <div className="mobile-scroll-content">
+                  <h3>{category.name}</h3>
+                  <p>{category.description || 'Explore Collection'}</p>
+                </div>
+              </Link>
+            ))}
           </div>
         ) : displayCategories.length > 0 ? (
         <div className="category-slider-container">

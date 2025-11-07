@@ -80,6 +80,40 @@ const Home = () => {
     },
   ];
 
+const fallbackSpecialOffers = [
+  {
+    id: 'offer-1',
+    title: 'Festive Sale',
+    description: 'Flat 25% off on festive collections',
+    discount_text: 'Use code FESTIVE25',
+    button_text: 'Shop Festive',
+    link_url: '/products',
+    icon: '🎉',
+    background_color: 'rgba(255,255,255,0.95)',
+    text_color: '#2C2C2C'
+  },
+  {
+    id: 'offer-2',
+    title: 'Buy 2 Get 1 Free',
+    description: 'Mix and match earrings & rings',
+    button_text: 'Explore Offer',
+    link_url: '/products?category=earrings',
+    icon: '💎',
+    background_color: 'rgba(255,255,255,0.95)',
+    text_color: '#2C2C2C'
+  },
+  {
+    id: 'offer-3',
+    title: 'Free Shipping',
+    description: 'Enjoy free shipping on orders above ₹999',
+    button_text: 'Start Shopping',
+    link_url: '/products',
+    icon: '🚚',
+    background_color: 'rgba(255,255,255,0.95)',
+    text_color: '#2C2C2C'
+  }
+];
+
   // Fetch featured products with error handling
   const {
     data: featuredProducts,
@@ -176,6 +210,12 @@ const Home = () => {
     : banners
     ? [banners]
     : fallbackBanners;
+  const displaySpecialOffers =
+    Array.isArray(specialOffers) && specialOffers.length > 0
+      ? specialOffers
+      : fallbackSpecialOffers;
+  const usingSpecialOfferFallback =
+    !specialOffers || specialOffers.length === 0;
 
   // Banner slider effect
   useEffect(() => {
@@ -450,7 +490,7 @@ const Home = () => {
       </section>
 
       {/* Special Offers & Promotions Section - Dynamic */}
-      {specialOffers && specialOffers.length > 0 && (
+      {displaySpecialOffers && displaySpecialOffers.length > 0 && (
         <section className="promotional-offers">
           <div className="container">
             <div className="offers-header">
@@ -459,7 +499,7 @@ const Home = () => {
             </div>
 
             <div className="offers-grid">
-              {specialOffers.map((offer) => (
+              {displaySpecialOffers.map((offer) => (
                 <div
                   key={offer.id}
                   className="offer-card"
@@ -517,6 +557,12 @@ const Home = () => {
               <h4>🚚 Free Shipping on Orders Above ₹999</h4>
               <p>*Terms and conditions apply. Valid for prepaid orders only.</p>
             </div>
+
+            {usingSpecialOfferFallback && (
+              <div style={{ textAlign: "center", marginTop: "20px", color: "#666", fontSize: "0.9rem" }}>
+                <p>We&apos;re showing curated offers while live promotions load.</p>
+              </div>
+            )}
           </div>
         </section>
       )}

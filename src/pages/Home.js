@@ -240,15 +240,27 @@ const fallbackSpecialOffers = [
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Fetch special offers
+  // Fetch special offers - Fixed: Better error handling and ensure array response
   useEffect(() => {
     const fetchSpecialOffers = async () => {
       try {
         const response = await api.get(`/special-offers`);
         console.log("Special Offers Response:", response.data);
-        setSpecialOffers(response.data || []);
+        // Ensure we always have an array
+        if (Array.isArray(response.data)) {
+          setSpecialOffers(response.data);
+        } else if (response.data && Array.isArray(response.data.offers)) {
+          setSpecialOffers(response.data.offers);
+        } else if (response.data && Array.isArray(response.data.data)) {
+          setSpecialOffers(response.data.data);
+        } else {
+          console.warn("Special offers response is not an array:", response.data);
+          setSpecialOffers([]);
+        }
       } catch (error) {
         console.error("Error fetching special offers:", error);
+        // Set empty array on error to show fallback
+        setSpecialOffers([]);
       }
     };
     fetchSpecialOffers();

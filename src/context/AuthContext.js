@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
           setJustLoggedIn(false);
           // Trigger profile fetch after delay
           queryClient.invalidateQueries('userProfile');
-        }, 500); // 500ms delay
+        }, 200); // Reduced delay to 200ms for faster profile load
         
         toast.success('Login successful!');
       },

@@ -40,8 +40,13 @@ export const WishlistProvider = ({ children }) => {
         toast.success('Added to wishlist!');
       },
       onError: (error) => {
+        console.error('Wishlist add error:', error);
         const message = error.response?.data?.message || 'Failed to add to wishlist';
-        if (!message.includes('already')) {
+        // Don't show error if already in wishlist (silent success)
+        if (message.includes('already')) {
+          // Silently update the wishlist state
+          queryClient.invalidateQueries('wishlist');
+        } else {
           toast.error(message);
         }
       }
@@ -116,6 +121,7 @@ export const WishlistProvider = ({ children }) => {
     </WishlistContext.Provider>
   );
 };
+
 
 
 

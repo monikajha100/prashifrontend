@@ -185,9 +185,15 @@ const Products = () => {
               <select
                 value={`${minPrice || ''}-${maxPrice || ''}`}
                 onChange={(e) => {
-                  const [min, max] = e.target.value.split('-');
-                  handleFilterChange('minPrice', min || '');
-                  handleFilterChange('maxPrice', max || '');
+                  const value = e.target.value;
+                  if (value === '-') {
+                    handleFilterChange('minPrice', '');
+                    handleFilterChange('maxPrice', '');
+                  } else {
+                    const [min, max] = value.split('-');
+                    handleFilterChange('minPrice', min && min !== '' ? min : '');
+                    handleFilterChange('maxPrice', max && max !== '' ? max : '');
+                  }
                 }}
                 className="price-input"
               >

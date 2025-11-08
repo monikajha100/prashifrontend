@@ -75,3 +75,4 @@ const MobileViewIndicator = () => {
 
 export default MobileViewIndicator;
 
+

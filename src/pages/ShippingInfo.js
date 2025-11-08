@@ -82,7 +82,7 @@ const ShippingInfo = () => {
               
               <h3>💰 Shipping Cost Structure</h3>
               <p>
-                <strong>Free shipping on all orders!</strong>
+                <strong>Free shipping on orders ₹999 & above!</strong>
               </p>
               
               <div className="shipping-table">
@@ -92,7 +92,7 @@ const ShippingInfo = () => {
                       <th>Shipping Method</th>
                       <th>Delivery Time</th>
                       <th>Cost (Orders below ₹999)</th>
-                      <th>Cost (Orders ₹999+)</th>
+                      <th>Cost (Orders ₹999 & above)</th>
                       <th>Coverage</th>
                     </tr>
                   </thead>
@@ -118,7 +118,7 @@ const ShippingInfo = () => {
               <h3>Shipping Cost Summary</h3>
               <ul>
                 <li><strong>Orders ₹999 and above:</strong> FREE standard shipping</li>
-                <li><strong>All orders:</strong> Free shipping</li>
+                <li><strong>Orders below ₹999:</strong> Standard shipping ₹80</li>
                 <li><strong>Express Shipping:</strong> ₹150 (all orders)</li>
                 <li><strong>No hidden charges:</strong> What you see is what you pay</li>
               </ul>

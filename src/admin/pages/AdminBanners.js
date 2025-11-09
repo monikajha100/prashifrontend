@@ -9,7 +9,7 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import "./AdminBanners.css";
-import api from "../../services/api";
+import api, { bannersAPI } from "../../services/api";
 
 const AdminBanners = () => {
   const [banners, setBanners] = useState([]);
@@ -35,13 +35,48 @@ const AdminBanners = () => {
   // Fetch banners
   const fetchBanners = async () => {
     try {
-      console.log("Fetching banners from /api/admin/banners/admin");
-      const response = await api.get("/admin/banners/admin");
+      setLoading(true);
+      setError(null);
+      console.log("Fetching banners from /admin/banners/admin");
+      console.log("API Base URL:", api.defaults.baseURL);
+      
+      // Try using the bannersAPI helper first, fallback to direct API call
+      let response;
+      try {
+        // Use direct API call since bannersAPI doesn't have getAdmin method
+        response = await api.get("/admin/banners/admin");
+      } catch (apiError) {
+        // If that fails, try the alternative endpoint
+        console.log("Trying alternative endpoint...");
+        response = await api.get("/banners/admin");
+      }
+      console.log("Banners response:", response);
       const data = response.data;
-      setBanners(data);
+      
+      // Handle both array and object responses
+      if (Array.isArray(data)) {
+        setBanners(data);
+      } else if (data && Array.isArray(data.banners)) {
+        setBanners(data.banners);
+      } else {
+        setBanners([]);
+      }
     } catch (error) {
       console.error("Error fetching banners:", error);
-      setError("Network error: Unable to connect to server");
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        config: error.config
+      });
+      
+      if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+        setError("Network error: Unable to connect to server. Please check if the backend server is running.");
+      } else if (error.response) {
+        setError(`Server error: ${error.response.status} - ${error.response.data?.message || error.message}`);
+      } else {
+        setError(`Error: ${error.message || 'Unable to connect to server'}`);
+      }
     } finally {
       setLoading(false);
     }

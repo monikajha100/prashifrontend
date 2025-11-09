@@ -246,6 +246,14 @@ const fallbackSpecialOffers = [
       try {
         const response = await api.get(`/special-offers`);
         console.log("Special Offers Response:", response.data);
+        
+        // Handle error response from backend
+        if (response.data && response.data.success === false) {
+          console.error("Backend error:", response.data.message || response.data.error);
+          setSpecialOffers([]);
+          return;
+        }
+        
         // Ensure we always have an array
         if (Array.isArray(response.data)) {
           setSpecialOffers(response.data);
@@ -259,6 +267,9 @@ const fallbackSpecialOffers = [
         }
       } catch (error) {
         console.error("Error fetching special offers:", error);
+        console.error("Error response:", error.response);
+        console.error("Error data:", error.response?.data);
+        
         // Set empty array on error to show fallback
         setSpecialOffers([]);
       }

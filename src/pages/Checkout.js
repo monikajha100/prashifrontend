@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FaPlus, FaMinus, FaTrash } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import { paymentsAPI, ordersAPI, storefrontAPI, couponsAPI } from '../services/api';
 import api from '../services/api';
 import './Checkout.css';
@@ -154,6 +155,7 @@ const Checkout = () => {
     
     if (!offer) {
       console.error('No offer provided');
+      toast.error('No offer selected');
       return;
     }
     
@@ -171,11 +173,23 @@ const Checkout = () => {
     
     if (!itemsToUse || itemsToUse.length === 0) {
       console.error('No cart items found');
-      alert('Your cart is empty. Please add items to your cart first.');
+      toast.error('Your cart is empty. Please add items to your cart first.');
       return;
     }
     
+    // Show loading toast
+    const loadingToast = toast.loading('Applying offer...');
+    
     try {
+      console.log('Calling API with offer_id:', offer.id);
+      console.log('Cart items:', itemsToUse.map(item => ({
+        id: item.id || item.product_id,
+        product_id: item.product_id || item.id,
+        category_id: item.category_id || item.categoryId,
+        price: parseFloat(item.price || 0),
+        quantity: parseInt(item.quantity || 1)
+      })));
+      
       // Call backend to calculate discount (handles all offer types)
       const response = await api.post('/special-offers/calculate', {
         offer_id: offer.id,
@@ -188,8 +202,11 @@ const Checkout = () => {
         }))
       });
       
+      console.log('API Response:', response.data);
+      
       if (!response.data.success) {
-        alert(response.data.message || 'This offer cannot be applied to your cart.');
+        toast.dismiss(loadingToast);
+        toast.error(response.data.message || 'This offer cannot be applied to your cart.');
         return;
       }
       
@@ -199,6 +216,12 @@ const Checkout = () => {
       
       console.log('Offer calculated:', offer.title, 'Discount:', discount, message);
       console.log('Discounted items:', discountedItemsData);
+      
+      if (discount <= 0) {
+        toast.dismiss(loadingToast);
+        toast.error('No discount available for this offer with your current cart items.');
+        return;
+      }
       
       // Calculate base subtotal
       const baseSubtotal = itemsToUse.reduce((sum, item) => {
@@ -252,22 +275,33 @@ const Checkout = () => {
       
       // Update localStorage
       localStorage.setItem('cartTotals', JSON.stringify(updatedTotals));
+      localStorage.setItem('selectedOffer', JSON.stringify(offer));
+      localStorage.setItem('offerDiscount', discount.toString());
       
       // Show success feedback
+      toast.dismiss(loadingToast);
+      toast.success(`🎉 ${offer.title} applied! You saved ₹${discount.toFixed(2)}`);
       console.log('Offer applied successfully!', message);
       
     } catch (error) {
       console.error('Error calculating offer:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to apply offer';
-      alert(errorMessage);
+      console.error('Error response:', error.response);
+      console.error('Error data:', error.response?.data);
+      
+      toast.dismiss(loadingToast);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to apply offer. Please try again.';
+      toast.error(errorMessage);
     }
   };
 
   // Remove offer
   const removeOffer = () => {
+    const offerTitle = selectedOffer?.title || 'Offer';
     setSelectedOffer(null);
     setOfferDiscount(0);
     setDiscountedItems([]); // Clear discounted items
+    localStorage.removeItem('selectedOffer');
+    localStorage.removeItem('offerDiscount');
     
     // Recalculate totals without offer
     const itemsToUse = cartItems.length > 0 ? cartItems : (() => {
@@ -292,11 +326,30 @@ const Checkout = () => {
     
     setCartTotals(updatedTotals);
     localStorage.setItem('cartTotals', JSON.stringify(updatedTotals));
+    
+    toast.success(`${offerTitle} removed`);
   };
 
   // Load cart data from localStorage and recalculate totals when tax settings change
   useEffect(() => {
     const savedCartItems = localStorage.getItem('cartItems');
+    
+    // Restore selected offer from localStorage
+    const savedOffer = localStorage.getItem('selectedOffer');
+    const savedDiscount = localStorage.getItem('offerDiscount');
+    if (savedOffer && !selectedOffer) {
+      try {
+        const offer = JSON.parse(savedOffer);
+        setSelectedOffer(offer);
+        if (savedDiscount) {
+          setOfferDiscount(parseFloat(savedDiscount));
+        }
+      } catch (error) {
+        console.error('Error parsing saved offer:', error);
+        localStorage.removeItem('selectedOffer');
+        localStorage.removeItem('offerDiscount');
+      }
+    }
     
     if (savedCartItems) {
       const items = JSON.parse(savedCartItems);
@@ -317,9 +370,14 @@ const Checkout = () => {
         let finalTotalAmount = baseTotals.totalAmount;
         let discount = 0;
         
-        if (selectedOffer && selectedOffer.discount_percentage) {
+        // Use saved discount if available, otherwise calculate from selectedOffer
+        if (savedDiscount) {
+          discount = parseFloat(savedDiscount);
+        } else if (selectedOffer && selectedOffer.discount_percentage) {
           discount = (baseTotals.subtotal * selectedOffer.discount_percentage) / 100;
-          setOfferDiscount(discount);
+        }
+        
+        if (discount > 0) {
           finalSubtotal = Math.max(0, baseTotals.subtotal - discount);
           
           // Recalculate tax on discounted amount if tax is enabled

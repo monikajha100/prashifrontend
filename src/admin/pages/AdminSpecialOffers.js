@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import api, { API_BASE_URL } from "../../services/api";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 import "./AdminSpecialOffers.css";
 
@@ -19,7 +18,9 @@ const AdminSpecialOffers = () => {
       title: "",
       description: "",
       icon: "🎁",
+      offer_type: "percentage",
       discount_percentage: "",
+      discount_amount: "",
       discount_text: "",
       highlight_text: "",
       badge_text: "",
@@ -33,6 +34,12 @@ const AdminSpecialOffers = () => {
       text_color: "",
       sort_order: 0,
       is_active: true,
+      minimum_purchase_amount: "",
+      buy_quantity: "",
+      get_quantity: "",
+      max_discount_amount: "",
+      priority: 0,
+      stackable: false,
     };
   }
 
@@ -42,31 +49,22 @@ const AdminSpecialOffers = () => {
 
   const fetchOffers = async () => {
     try {
-      const token =
-        localStorage.getItem("token") || localStorage.getItem("adminToken");
-      const response = await axios.get(
-        `${API_BASE_URL}/special-offers/admin/all`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await api.get("/special-offers/admin/all");
       const offersData = response.data;
       
       // Fetch customer counts for each offer
       const offersWithCounts = await Promise.all(
         offersData.map(async (offer) => {
           try {
-            const customersResponse = await axios.get(
-              `${API_BASE_URL}/special-offers/admin/${offer.id}/customers`,
-              {
-                headers: { Authorization: `Bearer ${token}` },
-              }
+            const customersResponse = await api.get(
+              `/special-offers/admin/${offer.id}/customers`
             );
             return {
               ...offer,
               customerCount: customersResponse.data.customers?.length || 0
             };
           } catch (error) {
+            console.error(`Error fetching customers for offer ${offer.id}:`, error);
             return { ...offer, customerCount: 0 };
           }
         })
@@ -75,7 +73,8 @@ const AdminSpecialOffers = () => {
       setOffers(offersWithCounts);
     } catch (error) {
       console.error("Error fetching offers:", error);
-      toast.error("Failed to load offers");
+      console.error("Error response:", error.response);
+      toast.error(error.response?.data?.message || "Failed to load offers");
     } finally {
       setLoading(false);
     }
@@ -86,22 +85,84 @@ const AdminSpecialOffers = () => {
 
     try {
       // Validate required fields
-      if (!formData.title || !formData.description || !formData.link_url) {
-        toast.error("Please fill in all required fields");
+      if (!formData.title || !formData.description || !formData.link_url || !formData.button_text) {
+        toast.error("Please fill in all required fields (Title, Description, Link URL, Button Text)");
         return;
       }
 
+      // Validate and sanitize offer_type
+      const allowedOfferTypes = ['percentage', 'fixed_amount', 'buy_x_get_y', 'minimum_purchase', 'referral'];
+      const sanitizedOfferType = allowedOfferTypes.includes(formData.offer_type) 
+        ? formData.offer_type 
+        : 'percentage';
+
       const payload = {
-        ...formData,
-        discount_percentage: formData.discount_percentage ? parseInt(formData.discount_percentage) : null,
-        sort_order: parseInt(formData.sort_order) || 0
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        icon: formData.icon || "🎁",
+        offer_type: sanitizedOfferType,
+        discount_percentage: formData.discount_percentage && formData.discount_percentage !== '' 
+          ? parseInt(formData.discount_percentage) 
+          : null,
+        discount_amount: formData.discount_amount && formData.discount_amount !== '' 
+          ? parseFloat(formData.discount_amount) 
+          : null,
+        discount_text: formData.discount_text && formData.discount_text.trim() 
+          ? formData.discount_text.trim() 
+          : null,
+        highlight_text: formData.highlight_text && formData.highlight_text.trim() 
+          ? formData.highlight_text.trim() 
+          : null,
+        badge_text: formData.badge_text && formData.badge_text.trim() 
+          ? formData.badge_text.trim() 
+          : null,
+        timer_enabled: formData.timer_enabled === true || formData.timer_enabled === "true",
+        timer_text: formData.timer_text && formData.timer_text.trim() 
+          ? formData.timer_text.trim() 
+          : null,
+        start_date: formData.start_date && formData.start_date !== '' 
+          ? formData.start_date 
+          : null,
+        end_date: formData.end_date && formData.end_date !== '' 
+          ? formData.end_date 
+          : null,
+        link_url: formData.link_url.trim(),
+        button_text: formData.button_text.trim(),
+        background_color: formData.background_color && formData.background_color.trim() 
+          ? formData.background_color.trim() 
+          : null,
+        text_color: formData.text_color && formData.text_color.trim() 
+          ? formData.text_color.trim() 
+          : null,
+        sort_order: parseInt(formData.sort_order) || 0,
+        is_active: formData.is_active === true || formData.is_active === "true",
+        minimum_purchase_amount: formData.minimum_purchase_amount && formData.minimum_purchase_amount !== '' 
+          ? parseFloat(formData.minimum_purchase_amount) 
+          : null,
+        buy_quantity: formData.buy_quantity && formData.buy_quantity !== '' 
+          ? parseInt(formData.buy_quantity) 
+          : null,
+        get_quantity: formData.get_quantity && formData.get_quantity !== '' 
+          ? parseInt(formData.get_quantity) 
+          : null,
+        max_discount_amount: formData.max_discount_amount && formData.max_discount_amount !== '' 
+          ? parseFloat(formData.max_discount_amount) 
+          : null,
+        priority: formData.priority !== undefined && formData.priority !== '' 
+          ? (parseInt(formData.priority) || 0) 
+          : 0,
+        stackable: formData.stackable === true || formData.stackable === "true"
       };
 
+      console.log("Submitting payload:", payload);
+
       if (editingOffer) {
-        await api.put(`/special-offers/${editingOffer.id}`, payload);
+        const response = await api.put(`/special-offers/${editingOffer.id}`, payload);
+        console.log("Update response:", response);
         toast.success("Offer updated successfully!");
       } else {
-        await api.post(`/special-offers`, payload);
+        const response = await api.post(`/special-offers`, payload);
+        console.log("Create response:", response);
         toast.success("Offer created successfully!");
       }
 
@@ -111,17 +172,46 @@ const AdminSpecialOffers = () => {
       fetchOffers();
     } catch (error) {
       console.error("Error saving offer:", error);
-      toast.error(error.response?.data?.message || "Failed to save offer");
+      console.error("Error response:", error.response);
+      console.error("Error data:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      
+      // Handle different error types
+      if (error.response?.data?.errors) {
+        // Validation errors from express-validator
+        const errorMessages = error.response.data.errors.map(err => err.msg || err.message).join(", ");
+        toast.error(`Validation Error: ${errorMessages}`);
+      } else if (error.response?.data?.error) {
+        // Database or other errors
+        const errorMsg = error.response.data.error || error.response.data.message;
+        toast.error(`Error: ${errorMsg}`);
+        console.error("Detailed error:", errorMsg);
+      } else if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to save offer. Please check console for details.");
+      }
     }
   };
 
   const handleEdit = (offer) => {
     setEditingOffer(offer);
+    
+    // Validate offer_type - ensure it's a valid value
+    const allowedOfferTypes = ['percentage', 'fixed_amount', 'buy_x_get_y', 'minimum_purchase', 'referral'];
+    const validOfferType = allowedOfferTypes.includes(offer.offer_type) 
+      ? offer.offer_type 
+      : 'percentage';
+    
     setFormData({
-      title: offer.title,
-      description: offer.description,
+      title: offer.title || "",
+      description: offer.description || "",
       icon: offer.icon || "🎁",
+      offer_type: validOfferType,
       discount_percentage: offer.discount_percentage || "",
+      discount_amount: offer.discount_amount || "",
       discount_text: offer.discount_text || "",
       highlight_text: offer.highlight_text || "",
       badge_text: offer.badge_text || "",
@@ -138,7 +228,13 @@ const AdminSpecialOffers = () => {
       background_color: offer.background_color || "",
       text_color: offer.text_color || "",
       sort_order: offer.sort_order || 0,
-      is_active: offer.is_active,
+      is_active: offer.is_active !== undefined ? offer.is_active : true,
+      minimum_purchase_amount: offer.minimum_purchase_amount || "",
+      buy_quantity: offer.buy_quantity || "",
+      get_quantity: offer.get_quantity || "",
+      max_discount_amount: offer.max_discount_amount || "",
+      priority: offer.priority || 0,
+      stackable: offer.stackable || false,
     });
     setShowForm(true);
   };
@@ -147,35 +243,31 @@ const AdminSpecialOffers = () => {
     if (!window.confirm("Are you sure you want to delete this offer?")) return;
 
     try {
-      const token =
-        localStorage.getItem("token") || localStorage.getItem("adminToken");
-      await axios.delete(`${API_BASE_URL}/special-offers/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      console.log("Deleting offer with ID:", id);
+      const response = await api.delete(`/special-offers/${id}`);
+      console.log("Delete response:", response);
       toast.success("Offer deleted successfully!");
       fetchOffers();
     } catch (error) {
       console.error("Error deleting offer:", error);
-      toast.error("Failed to delete offer");
+      console.error("Error response:", error.response);
+      console.error("Error data:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to delete offer");
     }
   };
 
   const handleToggleActive = async (id) => {
     try {
-      const token =
-        localStorage.getItem("token") || localStorage.getItem("adminToken");
-      await axios.patch(
-        `${API_BASE_URL}/special-offers/${id}/toggle`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      console.log("Toggling offer status for ID:", id);
+      const response = await api.patch(`/special-offers/${id}/toggle`, {});
+      console.log("Toggle response:", response);
       toast.success("Offer status updated!");
       fetchOffers();
     } catch (error) {
       console.error("Error toggling offer:", error);
-      toast.error("Failed to update status");
+      console.error("Error response:", error.response);
+      console.error("Error data:", error.response?.data);
+      toast.error(error.response?.data?.message || "Failed to update status");
     }
   };
 
@@ -190,18 +282,14 @@ const AdminSpecialOffers = () => {
     setLoadingCustomers(true);
     setSelectedOfferId(offerId);
     try {
-      const token =
-        localStorage.getItem("token") || localStorage.getItem("adminToken");
-      const response = await axios.get(
-        `${API_BASE_URL}/special-offers/admin/${offerId}/customers`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const response = await api.get(
+        `/special-offers/admin/${offerId}/customers`
       );
       setOfferCustomers(response.data.customers || []);
     } catch (error) {
       console.error("Error fetching offer customers:", error);
-      toast.error("Failed to load customers");
+      console.error("Error response:", error.response);
+      toast.error(error.response?.data?.message || "Failed to load customers");
       setOfferCustomers([]);
     } finally {
       setLoadingCustomers(false);
@@ -301,6 +389,21 @@ const AdminSpecialOffers = () => {
                 </div>
 
                 <div className="form-group">
+                  <label>Offer Type</label>
+                  <select
+                    value={formData.offer_type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, offer_type: e.target.value })
+                    }
+                  >
+                    <option value="percentage">Percentage Discount</option>
+                    <option value="fixed_amount">Fixed Amount Discount</option>
+                    <option value="buy_x_get_y">Buy X Get Y Free</option>
+                    <option value="referral">Referral Offer</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label>Discount %</label>
                   <input
                     type="number"
@@ -318,6 +421,23 @@ const AdminSpecialOffers = () => {
                 </div>
 
                 <div className="form-group">
+                  <label>Discount Amount (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.discount_amount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        discount_amount: e.target.value,
+                      })
+                    }
+                    placeholder="e.g., 100"
+                  />
+                </div>
+
+                <div className="form-group">
                   <label>Discount Text</label>
                   <input
                     type="text"
@@ -330,6 +450,108 @@ const AdminSpecialOffers = () => {
                     }
                     placeholder="e.g., Up to 70% OFF"
                   />
+                </div>
+
+                {formData.offer_type === "buy_x_get_y" && (
+                  <>
+                    <div className="form-group">
+                      <label>Buy Quantity</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.buy_quantity}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            buy_quantity: e.target.value,
+                          })
+                        }
+                        placeholder="e.g., 3"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>Get Quantity (Free)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={formData.get_quantity}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            get_quantity: e.target.value,
+                          })
+                        }
+                        placeholder="e.g., 1"
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div className="form-group">
+                  <label>Minimum Purchase Amount (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.minimum_purchase_amount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        minimum_purchase_amount: e.target.value,
+                      })
+                    }
+                    placeholder="e.g., 1000"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Max Discount Amount (₹)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.max_discount_amount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        max_discount_amount: e.target.value,
+                      })
+                    }
+                    placeholder="e.g., 500"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Priority</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.priority}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        priority: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    placeholder="0"
+                  />
+                  <small>Higher priority offers are applied first</small>
+                </div>
+
+                <div className="form-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={formData.stackable}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          stackable: e.target.checked,
+                        })
+                      }
+                    />
+                    Stackable (Can be combined with other offers)
+                  </label>
                 </div>
 
                 <div className="form-group">

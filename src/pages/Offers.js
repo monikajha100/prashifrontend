@@ -99,14 +99,14 @@ const Offers = () => {
                     )}
                   </div>
                   <Link
-                    to="/products"
+                    to={offer.link_url || offer.button_link || "/products"}
                     className="offer-button"
                     style={{
                       backgroundColor: offer.button_color || '#FFB6C1',
                       color: offer.text_color || '#FFFFFF'
                     }}
                   >
-                    Shop Now
+                    {offer.button_text || "Shop Now"}
                   </Link>
                 </div>
               </div>

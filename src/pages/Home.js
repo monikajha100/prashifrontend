@@ -561,7 +561,7 @@ const fallbackSpecialOffers = [
                   )}
 
                   <Link
-                    to={`/checkout?offer=${offer.id}`}
+                    to={offer.link_url || `/checkout?offer=${offer.id}`}
                     className="offer-btn"
                     onClick={() => {
                       // Track click

@@ -45,7 +45,7 @@ const Checkout = () => {
   );
 
   // Calculate cart totals from items
-  const calculateCartTotals = (items, taxEnabled = false, taxRate = 18) => {
+  const calculateCartTotals = (items, taxEnabled = false, taxRate = 18, discountedSubtotal = null) => {
     if (!items || items.length === 0) {
       return {
         subtotal: 0,
@@ -55,13 +55,14 @@ const Checkout = () => {
       };
     }
     
-    const subtotal = items.reduce((sum, item) => {
+    const subtotal = discountedSubtotal !== null ? discountedSubtotal : items.reduce((sum, item) => {
       const price = parseFloat(item.price || 0);
       const quantity = parseInt(item.quantity || 1);
       return sum + (price * quantity);
     }, 0);
     
-    const shippingAmount = 0; // Free shipping for all orders
+    // Shipping: Free if subtotal >= 999, otherwise Rs 70
+    const shippingAmount = subtotal >= 999 ? 0 : 70;
     const taxAmount = taxEnabled ? (subtotal * taxRate / 100) : 0;
     const totalAmount = subtotal + shippingAmount + taxAmount;
     
@@ -230,12 +231,15 @@ const Checkout = () => {
         finalTaxAmount = finalSubtotal * (taxRate / 100);
       }
       
-      const finalTotalAmount = finalSubtotal + baseTotals.shippingAmount + finalTaxAmount;
+      // Recalculate shipping based on discounted subtotal
+      const finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+      const finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
       
       // Update cart totals
       const updatedTotals = {
         ...baseTotals,
         subtotal: finalSubtotal,
+        shippingAmount: finalShippingAmount,
         taxAmount: finalTaxAmount,
         totalAmount: finalTotalAmount,
         discountAmount: discount,
@@ -309,6 +313,7 @@ const Checkout = () => {
         // Apply offer discount if available
         let finalSubtotal = baseTotals.subtotal;
         let finalTaxAmount = baseTotals.taxAmount;
+        let finalShippingAmount = baseTotals.shippingAmount;
         let finalTotalAmount = baseTotals.totalAmount;
         let discount = 0;
         
@@ -323,12 +328,15 @@ const Checkout = () => {
             finalTaxAmount = finalSubtotal * (taxRate / 100);
           }
           
-          finalTotalAmount = finalSubtotal + baseTotals.shippingAmount + finalTaxAmount;
+          // Recalculate shipping based on discounted subtotal
+          finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+          finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
         }
         
         setCartTotals({
           ...baseTotals,
           subtotal: finalSubtotal,
+          shippingAmount: finalShippingAmount,
           taxAmount: finalTaxAmount,
           totalAmount: finalTotalAmount,
           discountAmount: discount || offerDiscount || 0,
@@ -339,6 +347,7 @@ const Checkout = () => {
         localStorage.setItem('cartTotals', JSON.stringify({
           ...baseTotals,
           subtotal: finalSubtotal,
+          shippingAmount: finalShippingAmount,
           taxAmount: finalTaxAmount,
           totalAmount: finalTotalAmount,
           discountAmount: discount || offerDiscount || 0,
@@ -534,7 +543,9 @@ const Checkout = () => {
         const newTaxAmount = taxSettings?.tax_enabled 
           ? (discountedSubtotal * (taxSettings?.tax_rate || 18) / 100)
           : 0;
-        const newTotalAmount = discountedSubtotal + newTotals.shippingAmount + newTaxAmount;
+        // Recalculate shipping based on discounted subtotal
+        const newShippingAmount = discountedSubtotal >= 999 ? 0 : 70;
+        const newTotalAmount = discountedSubtotal + newShippingAmount + newTaxAmount;
 
         setCouponData({
           ...data.coupon,
@@ -544,6 +555,7 @@ const Checkout = () => {
         setCartTotals({
           ...newTotals,
           subtotal: discountedSubtotal,
+          shippingAmount: newShippingAmount,
           discountAmount: discountAmount,
           taxAmount: newTaxAmount,
           totalAmount: newTotalAmount,
@@ -760,6 +772,7 @@ const Checkout = () => {
       let finalSubtotal = totals.originalSubtotal || totals.subtotal;
       let finalDiscount = 0;
       let finalTaxAmount = totals.taxAmount;
+      let finalShippingAmount = totals.shippingAmount || 0;
       let finalTotalAmount = totals.totalAmount;
 
       // Prioritize offer discount if available, otherwise use coupon
@@ -773,7 +786,9 @@ const Checkout = () => {
           finalTaxAmount = finalSubtotal * (taxRate / 100);
         }
         
-        finalTotalAmount = finalSubtotal + totals.shippingAmount + finalTaxAmount;
+        // Recalculate shipping based on discounted subtotal
+        finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+        finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
       } else if (couponData) {
         finalDiscount = parseFloat(couponData.discount_amount || 0);
         // Discount is applied to subtotal (before tax)
@@ -785,7 +800,13 @@ const Checkout = () => {
           finalTaxAmount = finalSubtotal * (taxRate / 100);
         }
         
-        finalTotalAmount = finalSubtotal + totals.shippingAmount + finalTaxAmount;
+        // Recalculate shipping based on discounted subtotal
+        finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+        finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
+      } else {
+        // No discount applied, recalculate shipping based on current subtotal
+        finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+        finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
       }
 
       // Map cart items with item-level discounts if available
@@ -844,7 +865,7 @@ const Checkout = () => {
         subtotal: finalSubtotal + finalDiscount, // Original subtotal before discount
         discountAmount: finalDiscount,
         taxAmount: finalTaxAmount,
-        shippingAmount: totals.shippingAmount,
+        shippingAmount: finalShippingAmount, // Shipping calculated based on discounted subtotal
         totalAmount: finalTotalAmount,
         notes: formData.notes
       };

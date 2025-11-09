@@ -47,7 +47,8 @@ const Cart = () => {
 
   const calculateTotals = () => {
     const subtotal = validCartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
-    const shippingAmount = 0; // Free shipping for all orders
+    // Shipping: Free if subtotal >= 999, otherwise Rs 70
+    const shippingAmount = subtotal >= 999 ? 0 : 70;
     const taxEnabled = taxSettings?.tax_enabled || false;
     const taxRate = taxSettings?.tax_rate || 18;
     const taxAmount = taxEnabled ? Math.round(subtotal * taxRate / 100) : 0;

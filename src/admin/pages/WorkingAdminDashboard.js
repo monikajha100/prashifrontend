@@ -1,8 +1,21 @@
 import React, { useMemo } from 'react';
 import { useQuery } from 'react-query';
-import { visitorAPI } from '../../services/api';
+import { visitorAPI, adminAPI } from '../../services/api';
 
 const WorkingAdminDashboard = () => {
+  // Fetch dashboard stats from API
+  const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError } = useQuery(
+    'adminDashboard',
+    async () => {
+      const response = await adminAPI.getDashboard();
+      return response?.data ?? {};
+    },
+    {
+      refetchInterval: 60000, // Refetch every minute
+      refetchOnWindowFocus: true
+    }
+  );
+
   const { data: visitorStats, isLoading: visitorLoading, error: visitorError } = useQuery(
     'adminVisitorStats',
     async () => {
@@ -57,56 +70,51 @@ const WorkingAdminDashboard = () => {
     });
   }, [lastVisitRaw]);
 
-  const sampleData = {
-    stats: {
-      totalProducts: 24,
-      totalOrders: 156,
-      totalUsers: 89,
-      totalRevenue: 245600
-    },
-    recentOrders: [
-      { id: 1, order_number: 'ORD-001', user_name: 'John Doe', total_amount: 2999, status: 'completed' },
-      { id: 2, order_number: 'ORD-002', user_name: 'Jane Smith', total_amount: 1799, status: 'processing' },
-      { id: 3, order_number: 'ORD-003', user_name: 'Mike Johnson', total_amount: 4500, status: 'shipped' },
-      { id: 4, order_number: 'ORD-004', user_name: 'Sarah Wilson', total_amount: 6200, status: 'pending' }
-    ],
-    lowStockProducts: [
-      { id: 1, name: 'Victorian Ring Set', stock_quantity: 2 },
-      { id: 2, name: 'Color Changing Earrings', stock_quantity: 1 },
-      { id: 3, name: 'Gold Necklace', stock_quantity: 3 }
-    ]
+  // Use real data from API or fallback to defaults
+  const stats = dashboardData?.stats || {
+    totalProducts: 0,
+    totalOrders: 0,
+    totalUsers: 0,
+    totalRevenue: 0
   };
+  const recentOrders = dashboardData?.recentOrders || [];
+  const lowStockProducts = dashboardData?.lowStockProducts || [];
 
   const statCards = [
     {
       title: 'Total Products',
-      value: sampleData.stats.totalProducts,
+      value: dashboardLoading ? '...' : stats.totalProducts,
       icon: '📦',
       color: '#D4AF37',
       bgColor: 'rgba(212, 175, 55, 0.1)'
     },
     {
       title: 'Total Orders',
-      value: sampleData.stats.totalOrders,
+      value: dashboardLoading ? '...' : stats.totalOrders,
       icon: '🛒',
       color: '#28a745',
       bgColor: 'rgba(40, 167, 69, 0.1)'
     },
     {
       title: 'Total Users',
-      value: sampleData.stats.totalUsers,
+      value: dashboardLoading ? '...' : stats.totalUsers,
       icon: '👥',
       color: '#007bff',
       bgColor: 'rgba(0, 123, 255, 0.1)'
     },
     {
       title: 'Total Revenue',
-      value: `₹${sampleData.stats.totalRevenue.toLocaleString()}`,
+      value: dashboardLoading ? '...' : `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}`,
       icon: '💰',
       color: '#dc3545',
       bgColor: 'rgba(220, 53, 69, 0.1)'
     }
   ];
+
+  // Show error message if dashboard fails to load
+  if (dashboardError) {
+    console.error('Dashboard error:', dashboardError);
+  }
 
   return (
     <div style={{ padding: '20px', background: '#f8f9fa', minHeight: '100vh' }}>
@@ -124,6 +132,18 @@ const WorkingAdminDashboard = () => {
           <p style={{ color: '#666', fontSize: '1.1rem' }}>
             Welcome to the working admin panel
           </p>
+          {dashboardError && (
+            <div style={{
+              marginTop: '15px',
+              padding: '12px',
+              background: '#f8d7da',
+              color: '#721c24',
+              borderRadius: '8px',
+              fontSize: '0.9rem'
+            }}>
+              ⚠️ Unable to load dashboard data. Please refresh the page.
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}
@@ -295,7 +315,12 @@ const WorkingAdminDashboard = () => {
             </div>
             
             <div>
-              {sampleData.recentOrders.map((order) => (
+              {dashboardLoading ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Loading orders...
+                </div>
+              ) : recentOrders.length > 0 ? (
+                recentOrders.map((order) => (
                 <div key={order.id} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -309,14 +334,14 @@ const WorkingAdminDashboard = () => {
                       color: '#2C2C2C',
                       margin: '0 0 5px 0'
                     }}>
-                      {order.order_number}
+                      {order.order_number || `#${order.id}`}
                     </p>
                     <p style={{
                       color: '#666',
                       fontSize: '0.9rem',
                       margin: '0'
                     }}>
-                      {order.user_name}
+                      {order.customer_name || order.user_name || 'Guest'}
                     </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -325,7 +350,7 @@ const WorkingAdminDashboard = () => {
                       color: '#2C2C2C',
                       margin: '0 0 5px 0'
                     }}>
-                      ₹{order.total_amount}
+                      ₹{(order.total_amount || 0).toLocaleString('en-IN')}
                     </p>
                     <span style={{
                       background: order.status === 'completed' ? '#d4edda' : 
@@ -339,11 +364,16 @@ const WorkingAdminDashboard = () => {
                       fontSize: '0.8rem',
                       fontWeight: '500'
                     }}>
-                      {order.status}
+                      {order.status || 'pending'}
                     </span>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  No recent orders
+                </div>
+              )}
             </div>
           </div>
 
@@ -381,7 +411,12 @@ const WorkingAdminDashboard = () => {
             </div>
             
             <div>
-              {sampleData.lowStockProducts.map((product) => (
+              {dashboardLoading ? (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  Loading products...
+                </div>
+              ) : lowStockProducts.length > 0 ? (
+                lowStockProducts.map((product) => (
                 <div key={product.id} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -414,11 +449,16 @@ const WorkingAdminDashboard = () => {
                       fontSize: '0.9rem',
                       fontWeight: '600'
                     }}>
-                      {product.stock_quantity} left
+                      {product.stock_quantity || 0} left
                     </span>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+                  No low stock products
+                </div>
+              )}
             </div>
           </div>
         </div>

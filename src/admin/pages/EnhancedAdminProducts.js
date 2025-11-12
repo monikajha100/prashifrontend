@@ -341,7 +341,14 @@ const ProductFormModal = ({ product, categories, subcategories, onClose, onSucce
       const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
       
       if (product) {
-        return adminAPI.updateProduct(product.id, data);
+        // For updates, use direct axios call with FormData and proper headers
+        const response = await axios.put(`${API_BASE_URL}/admin/products/${product.id}`, data, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response;
       } else {
         // Use direct axios call with proper headers for create
         const response = await axios.post(`${API_BASE_URL}/admin/products`, data, {

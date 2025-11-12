@@ -386,18 +386,6 @@ const fallbackSpecialOffers = [
               >
                 <div className="container">
                   <div className="hero-content">
-                    <h1
-                      className="hero-title text-mobile-center"
-                      style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: isMobile ? "2.5rem" : "3.5rem",
-                        fontWeight: "700",
-                        marginBottom: "20px",
-                        textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
-                      }}
-                    >
-                      {displayTitle}
-                    </h1>
                     {displaySubtitle && (
                       <p
                         className="hero-subtitle"
@@ -414,24 +402,6 @@ const fallbackSpecialOffers = [
                         {displaySubtitle}
                       </p>
                     )}
-                    <Link
-                      to={banner.link_url || "/products"}
-                      className="hero-btn"
-                      style={{
-                        background: "#D4AF37",
-                        color: "white",
-                        padding: isMobile ? "12px 25px" : "15px 30px",
-                        borderRadius: "25px",
-                        textDecoration: "none",
-                        fontWeight: "600",
-                        display: "inline-block",
-                        transition: "all 0.3s ease",
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
-                        fontSize: isMobile ? "0.9rem" : "1rem",
-                      }}
-                    >
-                      {banner.button_text || "Shop Now"}
-                    </Link>
                   </div>
                 </div>
               </div>

@@ -30,6 +30,7 @@ import TermsOfService from './pages/TermsOfService';
 import ShippingInfo from './pages/ShippingInfo';
 import ReturnsExchanges from './pages/ReturnsExchanges';
 import NotFound from './pages/NotFound';
+import LuxuryLanding from './pages/LuxuryLanding';
 
 // Admin Pages
 import AdminLogin from './admin/pages/WorkingAdminLogin';
@@ -154,6 +155,14 @@ function App() {
               <>
                 <Header />
                 <Offers />
+                <Footer />
+              </>
+            } />
+
+            <Route path="/bespoke" element={
+              <>
+                <Header />
+                <LuxuryLanding />
                 <Footer />
               </>
             } />

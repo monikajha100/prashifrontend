@@ -1,6 +1,62 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useQuery } from 'react-query';
+import { visitorAPI } from '../../services/api';
 
 const WorkingAdminDashboard = () => {
+  const { data: visitorStats, isLoading: visitorLoading, error: visitorError } = useQuery(
+    'adminVisitorStats',
+    async () => {
+      const response = await visitorAPI.getStats();
+      return response?.data?.data ?? response?.data ?? {};
+    },
+    {
+      refetchInterval: 30000,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  const visitorFormatter = useMemo(() => new Intl.NumberFormat('en-IN'), []);
+
+  const normalizeCount = (value) => {
+    const numeric = Number(
+      value ?? 0
+    );
+    if (!Number.isFinite(numeric) || numeric < 0) {
+      return 0;
+    }
+    return numeric;
+  };
+
+  const totalVisitorsValue = normalizeCount(
+    visitorStats?.totalVisitors ?? visitorStats?.total_visitors
+  );
+  const todayVisitorsValue = normalizeCount(
+    visitorStats?.todayVisitors ?? visitorStats?.today_visitors
+  );
+
+  const formattedTotalVisitors = visitorLoading
+    ? '...'
+    : visitorFormatter.format(totalVisitorsValue);
+  const formattedTodayVisitors = visitorLoading
+    ? '...'
+    : visitorFormatter.format(todayVisitorsValue);
+
+  const lastVisitRaw = visitorStats?.lastVisitAt ?? visitorStats?.last_visit_at;
+  const formattedLastUpdate = useMemo(() => {
+    if (!lastVisitRaw) return null;
+    const parsed = new Date(lastVisitRaw);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+    return parsed.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }, [lastVisitRaw]);
+
   const sampleData = {
     stats: {
       totalProducts: 24,
@@ -129,6 +185,75 @@ const WorkingAdminDashboard = () => {
               </div>
             </div>
           ))}
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '15px',
+              padding: '25px',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px',
+              transition: 'transform 0.2s ease',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            <div
+              style={{
+                backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                color: '#6f42c1',
+                width: '60px',
+                height: '60px',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px'
+              }}
+            >
+              👁️
+            </div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{
+                fontSize: '2rem',
+                fontWeight: '700',
+                color: '#2C2C2C',
+                margin: '0 0 5px 0',
+                fontFamily: "'Cormorant Garamond', serif"
+              }}>
+                {formattedTotalVisitors}
+              </h3>
+              <p style={{
+                color: '#666',
+                margin: '0 0 12px 0',
+                fontSize: '1rem',
+                fontWeight: '500'
+              }}>
+                Total Visitors
+              </p>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                fontSize: '0.95rem'
+              }}>
+                <span style={{ color: '#6f42c1', fontWeight: 600 }}>Today:</span>
+                <span style={{ color: '#2C2C2C', fontWeight: 600 }}>{formattedTodayVisitors}</span>
+              </div>
+              {!visitorLoading && visitorError && (
+                <p style={{ color: '#dc3545', fontSize: '0.85rem', marginTop: '12px' }}>
+                  Unable to fetch latest visitor stats.
+                </p>
+              )}
+              {!visitorLoading && !visitorError && formattedLastUpdate && (
+                <p style={{ color: '#888', fontSize: '0.85rem', marginTop: '12px' }}>
+                  Updated: {formattedLastUpdate}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         <div style={{

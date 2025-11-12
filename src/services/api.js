@@ -329,6 +329,11 @@ export const partnersAPI = {
   },
 };
 
+export const visitorAPI = {
+  trackVisit: () => api.post('/visitors'),
+  getStats: () => api.get('/visitors'),
+};
+
 export const contractsAPI = {
   getAllContracts: (params) => api.get('/contracts', { params }),
   getContractById: (contractId) => api.get(`/contracts/${contractId}`),

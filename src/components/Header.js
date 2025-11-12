@@ -236,6 +236,9 @@ const Header = () => {
               <Link to="/products?category=fragrance" className="nav-link">
                 Fragrance
               </Link>
+              <Link to="/bespoke" className="nav-link">
+                Bespoke Experience
+              </Link>
               <Link to="/partner" className="nav-link partner-link">
                 Become a Partner
               </Link>
@@ -457,6 +460,12 @@ const Header = () => {
               onClick={() => handleMobileMenuItemClick('/products?category=fragrance')}
             >
               Fragrance
+            </div>
+            <div
+              className="mobile-nav-link"
+              onClick={() => handleMobileMenuItemClick('/bespoke')}
+            >
+              Bespoke Experience
             </div>
             <div
               className="mobile-nav-link partner-link"

@@ -1,9 +1,39 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaTwitter } from 'react-icons/fa';
 import './Footer.css';
+import { visitorAPI } from '../services/api';
 
 const Footer = () => {
+  useEffect(() => {
+    const sessionKey = 'praashiVisitorTracked';
+    const supportsSessionStorage =
+      typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
+
+    const hasTracked = supportsSessionStorage
+      ? window.sessionStorage.getItem(sessionKey)
+      : false;
+    if (hasTracked) {
+      return;
+    }
+
+    const registerVisit = async () => {
+      try {
+        await visitorAPI.trackVisit();
+        if (supportsSessionStorage) {
+          window.sessionStorage.setItem(sessionKey, 'true');
+        }
+      } catch (error) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Visitor tracking failed', error);
+        }
+      }
+    };
+
+    registerVisit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <footer className="footer">
       <div className="container">
@@ -106,12 +136,16 @@ const Footer = () => {
         <div className="footer-bottom">
           <div className="footer-separator"></div>
           <div className="footer-bottom-content">
-            <p className="copyright">© 2025 All rights reserved by Praashi By Supal</p>
             <div className="footer-bottom-links">
               <Link to="/privacy-policy" className="footer-bottom-link">Privacy Policy</Link>
               <Link to="/terms-of-service" className="footer-bottom-link">Terms of Service</Link>
               <Link to="/shipping-info" className="footer-bottom-link">Shipping Info</Link>
               <Link to="/returns-exchanges" className="footer-bottom-link">Returns & Exchanges</Link>
+            </div>
+
+            <div className="footer-bottom-copy-wrapper">
+              <div className="footer-bottom-sparkle" aria-hidden="true"></div>
+              <p className="copyright">© 2025 All rights reserved by Praashi By Supal</p>
             </div>
           </div>
         </div>

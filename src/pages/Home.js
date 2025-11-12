@@ -176,14 +176,33 @@ const fallbackSpecialOffers = [
           bannerData = response;
         }
 
+        console.log('Banners received from API:', bannerData.length, bannerData);
+        console.log('Banner details:', bannerData.map(b => ({
+          id: b.id,
+          title: b.title,
+          is_active: b.is_active,
+          device_type: b.device_type,
+          image: b.image ? (b.image.length > 80 ? b.image.substring(0, 80) + '...' : b.image) : 'NO IMAGE'
+        })));
+
         // Filter banners based on device type
+        // If device_type is null/undefined, show on all devices (default to "both")
         const isMobileCheck = window.innerWidth <= 768;
-        return bannerData.filter(
-          (banner) =>
-            banner.device_type === "both" ||
-            (isMobileCheck && banner.device_type === "mobile") ||
-            (!isMobileCheck && banner.device_type === "desktop")
+        const filteredBanners = bannerData.filter(
+          (banner) => {
+            const deviceType = banner.device_type || "both"; // Default to "both" if not set
+            const matches = deviceType === "both" ||
+                   (isMobileCheck && deviceType === "mobile") ||
+                   (!isMobileCheck && deviceType === "desktop");
+            if (!matches) {
+              console.log(`Banner ${banner.id} (${banner.title}) filtered out - device_type: ${deviceType}, isMobile: ${isMobileCheck}`);
+            }
+            return matches;
+          }
         );
+        
+        console.log('Filtered banners after device_type check:', filteredBanners.length, filteredBanners.map(b => ({ id: b.id, title: b.title })));
+        return filteredBanners;
       },
       retry: 1,
       retryDelay: 1000,
@@ -333,6 +352,14 @@ const fallbackSpecialOffers = [
                 ? banner.mobile_image
                 : banner.image;
 
+            // Properly encode the image URL for CSS background
+            let imageUrl = null;
+            if (displayImage) {
+              const absoluteUrl = toAbsoluteImageUrl(displayImage);
+              // CSS url() needs proper encoding - encodeURI handles this
+              imageUrl = encodeURI(absoluteUrl);
+            }
+
             return (
               <div
                 key={banner.id}
@@ -347,10 +374,8 @@ const fallbackSpecialOffers = [
                   height: "100%",
                   opacity: index === currentBannerIndex ? 1 : 0,
                   transition: "opacity 1s ease-in-out",
-                  background: displayImage
-                    ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${toAbsoluteImageUrl(
-                        displayImage
-                      )}) center/${isMobile ? "contain" : "cover"} no-repeat`
+                  background: imageUrl
+                    ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("${imageUrl}") center/${isMobile ? "contain" : "cover"} no-repeat`
                     : "linear-gradient(135deg, #2c3e50 0%, #34495e 100%)",
                   display: "flex",
                   alignItems: "center",

@@ -1139,6 +1139,29 @@ const Checkout = () => {
                         return savedCartItems ? JSON.parse(savedCartItems) : [];
                       })();
                       
+                      // Filter eligible items based on product_ids or category_ids (same logic as backend)
+                      let eligibleItems = itemsToUse;
+                      
+                      // Filter by product IDs if specified
+                      if (offer.product_ids) {
+                        const productIdArray = offer.product_ids.split(',').map(id => parseInt(id.trim()));
+                        eligibleItems = itemsToUse.filter(item => 
+                          productIdArray.includes(parseInt(item.id)) || 
+                          productIdArray.includes(parseInt(item.product_id))
+                        );
+                      }
+                      
+                      // Filter by category IDs if specified
+                      if (offer.category_ids && eligibleItems.length > 0) {
+                        const categoryIdArray = offer.category_ids.split(',').map(id => parseInt(id.trim()));
+                        eligibleItems = eligibleItems.filter(item => {
+                          const itemCategoryId = parseInt(item.category_id || item.categoryId || 0);
+                          return categoryIdArray.includes(itemCategoryId);
+                        });
+                      }
+                      
+                      // Calculate total quantity of ELIGIBLE items only (not all cart items)
+                      const totalEligibleItems = eligibleItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0);
                       const totalCartItems = itemsToUse.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0);
                       
                       // Check if offer has any discount mechanism
@@ -1171,15 +1194,24 @@ const Checkout = () => {
                           : `✗ Minimum order ₹${minAmount} required (You have ₹${cartSubtotal.toFixed(2)})`;
                       }
                       
-                      // Check BOGO conditions
+                      // Check BOGO conditions - use ELIGIBLE items count, not total cart items
                       if (hasBOGO) {
-                        const totalQty = totalCartItems;
                         const requiredQty = parseInt(offer.buy_quantity) + parseInt(offer.get_quantity);
-                        meetsCondition = meetsCondition && totalQty >= requiredQty;
+                        // For BOGO, only count eligible items (e.g., only earrings if offer is for earrings)
+                        const eligibleQty = totalEligibleItems;
+                        meetsCondition = meetsCondition && eligibleQty >= requiredQty;
+                        
+                        // Build condition text with eligible items info
+                        const itemType = offer.product_ids ? 'eligible product(s)' : 
+                                       offer.category_ids ? 'eligible item(s)' : 'item(s)';
+                        
                         if (!meetsCondition && !conditionText) {
-                          conditionText = `✗ Buy ${offer.buy_quantity} Get ${offer.get_quantity} Free - Need ${requiredQty} items (You have ${totalQty})`;
+                          conditionText = `✗ Buy ${offer.buy_quantity} Get ${offer.get_quantity} Free - Need ${requiredQty} ${itemType} (You have ${eligibleQty} eligible, ${totalCartItems} total)`;
                         } else if (!meetsCondition) {
-                          conditionText += ` | Need ${requiredQty} items for BOGO (You have ${totalQty})`;
+                          conditionText += ` | Need ${requiredQty} ${itemType} for BOGO (You have ${eligibleQty} eligible)`;
+                        } else {
+                          // Condition met - show success message
+                          conditionText = conditionText || `✓ ${eligibleQty} eligible ${itemType} (Need ${requiredQty})`;
                         }
                       }
                       
@@ -1409,40 +1441,70 @@ const Checkout = () => {
             </div>
 
             <div className="summary-totals">
-              <div className="summary-row">
-                <span className="summary-label">Subtotal:</span>
-                <span className="summary-value">₹{parseFloat((cartTotals?.originalSubtotal || cartTotals?.subtotal || 0) + (cartTotals?.discountAmount || 0)).toFixed(2)}</span>
-              </div>
-              {selectedOffer && offerDiscount > 0 && (
-                <div className="summary-row discount">
-                  <span className="summary-label">Special Offer Discount ({selectedOffer.title}):</span>
-                  <span className="summary-value">-₹{parseFloat(offerDiscount).toFixed(2)}</span>
-                </div>
-              )}
-              {couponData && (cartTotals?.discountAmount || couponData.discount_amount || 0) > 0 && !selectedOffer && (
-                <div className="summary-row discount">
-                  <span className="summary-label">Discount ({couponData.code}):</span>
-                  <span className="summary-value">-₹{parseFloat(cartTotals?.discountAmount || couponData.discount_amount || 0).toFixed(2)}</span>
-                </div>
-              )}
-              <div className="summary-row">
-                <span className="summary-label">Shipping:</span>
-                <span className="summary-value">
-                  {cartTotals?.shippingAmount === 0 || cartTotals?.shippingAmount === undefined || cartTotals?.shippingAmount === null 
-                    ? 'Free' 
-                    : `₹${parseFloat(cartTotals?.shippingAmount || 0).toFixed(2)}`}
-                </span>
-              </div>
-              {taxSettings?.tax_enabled && (
-                <div className="summary-row">
-                  <span className="summary-label">Tax ({taxSettings?.tax_rate || 18}%):</span>
-                  <span className="summary-value">₹{parseFloat(cartTotals?.taxAmount || 0).toFixed(2)}</span>
-                </div>
-              )}
-              <div className="summary-row total">
-                <span className="summary-label">Total:</span>
-                <span className="summary-value">₹{parseFloat(cartTotals?.totalAmount || 0).toFixed(2)}</span>
-              </div>
+              {/* Calculate original subtotal (before discount) - recalculate from cart items to ensure accuracy */}
+              {(() => {
+                // Recalculate original subtotal directly from cart items (sum of all item prices * quantities)
+                const recalculatedOriginalSubtotal = cartItems.reduce((sum, item) => {
+                  const price = parseFloat(item.price || 0);
+                  const quantity = parseInt(item.quantity || 1);
+                  return sum + (price * quantity);
+                }, 0);
+                
+                // Use recalculated value or fallback to stored value
+                const originalSubtotal = recalculatedOriginalSubtotal > 0 
+                  ? recalculatedOriginalSubtotal
+                  : (cartTotals?.originalSubtotal || 
+                      (cartTotals?.subtotal && cartTotals?.discountAmount 
+                        ? cartTotals.subtotal + cartTotals.discountAmount 
+                        : cartTotals?.subtotal || 0));
+                
+                // Calculate discounted subtotal
+                const discountedSubtotal = cartTotals?.subtotal || 0;
+                
+                // Calculate final total: discounted subtotal + shipping + tax
+                const finalTotal = discountedSubtotal + 
+                  (cartTotals?.shippingAmount || 0) + 
+                  (cartTotals?.taxAmount || 0);
+                
+                return (
+                  <>
+                    <div className="summary-row">
+                      <span className="summary-label">Subtotal:</span>
+                      <span className="summary-value">₹{parseFloat(originalSubtotal).toFixed(2)}</span>
+                    </div>
+                    {selectedOffer && offerDiscount > 0 && (
+                      <div className="summary-row discount">
+                        <span className="summary-label">Special Offer Discount ({selectedOffer.title}):</span>
+                        <span className="summary-value">-₹{parseFloat(offerDiscount).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {couponData && (cartTotals?.discountAmount || couponData.discount_amount || 0) > 0 && !selectedOffer && (
+                      <div className="summary-row discount">
+                        <span className="summary-label">Discount ({couponData.code}):</span>
+                        <span className="summary-value">-₹{parseFloat(cartTotals?.discountAmount || couponData.discount_amount || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="summary-row">
+                      <span className="summary-label">Shipping:</span>
+                      <span className="summary-value">
+                        {cartTotals?.shippingAmount === 0 || cartTotals?.shippingAmount === undefined || cartTotals?.shippingAmount === null 
+                          ? 'Free' 
+                          : `₹${parseFloat(cartTotals?.shippingAmount || 0).toFixed(2)}`}
+                      </span>
+                    </div>
+                    {taxSettings?.tax_enabled && (
+                      <div className="summary-row">
+                        <span className="summary-label">Tax ({taxSettings?.tax_rate || 18}%):</span>
+                        <span className="summary-value">₹{parseFloat(cartTotals?.taxAmount || 0).toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="summary-row total">
+                      <span className="summary-label">Total:</span>
+                      <span className="summary-value">₹{parseFloat(finalTotal).toFixed(2)}</span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

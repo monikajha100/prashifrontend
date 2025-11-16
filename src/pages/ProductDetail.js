@@ -34,9 +34,23 @@ const ProductDetail = () => {
 
   const inWishlist = product ? isInWishlist(product.id) : false;
 
+  const isOutOfStock = product.stock_quantity === 0 || product.stock_quantity === null || product.stock_quantity === undefined;
+  const availableStock = product.stock_quantity || 0;
+
   const handleAddToCart = () => {
+    if (isOutOfStock) {
+      toast.error('This product is currently out of stock');
+      return;
+    }
     console.log('Add to cart clicked!', product, quantity);
     const qty = Math.max(1, Math.min(10, Number(quantity) || 1));
+    
+    // Check if requested quantity exceeds available stock
+    if (qty > availableStock) {
+      toast.error(`Only ${availableStock} unit(s) available`);
+      return;
+    }
+    
     addToCart(product, qty);
     toast.success('Product added to cart!');
   };
@@ -261,6 +275,34 @@ const ProductDetail = () => {
             border: '1px solid #e9ecef',
             maxWidth: '600px'
           }}>
+            {isOutOfStock && (
+              <div style={{
+                padding: '12px',
+                marginBottom: '20px',
+                backgroundColor: '#fee',
+                border: '1px solid #fcc',
+                borderRadius: '8px',
+                color: '#c33',
+                textAlign: 'center',
+                fontWeight: '600'
+              }}>
+                ⚠️ This product is currently out of stock
+              </div>
+            )}
+            {!isOutOfStock && availableStock > 0 && (
+              <div style={{
+                padding: '8px',
+                marginBottom: '20px',
+                backgroundColor: '#e8f5e9',
+                border: '1px solid #c8e6c9',
+                borderRadius: '8px',
+                color: '#2e7d32',
+                textAlign: 'center',
+                fontSize: '14px'
+              }}>
+                ✓ {availableStock} unit(s) available
+              </div>
+            )}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
@@ -276,16 +318,19 @@ const ProductDetail = () => {
               <input
                 type="number"
                 min={1}
-                max={10}
+                max={Math.min(10, availableStock)}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
+                disabled={isOutOfStock}
                 style={{ 
                   width: 80, 
                   padding: '8px 12px', 
                   borderRadius: 6, 
                   border: '1px solid #ddd',
                   fontSize: '16px',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  opacity: isOutOfStock ? 0.6 : 1,
+                  cursor: isOutOfStock ? 'not-allowed' : 'text'
                 }}
               />
             </div>
@@ -299,44 +344,56 @@ const ProductDetail = () => {
             }}>
               <button 
                 onClick={handleAddToCart}
+                disabled={isOutOfStock}
                 style={{
                   padding: '15px 30px',
                   fontSize: '16px',
                   fontWeight: '600',
                   borderRadius: '8px',
                   border: 'none',
-                  cursor: 'pointer',
-                  background: 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
+                  cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                  background: isOutOfStock 
+                    ? '#6c757d' 
+                    : 'linear-gradient(135deg, #D4AF37 0%, #B8941F 100%)',
                   color: 'white',
                   minWidth: '150px',
-                  boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)',
-                  transition: 'all 0.3s ease'
+                  boxShadow: isOutOfStock ? 'none' : '0 4px 15px rgba(212, 175, 55, 0.3)',
+                  transition: 'all 0.3s ease',
+                  opacity: isOutOfStock ? 0.7 : 1
                 }}
                 onMouseOver={(e) => {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.4)';
+                  if (!isOutOfStock) {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(212, 175, 55, 0.4)';
+                  }
                 }}
                 onMouseOut={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.3)';
+                  if (!isOutOfStock) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(212, 175, 55, 0.3)';
+                  }
                 }}
               >
-                Add to Cart
+                {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
               </button>
               
               <button 
                 onClick={() => {
+                  if (isOutOfStock) return;
                   handleAddToCart();
                   window.location.href = '/checkout';
                 }}
+                disabled={isOutOfStock}
                 style={{ 
                   padding: '15px 30px',
                   fontSize: '16px',
                   fontWeight: '600',
                   borderRadius: '8px',
                   border: 'none',
-                  cursor: 'pointer',
-                  background: 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
+                  cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+                  background: isOutOfStock 
+                    ? '#6c757d' 
+                    : 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)',
                   color: 'white',
                   minWidth: '150px',
                   boxShadow: '0 4px 15px rgba(44, 62, 80, 0.3)',

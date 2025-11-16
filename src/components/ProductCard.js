@@ -15,9 +15,15 @@ const ProductCard = ({ product }) => {
   const inWishlist = isInWishlist(product.id);
   const [selectedColorImage, setSelectedColorImage] = useState(null);
 
+  const isOutOfStock = product.stock_quantity === 0 || product.stock_quantity === null || product.stock_quantity === undefined;
+  const availableStock = product.stock_quantity || 0;
+
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isOutOfStock) {
+      return;
+    }
     addToCart(product, 1);
   };
 
@@ -31,7 +37,10 @@ const ProductCard = ({ product }) => {
     >
       <Link to={`/product/${product.slug}`} className="product-link">
         <div className="product-image">
-          {product.discount_percentage > 0 && (
+          {isOutOfStock && (
+            <div className="out-of-stock-badge">Out of Stock</div>
+          )}
+          {!isOutOfStock && product.discount_percentage > 0 && (
             <div className="sale-badge">Sale</div>
           )}
           <button
@@ -118,10 +127,16 @@ const ProductCard = ({ product }) => {
           </div>
           
           <button 
-            className={`add-to-cart-btn ${inCart ? 'in-cart' : ''}`}
+            className={`add-to-cart-btn ${inCart ? 'in-cart' : ''} ${isOutOfStock ? 'out-of-stock' : ''}`}
             onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            title={isOutOfStock ? 'This product is currently out of stock' : ''}
           >
-            {inCart ? `In Cart (${cartQuantity})` : 'Add to Cart'}
+            {isOutOfStock 
+              ? 'Out of Stock' 
+              : inCart 
+                ? `In Cart (${cartQuantity})` 
+                : 'Add to Cart'}
           </button>
           <Link to={`/product/${product.slug || product.id}`} className="view-details-btn">
             View Details

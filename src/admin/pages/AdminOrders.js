@@ -25,7 +25,8 @@ const AdminOrders = () => {
     },
     {
       retry: 1,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
+      refetchInterval: 30000, // Refetch every 30 seconds for live data
       select: (response) => {
         console.log('🟡 Select function - input response:', response);
         // Handle both array and object responses

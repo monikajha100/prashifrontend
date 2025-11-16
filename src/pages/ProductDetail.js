@@ -32,8 +32,23 @@ const ProductDetail = () => {
     }
   );
 
-  const inWishlist = product ? isInWishlist(product.id) : false;
+  if (isLoading) {
+    return <LoadingSpinner text="Loading product..." />;
+  }
 
+  if (error || !product) {
+    console.log('Product error or not found:', error, product);
+    return (
+      <div className="container" style={{ padding: '60px 20px', textAlign: 'center' }}>
+        <h2>Product not found</h2>
+        <p>The product you're looking for doesn't exist.</p>
+        {error && <p>Error: {error.message}</p>}
+      </div>
+    );
+  }
+
+  // Only access product properties after confirming product exists
+  const inWishlist = isInWishlist(product.id);
   const isOutOfStock = product.stock_quantity === 0 || product.stock_quantity === null || product.stock_quantity === undefined;
   const availableStock = product.stock_quantity || 0;
 
@@ -54,21 +69,6 @@ const ProductDetail = () => {
     addToCart(product, qty);
     toast.success('Product added to cart!');
   };
-
-  if (isLoading) {
-    return <LoadingSpinner text="Loading product..." />;
-  }
-
-  if (error || !product) {
-    console.log('Product error or not found:', error, product);
-    return (
-      <div className="container" style={{ padding: '60px 20px', textAlign: 'center' }}>
-        <h2>Product not found</h2>
-        <p>The product you're looking for doesn't exist.</p>
-        {error && <p>Error: {error.message}</p>}
-      </div>
-    );
-  }
 
   console.log('Product loaded successfully:', product);
   console.log('Rendering buttons and related products...');

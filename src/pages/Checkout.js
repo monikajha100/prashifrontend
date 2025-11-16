@@ -219,7 +219,11 @@ const Checkout = () => {
       
       if (discount <= 0) {
         toast.dismiss(loadingToast);
-        toast.error('No discount available for this offer with your current cart items.');
+        // Use backend message if available, otherwise show generic message
+        const errorMessage = message && message !== 'Offer applied' 
+          ? message 
+          : 'No discount available for this offer with your current cart items.';
+        toast.error(errorMessage);
         return;
       }
       
@@ -935,8 +939,8 @@ const Checkout = () => {
       }
 
       // Add offer ID if available
-      if (selectedOffer && offerId) {
-        orderData.offerId = parseInt(offerId);
+      if (selectedOffer && selectedOffer.id) {
+        orderData.offerId = parseInt(selectedOffer.id);
       }
 
       console.log('Order data being sent:', JSON.stringify(orderData, null, 2));
@@ -1138,9 +1142,15 @@ const Checkout = () => {
                       const totalCartItems = itemsToUse.reduce((sum, item) => sum + (parseInt(item.quantity) || 1), 0);
                       
                       // Check if offer has any discount mechanism
-                      const hasPercentage = offer.discount_percentage && offer.discount_percentage > 0;
-                      const hasFixedAmount = offer.discount_amount && parseFloat(offer.discount_amount) > 0;
-                      const hasBOGO = offer.offer_type === 'buy_x_get_y' && offer.buy_quantity && offer.get_quantity;
+                      // Allow offers with explicit discount fields OR offer types that suggest discounts
+                      const normalizedOfferType = (offer.offer_type || '').toString().trim().toLowerCase();
+                      const isPercentageType = ['percentage', 'flash_sale', 'discount_percentage', 'new_arrival', 'referral', 'minimum_purchase'].includes(normalizedOfferType);
+                      const isFixedType = ['fixed_amount', 'discount_fixed'].includes(normalizedOfferType);
+                      const isBOGOType = normalizedOfferType === 'buy_x_get_y';
+                      
+                      const hasPercentage = (offer.discount_percentage && offer.discount_percentage > 0) || (isPercentageType && !isBOGOType);
+                      const hasFixedAmount = (offer.discount_amount && parseFloat(offer.discount_amount) > 0) || isFixedType;
+                      const hasBOGO = isBOGOType && offer.buy_quantity && offer.get_quantity;
                       const hasMinimumPurchase = offer.minimum_purchase_amount && parseFloat(offer.minimum_purchase_amount) > 0;
                       
                       // Calculate cart subtotal for minimum purchase check
@@ -1179,8 +1189,17 @@ const Checkout = () => {
                         conditionText += conditionText ? ' | Product/Category specific' : 'Product/Category specific offer';
                       }
                       
-                      const hasDiscount = hasPercentage || hasFixedAmount || hasBOGO;
-                      const canApply = hasDiscount && meetsCondition;
+                      // Consider offer as having discount if:
+                      // 1. Has explicit discount fields, OR
+                      // 2. Has a valid offer_type that suggests discount, OR
+                      // 3. Is a BOGO offer
+                      const hasDiscount = hasPercentage || hasFixedAmount || hasBOGO || 
+                                         normalizedOfferType === 'free_shipping' ||
+                                         (isPercentageType && offer.is_active);
+                      
+                      // Allow applying if offer has discount mechanism OR if it's active and has a valid type
+                      // The backend will validate and calculate the actual discount
+                      const canApply = (hasDiscount || (offer.is_active && normalizedOfferType !== '')) && meetsCondition;
                       
                       return (
                         <div key={`offer-${offer.id}-${index}`} className="offer-item">

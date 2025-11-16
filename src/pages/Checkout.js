@@ -421,22 +421,59 @@ const Checkout = () => {
         if (savedCartTotals) {
           try {
             const parsedTotals = JSON.parse(savedCartTotals);
+            // Preserve originalSubtotal if it exists, otherwise calculate it
+            let originalSubtotal = parsedTotals.originalSubtotal;
+            if (!originalSubtotal && parsedTotals.discountAmount && parsedTotals.subtotal) {
+              // Reconstruct original: discounted subtotal + discount amount
+              originalSubtotal = parsedTotals.subtotal + parsedTotals.discountAmount;
+            } else if (!originalSubtotal) {
+              // Calculate from cart items
+              originalSubtotal = items.reduce((sum, item) => {
+                const price = parseFloat(item.price || 0);
+                const quantity = parseInt(item.quantity || 1);
+                return sum + (price * quantity);
+              }, 0);
+              // If calculation gives 0, use subtotal as fallback
+              if (originalSubtotal === 0) {
+                originalSubtotal = parsedTotals.subtotal || 0;
+              }
+            }
+            
             setCartTotals({
               subtotal: parsedTotals.subtotal || 0,
               shippingAmount: parsedTotals.shippingAmount ?? 0,
               taxAmount: parsedTotals.taxAmount || 0,
               totalAmount: parsedTotals.totalAmount || 0,
-              discountAmount: parsedTotals.discountAmount || 0
+              discountAmount: parsedTotals.discountAmount || 0,
+              originalSubtotal: originalSubtotal
             });
           } catch (error) {
             // If parsing fails, calculate fresh totals
             const totals = calculateCartTotals(items, false, 18);
-            setCartTotals(totals);
+            // Calculate original subtotal from items
+            const originalSubtotal = items.reduce((sum, item) => {
+              const price = parseFloat(item.price || 0);
+              const quantity = parseInt(item.quantity || 1);
+              return sum + (price * quantity);
+            }, 0);
+            setCartTotals({
+              ...totals,
+              originalSubtotal: originalSubtotal || totals.subtotal
+            });
           }
         } else {
           // Calculate with default (no tax)
           const totals = calculateCartTotals(items, false, 18);
-          setCartTotals(totals);
+          // Calculate original subtotal from items
+          const originalSubtotal = items.reduce((sum, item) => {
+            const price = parseFloat(item.price || 0);
+            const quantity = parseInt(item.quantity || 1);
+            return sum + (price * quantity);
+          }, 0);
+          setCartTotals({
+            ...totals,
+            originalSubtotal: originalSubtotal || totals.subtotal
+          });
         }
       }
     } else {
@@ -529,8 +566,44 @@ const Checkout = () => {
         taxSettings.tax_enabled || false,
         taxSettings.tax_rate || 18
       );
-      setCartTotals(totals);
-      localStorage.setItem('cartTotals', JSON.stringify(totals));
+      
+      // If there's a discount applied, we need to recalculate it
+      // For now, preserve the discount amount and recalculate original subtotal
+      const currentDiscount = cartTotals?.discountAmount || 0;
+      const originalSubtotal = totals.subtotal; // New original subtotal from updated items
+      
+      // If discount exists, recalculate discounted subtotal
+      let finalSubtotal = originalSubtotal;
+      let finalTaxAmount = totals.taxAmount;
+      let finalShippingAmount = totals.shippingAmount;
+      let finalTotalAmount = totals.totalAmount;
+      
+      if (currentDiscount > 0) {
+        finalSubtotal = Math.max(0, originalSubtotal - currentDiscount);
+        
+        // Recalculate tax on discounted amount if tax is enabled
+        if (taxSettings.tax_enabled) {
+          const taxRate = taxSettings.tax_rate || 18;
+          finalTaxAmount = finalSubtotal * (taxRate / 100);
+        }
+        
+        // Recalculate shipping based on discounted subtotal
+        finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+        finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
+      }
+      
+      const updatedTotals = {
+        ...totals,
+        subtotal: finalSubtotal,
+        shippingAmount: finalShippingAmount,
+        taxAmount: finalTaxAmount,
+        totalAmount: finalTotalAmount,
+        discountAmount: currentDiscount,
+        originalSubtotal: originalSubtotal
+      };
+      
+      setCartTotals(updatedTotals);
+      localStorage.setItem('cartTotals', JSON.stringify(updatedTotals));
     }
   };
 
@@ -553,8 +626,43 @@ const Checkout = () => {
         taxSettings.tax_enabled || false,
         taxSettings.tax_rate || 18
       );
-      setCartTotals(totals);
-      localStorage.setItem('cartTotals', JSON.stringify(totals));
+      
+      // If there's a discount applied, we need to recalculate it
+      const currentDiscount = cartTotals?.discountAmount || 0;
+      const originalSubtotal = totals.subtotal; // New original subtotal from updated items
+      
+      // If discount exists, recalculate discounted subtotal
+      let finalSubtotal = originalSubtotal;
+      let finalTaxAmount = totals.taxAmount;
+      let finalShippingAmount = totals.shippingAmount;
+      let finalTotalAmount = totals.totalAmount;
+      
+      if (currentDiscount > 0) {
+        finalSubtotal = Math.max(0, originalSubtotal - currentDiscount);
+        
+        // Recalculate tax on discounted amount if tax is enabled
+        if (taxSettings.tax_enabled) {
+          const taxRate = taxSettings.tax_rate || 18;
+          finalTaxAmount = finalSubtotal * (taxRate / 100);
+        }
+        
+        // Recalculate shipping based on discounted subtotal
+        finalShippingAmount = finalSubtotal >= 999 ? 0 : 70;
+        finalTotalAmount = finalSubtotal + finalShippingAmount + finalTaxAmount;
+      }
+      
+      const updatedTotals = {
+        ...totals,
+        subtotal: finalSubtotal,
+        shippingAmount: finalShippingAmount,
+        taxAmount: finalTaxAmount,
+        totalAmount: finalTotalAmount,
+        discountAmount: currentDiscount,
+        originalSubtotal: originalSubtotal
+      };
+      
+      setCartTotals(updatedTotals);
+      localStorage.setItem('cartTotals', JSON.stringify(updatedTotals));
     }
   };
 
@@ -1441,24 +1549,33 @@ const Checkout = () => {
             </div>
 
             <div className="summary-totals">
-              {/* Calculate original subtotal (before discount) - recalculate from cart items to ensure accuracy */}
+              {/* Calculate original subtotal (before discount) - use stored value if available */}
               {(() => {
-                // Recalculate original subtotal directly from cart items (sum of all item prices * quantities)
-                const recalculatedOriginalSubtotal = cartItems.reduce((sum, item) => {
-                  const price = parseFloat(item.price || 0);
-                  const quantity = parseInt(item.quantity || 1);
-                  return sum + (price * quantity);
-                }, 0);
+                // Use stored originalSubtotal if available (set when offer/coupon is applied)
+                // Otherwise, calculate from cart items or use current subtotal
+                let originalSubtotal = 0;
                 
-                // Use recalculated value or fallback to stored value
-                const originalSubtotal = recalculatedOriginalSubtotal > 0 
-                  ? recalculatedOriginalSubtotal
-                  : (cartTotals?.originalSubtotal || 
-                      (cartTotals?.subtotal && cartTotals?.discountAmount 
-                        ? cartTotals.subtotal + cartTotals.discountAmount 
-                        : cartTotals?.subtotal || 0));
+                if (cartTotals?.originalSubtotal !== undefined && cartTotals?.originalSubtotal !== null) {
+                  // Use stored original subtotal (before discount)
+                  originalSubtotal = cartTotals.originalSubtotal;
+                } else if (cartTotals?.discountAmount && cartTotals?.subtotal) {
+                  // Reconstruct original: discounted subtotal + discount amount
+                  originalSubtotal = cartTotals.subtotal + cartTotals.discountAmount;
+                } else {
+                  // Recalculate from cart items as fallback
+                  originalSubtotal = cartItems.reduce((sum, item) => {
+                    const price = parseFloat(item.price || 0);
+                    const quantity = parseInt(item.quantity || 1);
+                    return sum + (price * quantity);
+                  }, 0);
+                  
+                  // If recalculation gives 0 but we have a subtotal, use that
+                  if (originalSubtotal === 0 && cartTotals?.subtotal) {
+                    originalSubtotal = cartTotals.subtotal;
+                  }
+                }
                 
-                // Calculate discounted subtotal
+                // Calculate discounted subtotal (after discount)
                 const discountedSubtotal = cartTotals?.subtotal || 0;
                 
                 // Calculate final total: discounted subtotal + shipping + tax

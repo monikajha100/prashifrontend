@@ -21,12 +21,26 @@ export const WishlistProvider = ({ children }) => {
   // Fetch wishlist items
   const { data: wishlistItems = [], isLoading } = useQuery(
     'wishlist',
-    () => wishlistAPI.getAll().then(res => res.data),
+    () => wishlistAPI.getAll().then(res => {
+      // Handle both array response and object with data property
+      if (Array.isArray(res.data)) {
+        return res.data;
+      } else if (res.data && Array.isArray(res.data.data)) {
+        return res.data.data;
+      }
+      return [];
+    }),
     {
       enabled: isAuthenticated,
       refetchOnWindowFocus: false,
+      retry: 1,
       onError: (error) => {
         console.error('Error fetching wishlist:', error);
+        console.error('Error response:', error.response);
+        // Don't show error toast for 401 (not authenticated)
+        if (error.response?.status !== 401) {
+          toast.error('Failed to load wishlist');
+        }
       }
     }
   );
@@ -41,9 +55,25 @@ export const WishlistProvider = ({ children }) => {
       },
       onError: (error) => {
         console.error('Wishlist add error:', error);
-        const message = error.response?.data?.message || 'Failed to add to wishlist';
+        console.error('Error response:', error.response);
+        console.error('Error response data:', error.response?.data);
+        
+        // Extract error message safely
+        let message = 'Failed to add to wishlist';
+        if (error.response?.data) {
+          if (typeof error.response.data === 'string') {
+            message = error.response.data;
+          } else if (error.response.data.message) {
+            message = error.response.data.message;
+          } else if (error.response.data.error) {
+            message = error.response.data.error;
+          }
+        } else if (error.message) {
+          message = error.message;
+        }
+        
         // Don't show error if already in wishlist (silent success)
-        if (message.includes('already')) {
+        if (message.toLowerCase().includes('already') || message.toLowerCase().includes('duplicate')) {
           // Silently update the wishlist state
           queryClient.invalidateQueries('wishlist');
         } else {
@@ -93,8 +123,12 @@ export const WishlistProvider = ({ children }) => {
 
   // Check if product is in wishlist
   const isInWishlist = (productId) => {
-    if (!isAuthenticated || !wishlistItems) return false;
-    return wishlistItems.some(item => item.product_id === productId || item.product?.id === productId);
+    if (!isAuthenticated || !wishlistItems || !Array.isArray(wishlistItems)) return false;
+    const productIdNum = typeof productId === 'string' ? parseInt(productId) : productId;
+    return wishlistItems.some(item => {
+      const itemProductId = item.product_id || item.product?.id;
+      return itemProductId === productIdNum || itemProductId === productId;
+    });
   };
 
   // Get wishlist count

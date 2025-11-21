@@ -10,9 +10,27 @@ const EnhancedAdminProducts = () => {
   const queryClient = useQueryClient();
 
   // Fetch products
-  const { data: products, isLoading } = useQuery('adminProducts', async () => {
-    const response = await adminAPI.getProducts();
-    return response.data;
+  const { data: products, isLoading, error } = useQuery('adminProducts', async () => {
+    try {
+      const response = await adminAPI.getProducts();
+      console.log('Admin products response:', response);
+      // Handle both array and object responses
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (response.data && Array.isArray(response.data.products)) {
+        return response.data.products;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      return response.data || [];
+    } catch (err) {
+      console.error('Error fetching admin products:', err);
+      toast.error('Failed to load products. Please check your connection and try again.');
+      throw err;
+    }
+  }, {
+    retry: 1,
+    refetchOnWindowFocus: false
   });
 
   // Fetch categories
@@ -51,6 +69,31 @@ const EnhancedAdminProducts = () => {
       <div style={{ padding: '20px', textAlign: 'center' }}>
         <div style={{ fontSize: '2rem' }}>⏳</div>
         <p>Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <div style={{ fontSize: '2rem', color: '#e74c3c' }}>❌</div>
+        <p style={{ color: '#e74c3c', marginTop: '10px' }}>
+          Error loading products: {error.message || 'Unknown error'}
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            background: '#D4AF37',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Retry
+        </button>
       </div>
     );
   }

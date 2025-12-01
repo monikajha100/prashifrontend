@@ -66,7 +66,7 @@ const Login = () => {
               <div className="form-group">
                 <label htmlFor="password" className="form-label">Password</label>
                 <input
-                  type="password"
+                  type="text"
                   id="password"
                   name="password"
                   value={formData.password}

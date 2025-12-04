@@ -34,7 +34,7 @@ const Home = () => {
       id: 1,
       title: "Exclusive Victorian Collection",
       subtitle: "Discover our stunning range of Victorian jewelry sets",
-      image: "/banner.jpg",
+      image: "https://api.praashibysupal.com/uploads/banners/b1-1759477017588-533462894.jpg",
       link_url: "/products",
       button_text: "Shop Now",
       is_active: true,
